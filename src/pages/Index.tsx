@@ -3,8 +3,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { CompanyBriefingScreen } from "@/components/game/screens/CompanyBriefingScreen";
 import { TravelScreen } from "@/components/game/screens/TravelScreen";
 import { ArrivalScreen } from "@/components/game/screens/ArrivalScreen";
-import { InquiryScreen } from "@/components/game/screens/InquiryScreen";
-import { FramingScreen } from "@/components/game/screens/FramingScreen";
 import { ResultScreen } from "@/components/game/screens/ResultScreen";
 import { SoundProvider } from "@/hooks/useSoundEffects";
 import { MusicProvider } from "@/hooks/useBackgroundMusic";
@@ -15,9 +13,7 @@ import { PFGameProvider } from "@/contexts/PFGameContext";
 type Screen =
   | "company-briefing"
   | "travel"
-  | "arrival"
-  | "inquiry"
-  | "framing"
+  | "conversation"
   | "result"
   | "replay-briefing";
 
@@ -29,7 +25,9 @@ const GameContent = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>(() => {
     const saved = localStorage.getItem(storageKey) as Screen | null;
     if (saved === "replay-briefing") return "company-briefing";
-    return saved || "company-briefing";
+    // Map old screen names to new ones
+    if (saved === "arrival" || saved === "inquiry" || saved === "framing") return "conversation";
+    return (saved as Screen) || "company-briefing";
   });
 
   useEffect(() => {
@@ -78,16 +76,10 @@ const GameContent = () => {
         />
       )}
       {currentScreen === "travel" && (
-        <TravelScreen onComplete={() => handleNavigate("arrival")} />
+        <TravelScreen onComplete={() => handleNavigate("conversation")} />
       )}
-      {currentScreen === "arrival" && (
-        <ArrivalScreen onComplete={() => handleNavigate("inquiry")} />
-      )}
-      {currentScreen === "inquiry" && (
-        <InquiryScreen onComplete={() => handleNavigate("framing")} />
-      )}
-      {currentScreen === "framing" && (
-        <FramingScreen onComplete={() => handleNavigate("result")} />
+      {currentScreen === "conversation" && (
+        <ArrivalScreen onComplete={() => handleNavigate("result")} />
       )}
       {currentScreen === "result" && (
         <ResultScreen onNavigate={handleNavigate} />
