@@ -1,17 +1,15 @@
-// Timeline-based scenario data for the "Hidden Returns" case
-// No round numbers, no titles visible to player — pure narrative data
-
 export interface InquiryOption {
   id: string;
   text: string;
   tier: "strong" | "medium" | "weak";
   points: number;
   response: string;
-  explanation: string; // only shown in ResultScreen
+  explanation: string;
 }
 
 export interface InquiryRound {
   id: number;
+  title: string;
   options: InquiryOption[];
 }
 
@@ -25,6 +23,7 @@ export interface FramingOption {
 export const INQUIRY_ROUNDS: InquiryRound[] = [
   {
     id: 1,
+    title: "فهم الشكوى",
     options: [
       {
         id: "r1_strong",
@@ -54,6 +53,7 @@ export const INQUIRY_ROUNDS: InquiryRound[] = [
   },
   {
     id: 2,
+    title: "تكسير الحركة",
     options: [
       {
         id: "r2_strong",
@@ -83,6 +83,7 @@ export const INQUIRY_ROUNDS: InquiryRound[] = [
   },
   {
     id: 3,
+    title: "قياس المرتجعات",
     options: [
       {
         id: "r3_strong",
@@ -112,6 +113,7 @@ export const INQUIRY_ROUNDS: InquiryRound[] = [
   },
   {
     id: 4,
+    title: "البحث عن التغيير",
     options: [
       {
         id: "r4_strong",
@@ -141,6 +143,7 @@ export const INQUIRY_ROUNDS: InquiryRound[] = [
   },
   {
     id: 5,
+    title: "ربط المرتجعات بالبضاعة الجديدة",
     options: [
       {
         id: "r5_strong",
@@ -170,6 +173,7 @@ export const INQUIRY_ROUNDS: InquiryRound[] = [
   },
   {
     id: 6,
+    title: "التحقق من الجودة",
     options: [
       {
         id: "r6_strong",
@@ -199,6 +203,7 @@ export const INQUIRY_ROUNDS: InquiryRound[] = [
   },
   {
     id: 7,
+    title: "صياغة التأطير",
     options: [
       {
         id: "r7_strong",
@@ -256,7 +261,7 @@ export const FRAMING_OPTIONS: FramingOption[] = [
 ];
 
 export const FRAMING_POINTS = 10;
-export const MAX_SCORE = 31;
+export const MAX_SCORE = 31; // 7 rounds × 3 points + 10 framing
 
 export interface ScoreLevel {
   min: number;
@@ -270,20 +275,29 @@ export interface ScoreLevel {
 
 export const SCORE_LEVELS: ScoreLevel[] = [
   {
-    min: 25, max: 31,
-    title: "محلل استثنائي", titleEn: "Exceptional Analyst", icon: "🏆",
+    min: 25,
+    max: 31,
+    title: "محلل استثنائي",
+    titleEn: "Exceptional Analyst",
+    icon: "🏆",
     description: "فكّكت المشكلة بدقة ووصلت للسبب الحقيقي. أسئلتك كانت حادة ومنهجية.",
     color: "text-yellow-400",
   },
   {
-    min: 15, max: 24,
-    title: "محلل واعد", titleEn: "Promising Analyst", icon: "🥈",
+    min: 15,
+    max: 24,
+    title: "محلل واعد",
+    titleEn: "Promising Analyst",
+    icon: "🥈",
     description: "اقتربت من الحقيقة بس فاتتك بعض الزوايا المهمة. حاول تسأل أسئلة أعمق.",
     color: "text-slate-300",
   },
   {
-    min: 0, max: 14,
-    title: "لسه في البداية", titleEn: "Getting Started", icon: "📚",
+    min: 0,
+    max: 14,
+    title: "لسه في البداية",
+    titleEn: "Getting Started",
+    icon: "📚",
     description: "الأسئلة محتاجة تكون أعمق وأكتر تركيزاً. حاول تكسر المشكلة قبل ما تقفز لحلول.",
     color: "text-amber-600",
   },
