@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { EnhancedDialogue } from "../EnhancedDialogue";
 import { PFNotebook } from "../PFNotebook";
 import type { InquiryOption } from "@/data/pf-scenario";
+import storeFrontImg from "@/assets/scenes/store-front.png";
 
 interface InquiryScreenProps {
   onComplete: () => void;
@@ -85,7 +86,10 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-secondary via-background to-background" />
+      <div className="absolute inset-0">
+        <img src={storeFrontImg} alt="" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
+      </div>
 
       <PFNotebook />
 
