@@ -23,7 +23,7 @@ const GameContent = () => {
   const storageKey = `pf-game-screen-${userId}`;
 
   const [currentScreen, setCurrentScreen] = useState<Screen>(() => {
-    const saved = localStorage.getItem(storageKey) as Screen | null;
+    const saved = localStorage.getItem(storageKey);
     if (saved === "replay-briefing") return "company-briefing";
     // Map old screen names to new ones
     if (saved === "arrival" || saved === "inquiry" || saved === "framing" || saved === "conversation") return "conversation" as Screen;
