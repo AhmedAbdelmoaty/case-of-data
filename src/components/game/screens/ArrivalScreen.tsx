@@ -8,7 +8,6 @@ import { PFNotebook } from "../PFNotebook";
 import { INQUIRY_ROUNDS, FRAMING_OPTIONS } from "@/data/pf-scenario";
 import { usePFGame } from "@/contexts/PFGameContext";
 import storeFrontImg from "@/assets/scenes/store-front.png";
-import type { ChoiceOption } from "../InteractiveDialogue";
 
 interface ArrivalScreenProps {
   onComplete: () => void;
