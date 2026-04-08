@@ -1,76 +1,45 @@
-الفهم الصحيح
-- أنت لا تريد واجهة “اختيار أسئلة” منفصلة. أنت تريد لقاء أبو سعيد يبقى محادثة سينمائية واحدة بنفس روح لقاء منصور.
-- لحظة الاختيار نفسها لازم تكون مجرد وقفة داخل نفس الـ Enhanced Dialogue: تظهر 3 جمل، اللاعب يختار واحدة، الجملة المختارة تتكتب Typed من شخصية اللاعب، وبعدها رد أبو سعيد يتكتب Typed من شخصيته.
-- أثناء اللعب لا يجب أن يظهر أي شيء يوحي بالتعليم أو الاختبار: لا “اختار سؤالك”، لا “جولة 2 من 7”، لا تلميحات، لا layout مختلف.
 
-المشكلة الحالية
-- `InquiryScreen.tsx` حالياً مقسوم `pick / response`، وده خلق شاشة وسطية بشكل “كويز”.
-- فيه عناصر كسرت الإحساس السردي: عنوان، وصف توضيحي، شريط جولات، وزر “السؤال التالي”.
-- `FramingScreen.tsx` أيضاً ما زال يشعر اللاعب أنه دخل اختبار في النهاية.
-- الكيس نفسها ليست المشكلة الأساسية هنا؛ المشكلة في إخراج التفاعل.
 
-الخطة المعتمدة للتعديل
-1. توحيد لقاء أبو سعيد في شاشة واحدة
-- توسيع `ArrivalScreen.tsx` ليحتوي:
-  - دخول المتجر
-  - السكريبت الافتتاحي مع أبو سعيد
-  - كل لحظات اختيار الأسئلة
-  - النهاية قبل النتيجة
-- إلغاء الانتقال إلى `InquiryScreen` كشاشة منفصلة، لأن ده هو أصل الإحساس السيئ.
+# Fix: InteractiveDialogue skips choices and jumps to result
 
-2. بناء محرك حوار تفاعلي داخل نفس الـ Enhanced Dialogue
-- تحويل تدفق أبو سعيد من “شاشة أسئلة” إلى “timeline” واحد فيه 3 أنواع مراحل:
-  - `line`: سطر حوار عادي
-  - `choiceBreakpoint`: لحظة تظهر فيها 3 اختيارات
-  - `framingBreakpoint`: لحظة اختيار التأطير النهائي
-- عند الوصول إلى `choiceBreakpoint`:
-  - يتوقف الحوار
-  - تظهر 3 اختيارات داخل نفس واجهة الحوار السفلية
-  - بدون أي عنوان أو شرح
-- عند اختيار اللاعب:
-  - يُضاف سطر جديد للحوار من شخصية اللاعب بالنص المختار
-  - ثم يُضاف سطر رد أبو سعيد
-  - وكلاهما يمران بنفس typewriter + نفس تحريك الشخصية
+## Root Cause
+In `InteractiveDialogue.tsx`, `isAtChoicePoint` is computed at **render time** using `currentLineIndex`, but by the time `handleNext` needs it, the player has already consumed the last resolved line. The stale value causes the fallthrough `else` branch to fire `onComplete()`.
 
-3. الحفاظ على نفس شكل الصورة الأولى طوال اللقاء
-- عدم استخدام الشكل الموجود في الصورة الثانية نهائياً.
-- الاختيارات تظهر داخل نفس shell الخاص بالـ dialogue، لا في منتصف الصفحة كواجهة مستقلة.
-- إزالة كل عناصر الـ “quiz feel” أثناء اللعب:
-  - “اختار سؤالك”
-  - “اختار السؤال الأنسب”
-  - “جولة x من 7”
-  - أشرطة التقدم الخاصة بالجولات
-  - زر “السؤال التالي”
-- الإبقاء فقط على الإحساس الطبيعي للحوار، ومع وقت القرار تظهر الاختيارات مباشرة بدل continue hint.
+## Fix (single file: `src/components/game/InteractiveDialogue.tsx`)
 
-4. تحويل التأطير النهائي لنفس الأسلوب
-- إلغاء `FramingScreen.tsx` بالشكل الحالي أو إعادة بنائه بنفس واجهة الحوار.
-- الأفضل: بعد آخر رد من أبو سعيد، يظهر انتقال سردي قصير ثم تظهر 4 اختيارات التأطير داخل نفس واجهة الحوار، وليس في شاشة اختبار.
-- اختيار اللاعب للتأطير يتكتب Typed كسطر من شخصيته، ثم الانتقال إلى `ResultScreen`.
+Replace the `handleNext` function to compute the choice-point check **inline** at click time instead of relying on the render-time `isAtChoicePoint` variable:
 
-5. مراجعة الصياغة لتبقى spoken لا اختبارية
-- تنقيح نصوص بعض الأسئلة لتبدو جمل طبيعية يقولها مستشار في لقاء حقيقي، لا جمل مكتوبة كتمرين.
-- إبقاء `tier / points / explanation` داخل البيانات فقط للنتيجة النهائية.
-- عدم إظهار أي تقييم أو hint أثناء اللعب.
+```typescript
+const handleNext = () => {
+  if (isTyping && currentLine) {
+    setDisplayedText(currentLine.text);
+    setIsTyping(false);
+    if (currentLine.isSaveable) setShowSaveButton(true);
+    return;
+  }
 
-6. الدفتر
-- يظل موجوداً كزر عائم لأن ده لا يكسر الإحساس.
-- زر “احفظ في الدفتر” يظهر فقط بعد رد أبو سعيد، بشكل صغير وطبيعي داخل نفس تدفق الحوار.
-- تهذيب النصوص داخل `PFNotebook.tsx` لتكون neutral، لا تعليمية.
-- الملاحظات تظل raw كما هي.
+  const nextIndex = currentLineIndex + 1;
 
-تفاصيل تقنية
-- `src/components/game/screens/ArrivalScreen.tsx`: إعادة بنائه ليصبح شاشة اللقاء الكامل مع state machine للحوار التفاعلي.
-- `src/components/game/screens/InquiryScreen.tsx`: إزالته من الـ flow أو حذفه إذا دمجنا المنطق بالكامل.
-- `src/components/game/screens/FramingScreen.tsx`: إزالته من الشكل الحالي أو تحويله لنفس interactive dialogue shell.
-- `src/components/game/EnhancedDialogue.tsx`: إضافة support لنقطة pause/choice mode داخل نفس الـ shell، أو استخراج shell reusable وبناء `InteractiveEnhancedDialogue` فوقه حتى نحافظ على نفس الشكل بدون كسر briefing.
-- `src/data/pf-scenario.ts`: إعادة تنظيم البيانات لتدعم breakpoints داخل الحوار بدل أن تكون “جولات” مرئية في الواجهة.
-- `src/pages/Index.tsx`: تبسيط الـ flow إلى briefing → travel → client conversation → result.
-- `src/components/game/PFNotebook.tsx`: تهذيب copy الدفتر فقط.
+  if (nextIndex < resolvedLines.length) {
+    setCurrentLineIndex(nextIndex);
+  } else {
+    // Check choice point NOW with nextIndex
+    const atChoice = timelineIndex < timeline.length && 
+      timeline[timelineIndex]?.type === "choice";
+    
+    if (atChoice) {
+      const entry = timeline[timelineIndex];
+      setCurrentChoiceOptions(shuffleArray(entry.options || []));
+      setShowChoices(true);
+    } else if (timelineIndex >= timeline.length) {
+      onComplete?.();
+    }
+    // Remove the dangerous else fallthrough that called onComplete
+  }
+};
+```
 
-معيار النجاح بعد التنفيذ
-- محادثة منصور ومحادثة أبو سعيد تبدوان من نفس العائلة البصرية تماماً.
-- لا توجد أي لحظة يشعر فيها اللاعب أنه خرج من اللعبة إلى شاشة اختبار.
-- السؤال المختار يظهر typed من شخصية اللاعب، والرد يظهر typed من أبو سعيد، بنفس الإحساس السردي.
-- لا توجد هنتات أو عناوين تعليمية أو شريط جولات ظاهر.
-- التجربة كلها تصبح “مهمة استشارية روائية” وليست “اختيار أسئلة في شاشة منفصلة”.
+Also remove the now-unused `isAtChoicePoint` const (line 161-163).
+
+This is a one-line logic fix — no UI or data changes needed.
+
