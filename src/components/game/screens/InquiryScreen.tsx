@@ -75,8 +75,9 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
   const handleSaveNote = (saveId: string, saveText: string) => {
     if (!savedNoteIds.includes(saveId)) {
       setSavedNoteIds(prev => [...prev, saveId]);
-      const rIdx: number = parseInt(saveId.replace("round-", ""), 10);
-      addNote(INQUIRY_ROUNDS[rIdx]?.id || saveId, saveText);
+      const rIdx = parseInt(saveId.replace("round-", ""), 10);
+      const roundId = INQUIRY_ROUNDS[rIdx]?.id ?? rIdx;
+      addNote(roundId, saveText);
     }
   };
 
