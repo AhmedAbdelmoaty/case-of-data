@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { EnhancedDialogue } from "../EnhancedDialogue";
 import { PFNotebook } from "../PFNotebook";
 import type { InquiryOption } from "@/data/pf-scenario";
+import storeFrontImg from "@/assets/scenes/store-front.png";
 
 interface InquiryScreenProps {
   onComplete: () => void;
