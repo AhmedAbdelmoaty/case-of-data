@@ -18,7 +18,7 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
   const dialogues = [
     {
       characterId: "abuSaeed",
-      text: `أهلاً وسهلاً… ${gText("نوّرت", "نوّرتي"، g)} يا ${gText("أستاذ", "أستاذة", g)}. ${gText("اتفضل", "اتفضلي", g)}.`,
+      text: `\u{202B}${gText("نو\u200Cرت", "نو\u200Cرتي", g)} يا ${gText("\u{202B}أستاذ", "\u{202B}أستاذة", g)}. ${gText("اتفضل", "اتفضلي", g)}.\u{202C}أهلاً وسهلاً… `,
       mood: "happy" as const,
     },
     {
@@ -43,7 +43,7 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
     },
     {
       characterId: "detective",
-      text: `${gText("طيب", "طيب"، g)}… ${gText("خليني أسألك", "خليني أسألك", g)} كام سؤال عشان ${gText("أفهم", "أفهم", g)} الصورة كويس.`,
+      text: "طيب… خليني أسألك كام سؤال عشان أفهم الصورة كويس.",
       mood: "neutral" as const,
     },
     {
@@ -117,7 +117,7 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <p className="text-muted-foreground text-sm">🏪 داخل المتجر</p>
+        <p className="text-muted-foreground text-sm">داخل المتجر 🏪</p>
         <h2 className="text-accent font-bold text-lg">Fashion House</h2>
       </motion.div>
 
