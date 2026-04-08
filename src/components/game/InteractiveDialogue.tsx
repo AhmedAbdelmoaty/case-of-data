@@ -158,65 +158,33 @@ export const InteractiveDialogue = ({
   }, [timeline]);
 
   const currentLine = resolvedLines[currentLineIndex];
-  const isAtChoicePoint = timelineIndex < timeline.length && 
-    timeline[timelineIndex]?.type === "choice" && 
-    currentLineIndex >= resolvedLines.length;
 
   // Typing effect
-  useEffect(() => {
-    if (!isActive || !currentLine) return;
-
-    setDisplayedText("");
-    setIsTyping(true);
-    setShowSaveButton(false);
-    setShowChoices(false);
-
-    let charIndex = 0;
-    const text = currentLine.text;
-
-    const typingInterval = setInterval(() => {
-      if (charIndex < text.length) {
-        setDisplayedText(text.slice(0, charIndex + 1));
-        charIndex++;
-      } else {
-        setIsTyping(false);
-        clearInterval(typingInterval);
-        if (currentLine.isSaveable) {
-          setShowSaveButton(true);
-        }
-      }
-    }, 30);
-
-    return () => clearInterval(typingInterval);
-  }, [currentLineIndex, isActive, currentLine]);
+  // (moved below)
 
   const handleNext = () => {
     if (isTyping && currentLine) {
-      // Skip typing
       setDisplayedText(currentLine.text);
       setIsTyping(false);
-      if (currentLine.isSaveable) {
-        setShowSaveButton(true);
-      }
+      if (currentLine.isSaveable) setShowSaveButton(true);
       return;
     }
 
     const nextIndex = currentLineIndex + 1;
 
     if (nextIndex < resolvedLines.length) {
-      // More pre-resolved lines
       setCurrentLineIndex(nextIndex);
-    } else if (isAtChoicePoint) {
-      // Show choices
-      const entry = timeline[timelineIndex];
-      setCurrentChoiceOptions(shuffleArray(entry.options || []));
-      setShowChoices(true);
-    } else if (timelineIndex >= timeline.length) {
-      // Timeline complete
-      onComplete?.();
     } else {
-      // Shouldn't happen, but safety
-      onComplete?.();
+      const atChoice = timelineIndex < timeline.length && 
+        timeline[timelineIndex]?.type === "choice";
+      
+      if (atChoice) {
+        const entry = timeline[timelineIndex];
+        setCurrentChoiceOptions(shuffleArray(entry.options || []));
+        setShowChoices(true);
+      } else if (timelineIndex >= timeline.length) {
+        onComplete?.();
+      }
     }
   };
 
