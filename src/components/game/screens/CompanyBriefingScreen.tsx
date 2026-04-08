@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { gText } from "@/lib/gText";
 import { EnhancedDialogue } from "../EnhancedDialogue";
-import { Rocket, Target, GraduationCap } from "lucide-react";
+import { Rocket, GraduationCap } from "lucide-react";
 import analystImg from "@/assets/characters/analyst.png";
 import saraImg from "@/assets/characters/sara.png";
 
@@ -26,52 +26,42 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
     },
     {
       characterId: "detective",
-      text: `الحمد لله يا أستاذ منصور، تمام.`,
+      text: "الحمد لله يا أستاذ منصور، تمام.",
       mood: "happy" as const,
     },
     {
       characterId: "mansour",
-      text: `اليوم عندنا موضوع مهم. وصلنا طلب استشارة جديد، وأنا ${gText("شايفك الشخص المناسب ليه", "شايفك الشخص المناسب ليه", g)}.`,
+      text: "عندنا مشروع جديد. وصلنا طلب استشارة من عميل اسمه أبو سعيد — عنده متجر ملابس في المنطقة التجارية اسمه Fashion House.",
+      mood: "neutral" as const,
+    },
+    {
+      characterId: "mansour",
+      text: "الراجل ده شغال في المجال من أكتر من 12 سنة. عميل محترم ومحله ماشي كويس الحمد لله.",
       mood: "neutral" as const,
     },
     {
       characterId: "detective",
-      text: `تحت أمرك يا أستاذ منصور. إيه التفاصيل؟`,
+      text: "تمام. إيه الموضوع؟",
       mood: "neutral" as const,
     },
     {
       characterId: "mansour",
-      text: "الطلب من متجر اسمه Fashion House — متجر ملابس في منطقة تجارية. صاحبه — أبو سعيد — راجل شغال من سنين في المجال.",
+      text: "اتصل بينا وقال إن فيه حاجة غريبة بتحصل عنده. حاسس إن الدنيا ماشية والمحل فيه حركة… بس لما بييجي يحسب آخر الشهر بيلاقي الأرقام أقل من المتوقع.",
       mood: "neutral" as const,
     },
     {
       characterId: "mansour",
-      text: "أبو سعيد بيقول إن المبيعات عنده نزلت الفترة الأخيرة، ومش فاهم السبب. حاسس إن فيه حاجة غلط بس مش قادر يحددها.",
+      text: `الراجل محتار. مش فاهم إيه اللي بيحصل. و${gText("عايزك تروح", "عايزك تروحي", g)} ${gText("تقعد", "تقعدي", g)} معاه و${gText("تفهم", "تفهمي", g)} الوضع.`,
       mood: "neutral" as const,
     },
     {
       characterId: "detective",
-      text: gText("فاهم. يعني المطلوب أحلل الموقف وأوصل للسبب؟", "فاهمة. يعني المطلوب أحلل الموقف وأوصل للسبب؟", g),
+      text: `${gText("ماشي", "ماشي", g)} يا أستاذ منصور. ${gText("هروح أشوف", "هروح أشوف", g)} إيه الحكاية.`,
       mood: "neutral" as const,
     },
     {
       characterId: "mansour",
-      text: `بالظبط. المطلوب ${gText("تروح", "تروحي", g)} المتجر، ${gText("تقابل", "تقابلي", g)} أبو سعيد، ${gText("تسمع", "تسمعي", g)} منه، و${gText("تحلل", "تحللي", g)} الموقف. ${gText("شوف", "شوفي", g)} البيانات، ${gText("اتكلم", "اتكلمي", g)} مع الموظفين، و${gText("حاول توصل", "حاولي توصلي", g)} للسبب الحقيقي.`,
-      mood: "neutral" as const,
-    },
-    {
-      characterId: "mansour",
-      text: `أبو سعيد راجل محترم وبيثق فينا. ${gText("فخلّي شغلك يعكس", "فخلّي شغلك يعكس", g)} مستوى الشركة.`,
-      mood: "neutral" as const,
-    },
-    {
-      characterId: "detective",
-      text: gText("إن شاء الله يا أستاذ منصور. مش هخيب ظنك.", "إن شاء الله يا أستاذ منصور. مش هخيب ظنك.", g),
-      mood: "happy" as const,
-    },
-    {
-      characterId: "mansour",
-      text: `يلا يا ${name}… بالتوفيق. أنا ${gText("مستنيك", "مستنياك", g)} بالنتيجة.`,
+      text: `تمام. يلا بالتوفيق يا ${name}. أنا ${gText("مستنيك", "مستنياكي", g)}.`,
       mood: "happy" as const,
     },
   ];
@@ -112,24 +102,11 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
             <GraduationCap className="w-8 h-8 text-accent mx-auto" />
             <p className="text-foreground text-lg font-bold leading-relaxed" dir="rtl">
               {gText(
-                `أنت خلّصت دبلومة IMP وفاهم عقلية المحلل ومنهجية التفكير الصح. دلوقتي جه وقت الاختبار الحقيقي — أثبت إنك قد المهمة.`,
-                `أنتِ خلّصتي دبلومة IMP وفاهمة عقلية المحلل ومنهجية التفكير الصح. دلوقتي جه وقت الاختبار الحقيقي — أثبتي إنك قد المهمة.`,
+                "قدامك مهمة جديدة — عميل محتار ومش فاهم إيه اللي بيحصل في متجره. روح اسمع وافهم.",
+                "قدامك مهمة جديدة — عميل محتار ومش فاهم إيه اللي بيحصل في متجره. روحي اسمعي وافهمي.",
                 g
               )}
             </p>
-            <p className="text-muted-foreground text-base leading-relaxed" dir="rtl">
-              {gText(
-                `قدامك قضية حقيقية — متجر بيخسر ومحتاج حد يفهم ليه. استخدم كل اللي اتعلمته: حلل، اسأل الأسئلة الصح، واوصل للسبب الحقيقي.`,
-                `قدامك قضية حقيقية — متجر بيخسر ومحتاج حد يفهم ليه. استخدمي كل اللي اتعلمتيه: حللي، اسألي الأسئلة الصح، واوصلي للسبب الحقيقي.`,
-                g
-              )}
-            </p>
-            <div className="flex items-center justify-center gap-2 pt-2">
-              <Target className="w-4 h-4 text-primary" />
-              <p className="text-primary font-bold text-sm" dir="rtl">
-                وقت التطبيق. القضية الأولى بتبدأ دلوقتي. 🚀
-              </p>
-            </div>
           </motion.div>
 
           <motion.button
@@ -167,7 +144,7 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <p className="text-muted-foreground text-sm">🏢 مكتب الشركة</p>
+        <p className="text-muted-foreground text-sm">مكتب الشركة 🏢</p>
         <h2 className="text-accent font-bold text-lg">Pinnacle Consulting</h2>
         <p className="text-muted-foreground text-xs">بيناكل للاستشارات</p>
       </motion.div>

@@ -1,60 +1,39 @@
 import { motion } from "framer-motion";
-import { Trophy, Star, RotateCcw, CheckCircle, XCircle, BookOpen } from "lucide-react";
-import { useGame } from "@/contexts/GameContext";
-import { CASE_INFO, EVIDENCE_ITEMS, HYPOTHESES } from "@/data/case1";
+import { Trophy, Star, RotateCcw, CheckCircle, XCircle, ChevronDown } from "lucide-react";
+import { usePFGame } from "@/contexts/PFGameContext";
+import { INQUIRY_ROUNDS, FRAMING_OPTIONS, getScoreLevel, MAX_SCORE } from "@/data/pf-scenario";
 import { cn } from "@/lib/utils";
-import excellentEndingImg from "@/assets/scenes/suspect-arrested.png";
-import wrongEndingImg from "@/assets/scenes/suspect-escaped.png";
+import { useState } from "react";
 
 interface ResultScreenProps {
   onNavigate: (screen: string) => void;
 }
 
 export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
-  const { state, resetGame, getEnding } = useGame();
-  const ending = getEnding();
-  const isWin = ending?.type === "excellent" || ending?.type === "partial";
+  const { state, resetGame } = usePFGame();
+  const [showDetails, setShowDetails] = useState(false);
 
-  const totalPossibleScore = 700;
-  const scorePercentage = Math.round((state.score / totalPossibleScore) * 100);
-
-  const getRank = () => {
-    if (ending?.type === "excellent") return { title: "محلل بيانات أسطوري", icon: "🏆", color: "text-yellow-400" };
-    if (ending?.type === "partial") return { title: "محلل بيانات متقدم", icon: "🥈", color: "text-slate-300" };
-    if (ending?.type === "wrong") return { title: "محلل بيانات مبتدئ", icon: "📚", color: "text-amber-600" };
-    return { title: "متدرب", icon: "🔰", color: "text-muted-foreground" };
-  };
-
-  const rank = getRank();
+  const level = getScoreLevel(state.score);
+  const chosenFraming = FRAMING_OPTIONS.find((f) => f.id === state.chosenFramingId);
+  const correctFraming = FRAMING_OPTIONS.find((f) => f.isCorrect);
+  const isFramingCorrect = chosenFraming?.isCorrect || false;
 
   const handleReplay = () => {
     resetGame();
-    onNavigate("intro");
+    onNavigate("company-briefing");
   };
 
-  const stats = [
-    { label: "أدلة في الدفتر", value: state.notebook.length, max: 16, icon: "📓" },
-    { label: "أدلة مشاهدة", value: state.viewedEvidence.length, max: EVIDENCE_ITEMS.length, icon: "📁" },
-    { label: "مقابلات مكتملة", value: state.completedInterviews.length, max: 3, icon: "👥" },
-    { label: "H3 ضمن الاختيارات", value: state.selectedHypotheses.includes("H3") ? "✓" : "✗", max: "", icon: "🎯" },
-  ];
-
-  const chosenHypothesis = HYPOTHESES.find(h => h.id === state.finalHypothesis);
-
   return (
-    <div className={cn("min-h-screen relative overflow-hidden")}>
-      {/* Background scene image */}
-      <div className="absolute inset-0">
-        <img src={isWin ? excellentEndingImg : wrongEndingImg} alt="Ending" className="w-full h-full object-cover" />
-        <div className={cn("absolute inset-0",
-          isWin ? "bg-gradient-to-b from-green-950/80 via-green-900/60 to-background/95" : "bg-gradient-to-b from-red-950/80 via-red-900/60 to-background/95"
-        )} />
-      </div>
+    <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Particles */}
-      <div className="absolute inset-0 overflow-hidden">
-        {[...Array(20)].map((_, i) => (
-          <motion.div key={i}
-            className={cn("absolute w-2 h-2 rounded-full", isWin ? "bg-green-400/30" : "bg-red-400/30")}
+      <div className="absolute inset-0">
+        {[...Array(15)].map((_, i) => (
+          <motion.div
+            key={i}
+            className={cn(
+              "absolute w-2 h-2 rounded-full",
+              isFramingCorrect ? "bg-green-400/30" : "bg-amber-400/30"
+            )}
             style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%` }}
             animate={{ y: [0, -30, 0], opacity: [0.2, 0.8, 0.2] }}
             transition={{ duration: 3 + Math.random() * 2, repeat: Infinity, delay: Math.random() * 2 }}
@@ -62,116 +41,119 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
         ))}
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-8 max-w-4xl">
+      <div className="relative z-10 container mx-auto px-4 py-8 max-w-lg">
         {/* Header */}
-        <motion.div className="text-center mb-8" initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-          <motion.div className="text-8xl mb-4" animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}>
-            {ending?.rankIcon || "📊"}
+        <motion.div className="text-center mb-6" initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
+          <motion.div
+            className="text-7xl mb-3"
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            {level.icon}
           </motion.div>
-          <h1 className={cn("text-4xl md:text-5xl font-bold mb-2", isWin ? "text-green-400" : "text-red-400")}>
-            {ending?.title || "النتيجة"}
-          </h1>
-          <p className="text-muted-foreground text-lg">{ending?.description}</p>
+          <h1 className={cn("text-3xl font-bold mb-1", level.color)}>{level.title}</h1>
+          <p className="text-muted-foreground text-sm">{level.description}</p>
         </motion.div>
 
-        {/* What you chose */}
-        <motion.div className="p-4 rounded-xl bg-card/50 border border-border mb-6 text-center"
-          initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}
+        {/* Score */}
+        <motion.div
+          className="p-5 rounded-2xl bg-card/50 border border-border mb-4 text-center"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.2 }}
         >
-          <p className="text-sm text-muted-foreground mb-1">اختيارك النهائي:</p>
-          <p className="text-xl font-bold text-foreground">{chosenHypothesis?.text || "غير محدد"}</p>
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <Star className="w-6 h-6 text-amber-400" />
+            <span className="text-4xl font-bold text-amber-400">{state.score}</span>
+            <span className="text-muted-foreground text-lg">/ {MAX_SCORE}</span>
+          </div>
+          <p className="text-muted-foreground text-xs">النقاط النهائية</p>
         </motion.div>
 
-        {/* Consequences */}
-        {ending?.consequences && (
-          <motion.div className={cn("p-6 rounded-2xl border mb-6",
-            isWin ? "bg-green-500/10 border-green-500/30" : "bg-red-500/10 border-red-500/30"
-          )} initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }}>
-            <h3 className="text-lg font-bold text-foreground mb-4">النتائج:</h3>
-            <ul className="space-y-2">
-              {ending.consequences.map((c, i) => (
-                <motion.li key={i} className="flex items-start gap-3 text-foreground"
-                  initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 + i * 0.1 }}
-                >
-                  {isWin ? <CheckCircle className="w-5 h-5 text-green-400 shrink-0" /> : <XCircle className="w-5 h-5 text-destructive shrink-0" />}
-                  <span>{c}</span>
-                </motion.li>
-              ))}
-            </ul>
-          </motion.div>
-        )}
-
-        {/* Score & Rank */}
-        <motion.div className="p-6 rounded-2xl bg-card/50 border border-border mb-6"
-          initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.4 }}
+        {/* Framing result */}
+        <motion.div
+          className={cn(
+            "p-4 rounded-xl border mb-4",
+            isFramingCorrect ? "bg-green-500/10 border-green-500/30" : "bg-red-500/10 border-red-500/30"
+          )}
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3 }}
         >
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="text-center md:text-right">
-              <p className="text-muted-foreground text-sm mb-1">النقاط النهائية</p>
-              <div className="flex items-center gap-2">
-                <Star className="w-8 h-8 text-amber-400" />
-                <span className="text-5xl font-bold text-amber-400">{state.score}</span>
-              </div>
-            </div>
-            <div className="text-center">
-              <motion.div className="text-6xl mb-2" animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
-                {rank.icon}
-              </motion.div>
-              <p className={cn("text-2xl font-bold", rank.color)}>{rank.title}</p>
-            </div>
-            <div className="text-center md:text-left">
-              <p className="text-muted-foreground text-sm">المهمة</p>
-              <p className="text-xl font-bold text-foreground">{CASE_INFO.title}</p>
+          <div className="flex items-start gap-2 mb-2">
+            {isFramingCorrect ? (
+              <CheckCircle className="w-5 h-5 text-green-400 shrink-0 mt-0.5" />
+            ) : (
+              <XCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+            )}
+            <div>
+              <p className="text-sm font-bold text-foreground" dir="rtl">
+                {isFramingCorrect ? "التأطير صح! 🎯" : "التأطير مش دقيق"}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1" dir="rtl">
+                اختيارك: {chosenFraming?.text?.slice(0, 80)}...
+              </p>
             </div>
           </div>
-        </motion.div>
-
-        {/* Stats */}
-        <motion.div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"
-          initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5 }}
-        >
-          {stats.map((stat, i) => (
-            <motion.div key={stat.label} className="p-4 rounded-xl bg-card/50 border border-border text-center"
-              initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.6 + i * 0.1, type: "spring" }}
-            >
-              <span className="text-2xl mb-2 block">{stat.icon}</span>
-              <p className="text-2xl font-bold text-foreground">
-                {stat.value}{stat.max && <span className="text-muted-foreground text-sm">/{stat.max}</span>}
+          {!isFramingCorrect && correctFraming && (
+            <div className="mt-3 pt-3 border-t border-border">
+              <p className="text-xs font-bold text-green-400 mb-1" dir="rtl">التأطير الصح:</p>
+              <p className="text-xs text-foreground leading-relaxed" dir="rtl">
+                {correctFraming.text}
               </p>
-              <p className="text-xs text-muted-foreground">{stat.label}</p>
-            </motion.div>
-          ))}
+            </div>
+          )}
         </motion.div>
 
-        {/* Lesson learned */}
-        {ending?.lesson && (
-          <motion.div className="p-6 rounded-2xl bg-accent/10 border border-accent/30 mb-6"
-            initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.7 }}
+        {/* Round details toggle */}
+        <motion.button
+          onClick={() => setShowDetails(!showDetails)}
+          className="w-full p-3 rounded-xl bg-card/50 border border-border flex items-center justify-between mb-4"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.4 }}
+        >
+          <span className="text-sm font-bold text-foreground">📋 مراجعة الأسئلة</span>
+          <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform", showDetails && "rotate-180")} />
+        </motion.button>
+
+        {showDetails && (
+          <motion.div
+            className="space-y-2 mb-6"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
           >
-            <h3 className="text-lg font-bold text-accent mb-3 flex items-center gap-2">
-              <BookOpen className="w-5 h-5" />
-              الدرس المستفاد
-            </h3>
-            <p className="text-foreground leading-relaxed">{ending.lesson}</p>
+            {state.choices.map((choice, i) => {
+              const round = INQUIRY_ROUNDS[i];
+              const tierLabel = choice.tier === "strong" ? "🟢 قوي" : choice.tier === "medium" ? "🟡 متوسط" : "🔴 ضعيف";
+              return (
+                <div key={i} className="p-3 rounded-lg bg-card/30 border border-border">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs text-muted-foreground">جولة {i + 1}</span>
+                    <span className="text-xs font-bold">{tierLabel} (+{choice.points})</span>
+                  </div>
+                  <p className="text-xs text-foreground mb-1" dir="rtl">{choice.text.slice(0, 60)}...</p>
+                  <p className="text-xs text-muted-foreground" dir="rtl">{choice.explanation}</p>
+                </div>
+              );
+            })}
           </motion.div>
         )}
 
         {/* Actions */}
-        <motion.div className="flex flex-col sm:flex-row gap-4 justify-center"
-          initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.8 }}
+        <motion.div
+          className="space-y-3"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5 }}
         >
-          <motion.button onClick={handleReplay}
-            className="flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-primary text-primary-foreground font-bold text-lg"
-            whileHover={{ scale: 1.05 }}
+          <motion.button
+            onClick={handleReplay}
+            className="w-full flex items-center justify-center gap-3 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold"
+            whileHover={{ scale: 1.02 }}
           >
-            <RotateCcw className="w-6 h-6" />
-            🔄 العب مرة أخرى
-          </motion.button>
-          <motion.button onClick={() => { resetGame(); onNavigate("intro"); }}
-            className="flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-secondary text-foreground font-bold text-lg border border-border"
-            whileHover={{ scale: 1.05 }}
-          >
-            🏠 القائمة الرئيسية
+            <RotateCcw className="w-5 h-5" />
+            العب مرة أخرى
           </motion.button>
         </motion.div>
       </div>
