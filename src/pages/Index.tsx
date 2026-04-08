@@ -26,7 +26,7 @@ const GameContent = () => {
     const saved = localStorage.getItem(storageKey) as Screen | null;
     if (saved === "replay-briefing") return "company-briefing";
     // Map old screen names to new ones
-    if (saved === "arrival" || saved === "inquiry" || saved === "framing") return "conversation";
+    if (saved === "arrival" || saved === "inquiry" || saved === "framing" || saved === "conversation") return "conversation" as Screen;
     return (saved as Screen) || "company-briefing";
   });
 

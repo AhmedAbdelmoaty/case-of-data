@@ -14,7 +14,7 @@ interface DialogueLine {
   saveText?: string;
 }
 
-interface ChoiceOption {
+export interface ChoiceOption {
   id: string;
   text: string;
   // Hidden data — not shown to player
