@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
 import { MapPin, DoorOpen } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { gText } from "@/lib/gText";
-import { EnhancedDialogue } from "../EnhancedDialogue";
+import { InteractiveDialogue, type TimelineEntry } from "../InteractiveDialogue";
+import { PFNotebook } from "../PFNotebook";
+import { INQUIRY_ROUNDS, FRAMING_OPTIONS } from "@/data/pf-scenario";
+import { usePFGame } from "@/contexts/PFGameContext";
 import storeFrontImg from "@/assets/scenes/store-front.png";
 
 interface ArrivalScreenProps {
@@ -12,46 +15,144 @@ interface ArrivalScreenProps {
 
 export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
   const { profile } = useAuth();
+  const { chooseQuestion, addNote, chooseFraming } = usePFGame();
   const g = profile?.gender || "male";
-  const [phase, setPhase] = useState<"storefront" | "dialogue">("storefront");
+  const name = profile?.display_name || "محلل";
+  const [phase, setPhase] = useState<"storefront" | "conversation">("storefront");
+  const [savedNoteIds, setSavedNoteIds] = useState<string[]>([]);
 
-  const dialogues = [
-    {
-      characterId: "abuSaeed",
-      text: `\u{202B}${gText("نو\u200Cرت", "نو\u200Cرتي", g)} يا ${gText("\u{202B}أستاذ", "\u{202B}أستاذة", g)}. ${gText("اتفضل", "اتفضلي", g)}.\u{202C}أهلاً وسهلاً… `,
-      mood: "happy" as const,
-    },
-    {
-      characterId: "abuSaeed",
-      text: "أنا أبو سعيد. المحل ده بقالي فيه أكتر من 12 سنة والحمد لله… عملته بإيدي من الصفر.",
-      mood: "neutral" as const,
-    },
-    {
-      characterId: "abuSaeed",
-      text: "بس من كام أسبوع كده… حاسس إن فيه حاجة مش مظبوطة.",
-      mood: "nervous" as const,
-    },
-    {
-      characterId: "abuSaeed",
-      text: "الحركة في المحل كويسة… الناس بتيجي وبتتفرج وبتدخل وبتطلع… يعني المحل مش فاضي.",
-      mood: "neutral" as const,
-    },
-    {
-      characterId: "abuSaeed",
-      text: "بس لما باجي أحسب آخر الأسبوع… بلاقي الرقم أقل من اللي متوقعه. مش عارف ليه. الحركة كويسة بس الفلوس مش بتيجي زي الأول.",
-      mood: "nervous" as const,
-    },
-    {
-      characterId: "detective",
-      text: "طيب… خليني أسألك كام سؤال عشان أفهم الصورة كويس.",
-      mood: "neutral" as const,
-    },
-    {
-      characterId: "abuSaeed",
-      text: `اتفضل… اسأل اللي ${gText("عايزه", "عايزاه", g)}. أنا محتاج حد يفهمني إيه اللي بيحصل.`,
-      mood: "neutral" as const,
-    },
-  ];
+  // Build the full timeline: intro dialogue + 7 inquiry rounds + framing
+  const timeline = useMemo((): TimelineEntry[] => {
+    const entries: TimelineEntry[] = [];
+
+    // ---- Intro dialogue with Abu Saeed ----
+    entries.push({
+      type: "line",
+      line: {
+        characterId: "abuSaeed",
+        text: `أهلاً وسهلاً… ${gText("نوّرت", "نوّرتي", g)} يا ${gText("أستاذ", "أستاذة", g)}. ${gText("اتفضل", "اتفضلي", g)}.`,
+        mood: "happy",
+      },
+    });
+    entries.push({
+      type: "line",
+      line: {
+        characterId: "abuSaeed",
+        text: "أنا أبو سعيد. المحل ده بقالي فيه أكتر من 12 سنة والحمد لله… عملته بإيدي من الصفر.",
+        mood: "neutral",
+      },
+    });
+    entries.push({
+      type: "line",
+      line: {
+        characterId: "abuSaeed",
+        text: "بس من كام أسبوع كده… حاسس إن فيه حاجة مش مظبوطة.",
+        mood: "nervous",
+      },
+    });
+    entries.push({
+      type: "line",
+      line: {
+        characterId: "abuSaeed",
+        text: "الحركة في المحل كويسة… الناس بتيجي وبتتفرج وبتدخل وبتطلع… يعني المحل مش فاضي.",
+        mood: "neutral",
+      },
+    });
+    entries.push({
+      type: "line",
+      line: {
+        characterId: "abuSaeed",
+        text: "بس لما باجي أحسب آخر الأسبوع… بلاقي الرقم أقل من اللي متوقعه. مش عارف ليه. الحركة كويسة بس الفلوس مش بتيجي زي الأول.",
+        mood: "nervous",
+      },
+    });
+    entries.push({
+      type: "line",
+      line: {
+        characterId: "detective",
+        text: "طيب… خليني أسألك كام سؤال عشان أفهم الصورة كويس.",
+        mood: "neutral",
+      },
+    });
+    entries.push({
+      type: "line",
+      line: {
+        characterId: "abuSaeed",
+        text: `اتفضل… اسأل اللي ${gText("عايزه", "عايزاه", g)}. أنا محتاج حد يفهمني إيه اللي بيحصل.`,
+        mood: "neutral",
+      },
+    });
+
+    // ---- 7 Inquiry Rounds as choice breakpoints ----
+    INQUIRY_ROUNDS.forEach((round) => {
+      entries.push({
+        type: "choice",
+        options: round.options.map((opt) => ({
+          id: opt.id,
+          text: opt.text,
+          tier: opt.tier,
+          points: opt.points,
+          response: opt.response,
+          responseCharacterId: "abuSaeed",
+          responseMood: (opt.tier === "strong" ? "nervous" : "neutral") as "neutral" | "nervous",
+          isSaveable: true,
+          saveId: `round-${round.id}`,
+        })),
+      });
+    });
+
+    // ---- Transition to framing ----
+    entries.push({
+      type: "line",
+      line: {
+        characterId: "abuSaeed",
+        text: "طيب… أنا قولتلك كل حاجة أعرفها. إنت دلوقتي إيه رأيك؟ إيه المشكلة الحقيقية؟",
+        mood: "nervous",
+      },
+    });
+
+    // ---- Framing as a choice breakpoint ----
+    entries.push({
+      type: "choice",
+      options: FRAMING_OPTIONS.map((f) => ({
+        id: f.id,
+        text: f.text,
+        response: f.isCorrect
+          ? "يا ساتر… فعلاً! أنا ما كنتش شايف الصورة دي خالص. شكراً ليك — دلوقتي فاهم المشكلة."
+          : "ممكن… بس مش حاسس إن دي الصورة الكاملة.",
+        responseCharacterId: "abuSaeed",
+        responseMood: (f.isCorrect ? "happy" : "nervous") as "happy" | "nervous",
+      })),
+    });
+
+    return entries;
+  }, [g, name]);
+
+  const handleChoice = useCallback((optionId: string, option: any) => {
+    // Check if it's an inquiry round choice
+    for (const round of INQUIRY_ROUNDS) {
+      const found = round.options.find((o) => o.id === optionId);
+      if (found) {
+        chooseQuestion(found);
+        return;
+      }
+    }
+    // Check if it's a framing choice
+    const framingOption = FRAMING_OPTIONS.find((f) => f.id === optionId);
+    if (framingOption) {
+      chooseFraming(optionId);
+    }
+  }, [chooseQuestion, chooseFraming]);
+
+  const handleSaveNote = useCallback((saveId: string, saveText: string) => {
+    if (!savedNoteIds.includes(saveId)) {
+      setSavedNoteIds((prev) => [...prev, saveId]);
+      const roundNum = parseInt(saveId.replace("round-", ""), 10);
+      if (!isNaN(roundNum)) {
+        addNote(roundNum, saveText);
+      }
+    }
+  }, [savedNoteIds, addNote]);
 
   if (phase === "storefront") {
     return (
@@ -86,7 +187,7 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
           <motion.button
             className="relative px-8 py-3 rounded-xl text-base font-bold overflow-hidden group"
             style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))" }}
-            onClick={() => setPhase("dialogue")}
+            onClick={() => setPhase("conversation")}
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.5 }}
@@ -121,11 +222,16 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
         <h2 className="text-accent font-bold text-lg">Fashion House</h2>
       </motion.div>
 
-      <EnhancedDialogue
-        dialogues={dialogues}
-        isActive={phase === "dialogue"}
+      <PFNotebook />
+
+      <InteractiveDialogue
+        timeline={timeline}
+        isActive={phase === "conversation"}
         onComplete={onComplete}
-        playerName={profile?.display_name || "محلل"}
+        onChoice={handleChoice}
+        onSaveNote={handleSaveNote}
+        savedNoteIds={savedNoteIds}
+        playerName={name}
         playerGender={g as "male" | "female"}
       />
     </div>
