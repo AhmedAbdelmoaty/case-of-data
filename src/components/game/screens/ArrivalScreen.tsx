@@ -18,7 +18,7 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
   const dialogues = [
     {
       characterId: "abuSaeed",
-      text: `\u{202B}${gText("نو\u200Cرت", "نو\u200Cرتي", g)} يا ${gText("\u{202B}أستاذ", "\u{202B}أستاذة", g)}. ${gText("اتفضل", "اتفضلي", g)}.\u{202C}أهلاً وسهلاً… `,
+      text: `أهلاً وسهلاً… ${gText("نوّرت", "نوّرتي", g)} يا ${gText("أستاذ", "أستاذة", g)}. ${gText("اتفضل", "اتفضلي", g)}.`,
       mood: "happy" as const,
     },
     {
@@ -38,7 +38,7 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
     },
     {
       characterId: "abuSaeed",
-      text: "بس لما باجي أحسب آخر الأسبوع… بلاقي الرقم أقل من اللي متوقعه. مش عارف ليه. الحركة كويسة بس الفلوس مش بتيجي زي الأول.",
+      text: "بس لما باجي أحسب آخر الأسبوع… بلاقي الرقم مش زي ما متوقع. البيع مش باين رغم إن الحركة شكلها كويس.",
       mood: "nervous" as const,
     },
     {
@@ -48,7 +48,7 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
     },
     {
       characterId: "abuSaeed",
-      text: `اتفضل… اسأل اللي ${gText("عايزه", "عايزاه", g)}. أنا محتاج حد يفهمني إيه اللي بيحصل.`,
+      text: `${gText("اتفضل", "اتفضلي", g)}… اسأل اللي ${gText("عايزه", "عايزاه", g)}. أنا محتاج حد يفهمني إيه اللي بيحصل.`,
       mood: "neutral" as const,
     },
   ];
