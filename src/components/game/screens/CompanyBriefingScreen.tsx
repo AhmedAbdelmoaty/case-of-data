@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { useSound } from "@/hooks/useSoundEffects";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { gText } from "@/lib/gText";
@@ -111,7 +112,10 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
           </motion.div>
 
           <motion.button
-            onClick={() => setPhase("dialogue")}
+            onClick={() => {
+              try { playSound("door"); } catch {}
+              setPhase("dialogue");
+            }}
             className="mt-10 px-8 py-3 rounded-xl bg-card/60 backdrop-blur-md border border-border text-foreground font-bold hover:bg-card/80 transition-all"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
