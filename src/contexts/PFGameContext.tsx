@@ -6,13 +6,16 @@ interface NoteEntry {
   text: string;
 }
 
+export type PerformanceTier = "exceptional" | "promising" | "beginner";
+
 interface PFGameState {
   currentRound: number;
   choices: InquiryOption[];
   score: number;
   notes: NoteEntry[];
   chosenFramingId: string | null;
-  gamePhase: "briefing" | "travel" | "arrival" | "inquiry" | "framing" | "result";
+  gamePhase: "briefing" | "travel" | "arrival" | "inquiry" | "framing" | "presentation" | "return-travel" | "debrief" | "result";
+  trustLevel: number; // 0-10, starts at 5
 }
 
 interface PFGameContextValue {
@@ -24,6 +27,8 @@ interface PFGameContextValue {
   getFinalScore: () => number;
   resetGame: () => void;
   setPhase: (phase: PFGameState["gamePhase"]) => void;
+  getPerformanceTier: () => PerformanceTier;
+  isFramingCorrect: () => boolean;
 }
 
 const initialState: PFGameState = {
@@ -33,6 +38,7 @@ const initialState: PFGameState = {
   notes: [],
   chosenFramingId: null,
   gamePhase: "briefing",
+  trustLevel: 5,
 };
 
 const PFGameContext = createContext<PFGameContextValue | null>(null);
@@ -47,12 +53,17 @@ export const PFGameProvider = ({ children }: { children: ReactNode }) => {
   const [state, setState] = useState<PFGameState>(initialState);
 
   const chooseQuestion = useCallback((option: InquiryOption) => {
-    setState((prev) => ({
-      ...prev,
-      choices: [...prev.choices, option],
-      score: prev.score + option.points,
-      currentRound: prev.currentRound + 1,
-    }));
+    setState((prev) => {
+      const trustDelta = option.tier === "strong" ? 1 : option.tier === "weak" ? -1 : 0;
+      const newTrust = Math.max(0, Math.min(10, prev.trustLevel + trustDelta));
+      return {
+        ...prev,
+        choices: [...prev.choices, option],
+        score: prev.score + option.points,
+        currentRound: prev.currentRound + 1,
+        trustLevel: newTrust,
+      };
+    });
   }, []);
 
   const addNote = useCallback((roundId: number, text: string) => {
@@ -81,6 +92,17 @@ export const PFGameProvider = ({ children }: { children: ReactNode }) => {
 
   const getFinalScore = useCallback(() => state.score, [state.score]);
 
+  const getPerformanceTier = useCallback((): PerformanceTier => {
+    if (state.score >= 20) return "exceptional";
+    if (state.score >= 10) return "promising";
+    return "beginner";
+  }, [state.score]);
+
+  const isFramingCorrect = useCallback(() => {
+    const framing = FRAMING_OPTIONS.find((f) => f.id === state.chosenFramingId);
+    return framing?.isCorrect || false;
+  }, [state.chosenFramingId]);
+
   const resetGame = useCallback(() => {
     setState(initialState);
   }, []);
@@ -91,7 +113,7 @@ export const PFGameProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <PFGameContext.Provider
-      value={{ state, chooseQuestion, addNote, removeNote, chooseFraming, getFinalScore, resetGame, setPhase }}
+      value={{ state, chooseQuestion, addNote, removeNote, chooseFraming, getFinalScore, resetGame, setPhase, getPerformanceTier, isFramingCorrect }}
     >
       {children}
     </PFGameContext.Provider>
