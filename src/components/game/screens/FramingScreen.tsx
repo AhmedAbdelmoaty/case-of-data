@@ -4,7 +4,7 @@ import { Target, BookOpen } from "lucide-react";
 import { FRAMING_OPTIONS } from "@/data/pf-scenario";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { PFNotebook } from "../PFNotebook";
-import storeFrontImg from "@/assets/scenes/store-front.png";
+import storeCounterImg from "@/assets/scenes/store-counter.png";
 
 interface FramingScreenProps {
   onComplete: () => void;
@@ -34,16 +34,14 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      {/* Background */}
       <div className="absolute inset-0">
-        <img src={storeFrontImg} alt="" className="w-full h-full object-cover" />
+        <img src={storeCounterImg} alt="" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
       </div>
 
       <PFNotebook />
 
       <div className="relative z-10 max-w-2xl mx-auto px-4 py-8">
-        {/* Thinking animation intro */}
         <motion.div
           className="text-center mb-8"
           initial={{ opacity: 0, y: -20 }}
@@ -69,7 +67,6 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
           </p>
         </motion.div>
 
-        {/* Options appear one by one */}
         <AnimatePresence>
           {showOptions && (
             <div className="space-y-3">
@@ -96,7 +93,6 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
           )}
         </AnimatePresence>
 
-        {/* Confirm button */}
         <AnimatePresence>
           {selected && !confirmed && (
             <motion.button
@@ -115,7 +111,6 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
           )}
         </AnimatePresence>
 
-        {/* Confirmed transition */}
         <AnimatePresence>
           {confirmed && (
             <motion.div
