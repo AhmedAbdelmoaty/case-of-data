@@ -5,6 +5,9 @@ import { TravelScreen } from "@/components/game/screens/TravelScreen";
 import { ArrivalScreen } from "@/components/game/screens/ArrivalScreen";
 import { InquiryScreen } from "@/components/game/screens/InquiryScreen";
 import { FramingScreen } from "@/components/game/screens/FramingScreen";
+import { PresentationScreen } from "@/components/game/screens/PresentationScreen";
+import { ReturnTravelScreen } from "@/components/game/screens/ReturnTravelScreen";
+import { DebriefScreen } from "@/components/game/screens/DebriefScreen";
 import { ResultScreen } from "@/components/game/screens/ResultScreen";
 import { SoundProvider } from "@/hooks/useSoundEffects";
 import { MusicProvider } from "@/hooks/useBackgroundMusic";
@@ -18,6 +21,9 @@ type Screen =
   | "arrival"
   | "inquiry"
   | "framing"
+  | "presentation"
+  | "return-travel"
+  | "debrief"
   | "result"
   | "replay-briefing";
 
@@ -87,7 +93,16 @@ const GameContent = () => {
         <InquiryScreen onComplete={() => handleNavigate("framing")} />
       )}
       {currentScreen === "framing" && (
-        <FramingScreen onComplete={() => handleNavigate("result")} />
+        <FramingScreen onComplete={() => handleNavigate("presentation")} />
+      )}
+      {currentScreen === "presentation" && (
+        <PresentationScreen onComplete={() => handleNavigate("return-travel")} />
+      )}
+      {currentScreen === "return-travel" && (
+        <ReturnTravelScreen onComplete={() => handleNavigate("debrief")} />
+      )}
+      {currentScreen === "debrief" && (
+        <DebriefScreen onComplete={() => handleNavigate("result")} />
       )}
       {currentScreen === "result" && (
         <ResultScreen onNavigate={handleNavigate} />

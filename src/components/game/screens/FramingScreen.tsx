@@ -4,6 +4,7 @@ import { Target, BookOpen } from "lucide-react";
 import { FRAMING_OPTIONS } from "@/data/pf-scenario";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { PFNotebook } from "../PFNotebook";
+import storeFrontImg from "@/assets/scenes/store-front.png";
 
 interface FramingScreenProps {
   onComplete: () => void;
@@ -13,8 +14,8 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
   const { chooseFraming } = usePFGame();
   const [selected, setSelected] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
 
-  // Shuffle framing options once
   const [shuffled] = useState(() => {
     const arr = [...FRAMING_OPTIONS];
     for (let i = arr.length - 1; i > 0; i--) {
@@ -28,34 +29,39 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
     if (!selected) return;
     chooseFraming(selected);
     setConfirmed(true);
-    setTimeout(onComplete, 600);
+    setTimeout(onComplete, 800);
   };
 
   return (
     <div className="min-h-screen bg-background relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-secondary via-background to-background" />
+      {/* Background */}
+      <div className="absolute inset-0">
+        <img src={storeFrontImg} alt="" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+      </div>
 
       <PFNotebook />
 
       <div className="relative z-10 max-w-2xl mx-auto px-4 py-8">
+        {/* Thinking animation intro */}
         <motion.div
           className="text-center mb-8"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
+          onAnimationComplete={() => setTimeout(() => setShowOptions(true), 600)}
         >
           <motion.div
-            className="text-4xl mb-3"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: "spring" }}
+            className="text-5xl mb-4"
+            animate={{ scale: [1, 1.1, 1], rotate: [0, -5, 5, 0] }}
+            transition={{ duration: 2, repeat: 1 }}
           >
-            🎯
+            🤔
           </motion.div>
           <h1 className="text-xl font-bold text-foreground mb-2" dir="rtl">
-            التأطير النهائي
+            وقت التأطير
           </h1>
           <p className="text-muted-foreground text-sm" dir="rtl">
-            بناءً على اللي سمعته وفهمته… إيه التأطير اللي بيوصف المشكلة الحقيقية؟
+            بناءً على كل اللي سمعته وفهمته… إيه أقرب وصف للمشكلة الحقيقية؟
           </p>
           <p className="text-muted-foreground text-xs mt-2 flex items-center justify-center gap-1" dir="rtl">
             <BookOpen className="w-3.5 h-3.5" />
@@ -63,27 +69,32 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
           </p>
         </motion.div>
 
-        <div className="space-y-3">
-          {shuffled.map((option, i) => (
-            <motion.button
-              key={option.id}
-              onClick={() => !confirmed && setSelected(option.id)}
-              className={`w-full p-4 rounded-xl border text-right transition-all ${
-                selected === option.id
-                  ? "bg-primary/10 border-primary/50 ring-2 ring-primary/30"
-                  : "bg-card/80 border-border hover:border-primary/30"
-              } ${confirmed ? "pointer-events-none opacity-80" : ""}`}
-              dir="rtl"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 + i * 0.1 }}
-              whileHover={!confirmed ? { scale: 1.01 } : {}}
-              whileTap={!confirmed ? { scale: 0.99 } : {}}
-            >
-              <p className="text-foreground text-sm leading-relaxed">{option.text}</p>
-            </motion.button>
-          ))}
-        </div>
+        {/* Options appear one by one */}
+        <AnimatePresence>
+          {showOptions && (
+            <div className="space-y-3">
+              {shuffled.map((option, i) => (
+                <motion.button
+                  key={option.id}
+                  onClick={() => !confirmed && setSelected(option.id)}
+                  className={`w-full p-4 rounded-xl border text-right transition-all ${
+                    selected === option.id
+                      ? "bg-primary/10 border-primary/50 ring-2 ring-primary/30"
+                      : "bg-card/80 backdrop-blur-sm border-border hover:border-primary/30"
+                  } ${confirmed ? "pointer-events-none opacity-80" : ""}`}
+                  dir="rtl"
+                  initial={{ opacity: 0, x: 40 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.15, type: "spring", damping: 20 }}
+                  whileHover={!confirmed ? { scale: 1.01 } : {}}
+                  whileTap={!confirmed ? { scale: 0.99 } : {}}
+                >
+                  <p className="text-foreground text-sm leading-relaxed">{option.text}</p>
+                </motion.button>
+              ))}
+            </div>
+          )}
+        </AnimatePresence>
 
         {/* Confirm button */}
         <AnimatePresence>
@@ -99,8 +110,30 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
               whileTap={{ scale: 0.98 }}
             >
               <Target className="w-5 h-5" />
-              تأكيد الاختيار
+              تأكيد الاختيار وتقديم التقرير
             </motion.button>
+          )}
+        </AnimatePresence>
+
+        {/* Confirmed transition */}
+        <AnimatePresence>
+          {confirmed && (
+            <motion.div
+              className="mt-8 text-center"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+            >
+              <motion.div
+                className="text-4xl"
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 1, repeat: Infinity }}
+              >
+                📋
+              </motion.div>
+              <p className="text-muted-foreground text-sm mt-2" dir="rtl">
+                بتقدم التحليل لأبو سعيد...
+              </p>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>
