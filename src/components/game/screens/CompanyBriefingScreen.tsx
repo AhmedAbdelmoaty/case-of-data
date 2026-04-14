@@ -18,6 +18,7 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
   const { profile } = useAuth();
   const name = profile?.display_name || "محلل";
   const g = profile?.gender || "male";
+  const { playSound } = useSound();
   const [phase, setPhase] = useState<"establishing" | "dialogue" | "transition">(
     isReviewMode ? "dialogue" : "establishing"
   );
