@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSound } from "@/hooks/useSoundEffects";
 import cityDriveImg from "@/assets/scenes/city-drive.png";
 
 interface TravelScreenProps {
@@ -13,12 +14,14 @@ const WAYPOINTS = [
 ];
 
 export const TravelScreen = ({ onComplete }: TravelScreenProps) => {
+  const { playSound } = useSound();
   const [activeWaypoint, setActiveWaypoint] = useState(0);
 
   useEffect(() => {
+    try { playSound("carEngine"); } catch {}
     const timer = setTimeout(onComplete, 4500);
     return () => clearTimeout(timer);
-  }, [onComplete]);
+  }, [onComplete, playSound]);
 
   useEffect(() => {
     const timers = WAYPOINTS.map((wp, i) =>
