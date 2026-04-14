@@ -10,7 +10,11 @@ type SoundType =
   | "reveal" 
   | "dialogue" 
   | "suspense"
-  | "accuse";
+  | "accuse"
+  | "door"
+  | "carEngine"
+  | "storeBell"
+  | "confetti";
 
 interface SoundConfig {
   frequency: number;
@@ -105,6 +109,41 @@ const soundConfigs: Record<SoundType, SoundConfig> = {
     volume: 0.2,
     attack: 0.05,
     secondaryFreq: 200,
+  },
+  door: {
+    frequency: 120,
+    duration: 0.4,
+    type: "sine",
+    volume: 0.2,
+    attack: 0.02,
+    decay: 0.3,
+    secondaryFreq: 180,
+  },
+  carEngine: {
+    frequency: 80,
+    duration: 0.8,
+    type: "sawtooth",
+    volume: 0.12,
+    attack: 0.1,
+    decay: 0.5,
+    detune: 10,
+  },
+  storeBell: {
+    frequency: 1200,
+    duration: 0.5,
+    type: "sine",
+    volume: 0.18,
+    attack: 0.01,
+    decay: 0.4,
+    secondaryFreq: 1500,
+  },
+  confetti: {
+    frequency: 600,
+    duration: 0.3,
+    type: "sine",
+    volume: 0.2,
+    attack: 0.01,
+    secondaryFreq: 900,
   },
 };
 
