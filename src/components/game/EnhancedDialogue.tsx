@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookmarkPlus, Check, X } from "lucide-react";
 import { AnimatedCharacter, type CharacterId } from "./AnimatedCharacter";
@@ -12,6 +12,7 @@ interface DialogueLine {
   isSaveable?: boolean;
   saveId?: string;
   saveText?: string;
+  audioSrc?: string;
 }
 
 interface EnhancedDialogueProps {
@@ -69,6 +70,15 @@ export const EnhancedDialogue = ({
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
   const [showSaveButton, setShowSaveButton] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const stopAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
+  };
 
   const currentIndex = externalIndex ?? internalIndex;
   const setCurrentIndex = onIndexChange ?? setInternalIndex;
@@ -86,6 +96,7 @@ export const EnhancedDialogue = ({
   // Reset state when deactivated
   useEffect(() => {
     if (!isActive) {
+      stopAudio();
       setInternalIndex(0);
       setDisplayedText("");
       setIsTyping(false);
@@ -97,9 +108,19 @@ export const EnhancedDialogue = ({
   useEffect(() => {
     if (!isActive || !currentDialogue) return;
 
+    stopAudio();
     setDisplayedText("");
     setIsTyping(true);
     setShowSaveButton(false);
+
+    // Play voice over if available
+    if (currentDialogue.audioSrc) {
+      try {
+        const audio = new Audio(currentDialogue.audioSrc);
+        audioRef.current = audio;
+        audio.play().catch(() => {/* silent fallback */});
+      } catch {/* silent fallback */}
+    }
 
     let charIndex = 0;
     const text = currentDialogue.text;
@@ -121,6 +142,7 @@ export const EnhancedDialogue = ({
   }, [currentIndex, isActive, currentDialogue]);
 
   const handleClose = () => {
+    stopAudio();
     if (onClose) {
       onClose();
     } else {

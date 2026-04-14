@@ -20,28 +20,33 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
   const dialogues = [
     {
       characterId: "abuSaeed",
-      text: `أهلاً وسهلاً… ${gText("نوّرت", "نوّرتي", g)} يا ${gText("أستاذ", "أستاذة", g)}. ${gText("اتفضل", "اتفضلي", g)}.`,
+      text: "أهلاً وسهلاً… نوّرت يا أستاذ. اتفضل.",
       mood: "happy" as const,
+      audioSrc: "/voiceover/abu-saeed/arrival-01-welcome.mp3",
     },
     {
       characterId: "abuSaeed",
-      text: "أنا أبو سعيد. المحل ده بقالي فيه أكتر من 12 سنة والحمد لله… عملته بإيدي من الصفر.",
+      text: "أنا أبو سعيد. المحل ده بقالي فيه أكتر من اتناشر سنة، والحمد لله… عملته بإيدي من الصفر.",
       mood: "neutral" as const,
+      audioSrc: "/voiceover/abu-saeed/arrival-02-pride.mp3",
     },
     {
       characterId: "abuSaeed",
       text: "بس من كام أسبوع كده… حاسس إن فيه حاجة مش مظبوطة.",
       mood: "nervous" as const,
+      audioSrc: "/voiceover/abu-saeed/arrival-03-concern.mp3",
     },
     {
       characterId: "abuSaeed",
       text: "الحركة في المحل كويسة… الناس بتيجي وبتتفرج وبتدخل وبتطلع… يعني المحل مش فاضي.",
       mood: "neutral" as const,
+      audioSrc: "/voiceover/abu-saeed/arrival-04-traffic.mp3",
     },
     {
       characterId: "abuSaeed",
-      text: "بس لما باجي أحسب آخر الأسبوع… بلاقي الرقم مش زي ما متوقع. البيع مش باين رغم إن الحركة شكلها كويس.",
+      text: "بس لما باجي أحسِب آخِر الأسبوع… بلاقي الرقم مش زي ما متوقع. البيع مش باين… رغم إن الحركة شكلها كويس.",
       mood: "nervous" as const,
+      audioSrc: "/voiceover/abu-saeed/arrival-05-sales-problem.mp3",
     },
     {
       characterId: "detective",
@@ -50,8 +55,9 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
     },
     {
       characterId: "abuSaeed",
-      text: `${gText("اتفضل", "اتفضلي", g)}… اسأل اللي ${gText("عايزه", "عايزاه", g)}. أنا محتاج حد يفهمني إيه اللي بيحصل.`,
+      text: "اتفضل… اسأل اللي عايزه. أنا محتاج حد يفهمني إيه اللي بيحصل.",
       mood: "neutral" as const,
+      audioSrc: "/voiceover/abu-saeed/arrival-06-invite.mp3",
     },
   ];
 
