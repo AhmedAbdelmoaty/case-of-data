@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { FRAMING_OPTIONS } from "@/data/pf-scenario";
 import { EnhancedDialogue } from "../EnhancedDialogue";
-import storeFrontImg from "@/assets/scenes/store-front.png";
+import storeInsideImg from "@/assets/scenes/store-inside.png";
 
 interface PresentationScreenProps {
   onComplete: () => void;
@@ -12,6 +13,7 @@ interface PresentationScreenProps {
 export const PresentationScreen = ({ onComplete }: PresentationScreenProps) => {
   const { state, isFramingCorrect } = usePFGame();
   const { profile } = useAuth();
+  const [phase, setPhase] = useState<"establishing" | "dialogue">("establishing");
   const [dialogueIndex, setDialogueIndex] = useState(0);
 
   const playerName = profile?.display_name || "محلل";
@@ -23,7 +25,7 @@ export const PresentationScreen = ({ onComplete }: PresentationScreenProps) => {
     ? [
         {
           characterId: "detective",
-          text: `أبو سعيد… بعد الأسئلة اللي سألتها، أنا شايف إن المتجر مش عنده مشكلة إقبال. الناس بتدخل وبتهتم. المشكلة الأقرب إن الاهتمام ده — خصوصاً في قسم الحريمي — مش بيتحول لشراء فعلي بالنسبة المتوقعة.`,
+          text: `أبو سعيد… بعد الأسئلة اللي سألتها، أنا شايف إن المتجر مش عنده مشكلة إقبال. الناس بتدخل وبتهتم. المشكلة الأقرب إن الاهتمام ده مش بيتحول لشراء فعلي بالنسبة المتوقعة.`,
           mood: "neutral" as const,
         },
         {
@@ -55,10 +57,57 @@ export const PresentationScreen = ({ onComplete }: PresentationScreenProps) => {
         },
       ];
 
+  if (phase === "establishing") {
+    return (
+      <div className="min-h-screen bg-background relative overflow-hidden">
+        <motion.div
+          className="absolute inset-0"
+          initial={{ scale: 1.1, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 1.5 }}
+        >
+          <img src={storeInsideImg} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/40" />
+        </motion.div>
+
+        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="space-y-3"
+          >
+            <motion.p className="text-4xl" animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 1.5, repeat: 1 }}>
+              📋
+            </motion.p>
+            <h2 className="text-foreground text-lg font-bold" dir="rtl">
+              وقت تقديم التقرير لأبو سعيد
+            </h2>
+            <p className="text-muted-foreground text-sm" dir="rtl">
+              هتعرض عليه تحليلك وتشوف رأيه...
+            </p>
+          </motion.div>
+
+          <motion.button
+            onClick={() => setPhase("dialogue")}
+            className="mt-8 px-8 py-3 rounded-xl bg-card/60 backdrop-blur-md border border-border text-foreground font-bold hover:bg-card/80 transition-all"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.5 }}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+          >
+            ابدأ العرض
+          </motion.button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background relative">
       <div className="absolute inset-0">
-        <img src={storeFrontImg} alt="" className="w-full h-full object-cover" />
+        <img src={storeInsideImg} alt="" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
       </div>
 

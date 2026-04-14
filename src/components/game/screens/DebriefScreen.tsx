@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { EnhancedDialogue } from "../EnhancedDialogue";
 import { gText } from "@/lib/gText";
+import officeBriefingImg from "@/assets/scenes/office-briefing.png";
 
 interface DebriefScreenProps {
   onComplete: () => void;
@@ -11,6 +13,7 @@ interface DebriefScreenProps {
 export const DebriefScreen = ({ onComplete }: DebriefScreenProps) => {
   const { state, getPerformanceTier, isFramingCorrect } = usePFGame();
   const { profile } = useAuth();
+  const [phase, setPhase] = useState<"establishing" | "dialogue">("establishing");
   const [dialogueIndex, setDialogueIndex] = useState(0);
 
   const playerName = profile?.display_name || "محلل";
@@ -79,9 +82,63 @@ export const DebriefScreen = ({ onComplete }: DebriefScreenProps) => {
     ];
   };
 
+  if (phase === "establishing") {
+    return (
+      <div className="min-h-screen bg-background relative overflow-hidden">
+        <motion.div
+          className="absolute inset-0"
+          initial={{ scale: 1.1, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 1.5 }}
+        >
+          <img src={officeBriefingImg} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/40" />
+        </motion.div>
+
+        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="space-y-3"
+          >
+            <p className="text-muted-foreground text-sm tracking-widest">🏢 الطابق 12</p>
+            <h2 className="text-foreground text-lg font-bold" dir="rtl">
+              رجعت المكتب — منصور مستنيك
+            </h2>
+            <motion.p
+              className="text-muted-foreground text-xs"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.2 }}
+              dir="rtl"
+            >
+              وقت التقييم...
+            </motion.p>
+          </motion.div>
+
+          <motion.button
+            onClick={() => setPhase("dialogue")}
+            className="mt-8 px-8 py-3 rounded-xl bg-card/60 backdrop-blur-md border border-border text-foreground font-bold hover:bg-card/80 transition-all"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.5 }}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+          >
+            ادخل المكتب
+          </motion.button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-secondary/30 via-background to-background" />
+      <div className="absolute inset-0">
+        <img src={officeBriefingImg} alt="" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
+      </div>
 
       <EnhancedDialogue
         dialogues={getDialogues()}

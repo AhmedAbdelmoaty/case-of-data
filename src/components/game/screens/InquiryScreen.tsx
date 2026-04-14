@@ -6,7 +6,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { EnhancedDialogue } from "../EnhancedDialogue";
 import { PFNotebook } from "../PFNotebook";
 import type { InquiryOption } from "@/data/pf-scenario";
-import storeFrontImg from "@/assets/scenes/store-front.png";
+import storeInsideImg from "@/assets/scenes/store-inside.png";
+import storeCounterImg from "@/assets/scenes/store-counter.png";
 
 interface InquiryScreenProps {
   onComplete: () => void;
@@ -16,7 +17,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
   const { state, chooseQuestion, addNote } = usePFGame();
   const { profile } = useAuth();
 
-  const [phase, setPhase] = useState<"choosing" | "dialogue">("choosing");
+  const [phase, setPhase] = useState<"choosing" | "dialogue" | "scene-transition">("choosing");
   const [roundIndex, setRoundIndex] = useState(0);
   const [currentLines, setCurrentLines] = useState<any[]>([]);
   const [dialogueIndex, setDialogueIndex] = useState(0);
@@ -28,6 +29,10 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
   const g = (profile?.gender || "male") as "male" | "female";
 
   const round = INQUIRY_ROUNDS[roundIndex];
+
+  // Switch background at round 4 (index 3)
+  const currentBg = roundIndex >= 3 ? storeCounterImg : storeInsideImg;
+  const overlayOpacity = roundIndex >= 4 ? "bg-black/70" : "bg-black/60";
 
   const shuffledOptions = useMemo(() => {
     if (!round) return [];
@@ -63,7 +68,6 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
 
     const abuMood = getMoodForTier(option.tier);
 
-    // Dynamic prefix for high/low trust in later rounds
     let responsePrefix = "";
     if (roundIndex >= 3) {
       const currentTrust = state.trustLevel + (option.tier === "strong" ? 1 : option.tier === "weak" ? -1 : 0);
@@ -98,8 +102,18 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
 
   const handleDialogueComplete = () => {
     if (roundIndex < INQUIRY_ROUNDS.length - 1) {
-      setRoundIndex(prev => prev + 1);
-      setPhase("choosing");
+      const nextRound = roundIndex + 1;
+      // Scene transition when moving to round 4 (counter area)
+      if (nextRound === 3) {
+        setPhase("scene-transition");
+        setTimeout(() => {
+          setRoundIndex(nextRound);
+          setPhase("choosing");
+        }, 3000);
+      } else {
+        setRoundIndex(nextRound);
+        setPhase("choosing");
+      }
     } else {
       onComplete();
     }
@@ -116,14 +130,63 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
 
   if (!round) return null;
 
+  // Scene transition between store areas
+  if (phase === "scene-transition") {
+    return (
+      <div className="min-h-screen bg-background relative overflow-hidden">
+        <motion.div
+          className="absolute inset-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.5 }}
+        >
+          <img src={storeCounterImg} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-black/60" />
+        </motion.div>
+
+        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="space-y-3"
+          >
+            <p className="text-muted-foreground text-sm tracking-widest">📍 ركن الكاشير</p>
+            <h2 className="text-foreground text-lg font-bold" dir="rtl">
+              قعدت مع أبو سعيد عند الكاونتر...
+            </h2>
+            <motion.p
+              className="text-muted-foreground text-xs"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.5 }}
+              dir="rtl"
+            >
+              الكلام بيتعمّق أكتر
+            </motion.p>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background relative">
-      <div className="absolute inset-0">
-        <img src={storeFrontImg} alt="" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
-      </div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentBg}
+          className="absolute inset-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <img src={currentBg} alt="" className="w-full h-full object-cover" />
+          <div className={`absolute inset-0 ${overlayOpacity} backdrop-blur-[2px]`} />
+        </motion.div>
+      </AnimatePresence>
 
-      {/* Flash overlay for strong/weak choices */}
+      {/* Flash overlay */}
       <AnimatePresence>
         {flashColor && (
           <motion.div
@@ -167,7 +230,6 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
             exit={{ opacity: 0 }}
           >
             <div className="max-w-lg w-full px-4 space-y-3">
-              {/* Round title */}
               <motion.div
                 className="text-center mb-2"
                 initial={{ opacity: 0, y: -10 }}
