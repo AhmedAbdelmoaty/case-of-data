@@ -5,6 +5,7 @@ import { TravelScreen } from "@/components/game/screens/TravelScreen";
 import { ArrivalScreen } from "@/components/game/screens/ArrivalScreen";
 import { InquiryScreen } from "@/components/game/screens/InquiryScreen";
 import { FramingScreen } from "@/components/game/screens/FramingScreen";
+import { ReflectionTransition } from "@/components/game/screens/ReflectionTransition";
 import { PresentationScreen } from "@/components/game/screens/PresentationScreen";
 import { ReturnTravelScreen } from "@/components/game/screens/ReturnTravelScreen";
 import { DebriefScreen } from "@/components/game/screens/DebriefScreen";
@@ -20,6 +21,7 @@ type Screen =
   | "travel"
   | "arrival"
   | "inquiry"
+  | "reflection"
   | "framing"
   | "presentation"
   | "return-travel"
@@ -90,7 +92,10 @@ const GameContent = () => {
         <ArrivalScreen onComplete={() => handleNavigate("inquiry")} />
       )}
       {currentScreen === "inquiry" && (
-        <InquiryScreen onComplete={() => handleNavigate("framing")} />
+        <InquiryScreen onComplete={() => handleNavigate("reflection")} />
+      )}
+      {currentScreen === "reflection" && (
+        <ReflectionTransition onComplete={() => handleNavigate("framing")} />
       )}
       {currentScreen === "framing" && (
         <FramingScreen onComplete={() => handleNavigate("presentation")} />
