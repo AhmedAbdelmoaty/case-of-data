@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { MapPin, DoorOpen } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { gText } from "@/lib/gText";
+import { useSound } from "@/hooks/useSoundEffects";
 import { EnhancedDialogue } from "../EnhancedDialogue";
 import storeFrontImg from "@/assets/scenes/store-front.png";
 
@@ -12,6 +13,7 @@ interface ArrivalScreenProps {
 
 export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
   const { profile } = useAuth();
+  const { playSound } = useSound();
   const g = profile?.gender || "male";
   const [phase, setPhase] = useState<"storefront" | "dialogue">("storefront");
 
@@ -86,7 +88,10 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
           <motion.button
             className="relative px-8 py-3 rounded-xl text-base font-bold overflow-hidden group"
             style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))" }}
-            onClick={() => setPhase("dialogue")}
+            onClick={() => {
+              try { playSound("storeBell"); } catch {}
+              setPhase("dialogue");
+            }}
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.5 }}

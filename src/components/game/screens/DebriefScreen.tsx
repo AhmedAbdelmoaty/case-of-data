@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSound } from "@/hooks/useSoundEffects";
 import { EnhancedDialogue } from "../EnhancedDialogue";
 import { gText } from "@/lib/gText";
 import officeBriefingImg from "@/assets/scenes/office-briefing.png";
@@ -13,6 +14,7 @@ interface DebriefScreenProps {
 export const DebriefScreen = ({ onComplete }: DebriefScreenProps) => {
   const { state, getPerformanceTier, isFramingCorrect } = usePFGame();
   const { profile } = useAuth();
+  const { playSound } = useSound();
   const [phase, setPhase] = useState<"establishing" | "dialogue">("establishing");
   const [dialogueIndex, setDialogueIndex] = useState(0);
 
@@ -62,7 +64,6 @@ export const DebriefScreen = ({ onComplete }: DebriefScreenProps) => {
       ];
     }
 
-    // beginner
     return [
       {
         characterId: "mansour",
@@ -118,7 +119,10 @@ export const DebriefScreen = ({ onComplete }: DebriefScreenProps) => {
           </motion.div>
 
           <motion.button
-            onClick={() => setPhase("dialogue")}
+            onClick={() => {
+              try { playSound("door"); } catch {}
+              setPhase("dialogue");
+            }}
             className="mt-8 px-8 py-3 rounded-xl bg-card/60 backdrop-blur-md border border-border text-foreground font-bold hover:bg-card/80 transition-all"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -139,6 +143,35 @@ export const DebriefScreen = ({ onComplete }: DebriefScreenProps) => {
         <img src={officeBriefingImg} alt="" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
       </div>
+
+      {/* Confetti for exceptional */}
+      {tier === "exceptional" && (
+        <div className="absolute inset-0 pointer-events-none z-20">
+          {[...Array(20)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-2 h-2 rounded-full"
+              style={{
+                left: `${Math.random() * 100}%`,
+                backgroundColor: ["#FFD700", "#FF6B6B", "#4CAF50", "#2196F3", "#FF9800"][i % 5],
+              }}
+              initial={{ top: "-5%", opacity: 1, rotate: 0 }}
+              animate={{
+                top: "110%",
+                opacity: [1, 1, 0],
+                rotate: Math.random() * 720,
+                x: [0, (Math.random() - 0.5) * 80],
+              }}
+              transition={{
+                duration: 2.5 + Math.random() * 2,
+                delay: 1 + Math.random() * 2,
+                repeat: Infinity,
+                repeatDelay: Math.random() * 4,
+              }}
+            />
+          ))}
+        </div>
+      )}
 
       <EnhancedDialogue
         dialogues={getDialogues()}
