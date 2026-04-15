@@ -19,8 +19,8 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
   const { profile } = useAuth();
   const name = profile?.display_name || "محلل";
   const g = profile?.gender || "male";
-  const { playSound } = useSound();
-  const [phase, setPhase] = useState<"hallway" | "door-knock" | "office" | "dialogue" | "transition">(
+  const { playSound, playDoorKnock } = useSound();
+  const [phase, setPhase] = useState<"hallway" | "door-knock" | "dialogue" | "transition">(
     isReviewMode ? "dialogue" : "hallway"
   );
 
@@ -89,7 +89,7 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
     setPhase("transition");
   };
 
-  // Phase 1: Hallway with parallax zoom
+  // Phase 1: Hallway
   if (phase === "hallway") {
     return (
       <div className="min-h-screen bg-background relative overflow-hidden">
@@ -123,7 +123,10 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
           </motion.div>
 
           <motion.button
-            onClick={() => setPhase("door-knock")}
+            onClick={() => {
+              playDoorKnock();
+              setPhase("door-knock");
+            }}
             className="mt-10 px-8 py-3 rounded-xl bg-card/60 backdrop-blur-md border border-border text-foreground font-bold hover:bg-card/80 transition-all flex items-center gap-2"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -139,7 +142,7 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
     );
   }
 
-  // Phase 2: Door knock interaction
+  // Phase 2: Door knock → then auto-enter dialogue
   if (phase === "door-knock") {
     return (
       <div className="min-h-screen bg-background relative overflow-hidden">
@@ -159,7 +162,6 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
           >
-            {/* Knock animation */}
             <motion.p
               className="text-4xl"
               animate={{ x: [0, -5, 5, -3, 3, 0] }}
@@ -188,7 +190,7 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
             <motion.button
               onClick={() => {
                 try { playSound("door"); } catch {}
-                setPhase("office");
+                setPhase("dialogue");
               }}
               className="mt-4 px-8 py-3 rounded-xl bg-card/60 backdrop-blur-md border border-border text-foreground font-bold hover:bg-card/80 transition-all"
               initial={{ opacity: 0 }}
@@ -200,46 +202,6 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
               ادخل المكتب
             </motion.button>
           </motion.div>
-        </div>
-      </div>
-    );
-  }
-
-  // Phase 3: Office establishing shot (mansour at desk)
-  if (phase === "office") {
-    return (
-      <div className="min-h-screen bg-background relative overflow-hidden">
-        <motion.div
-          className="absolute inset-0"
-          initial={{ scale: 1.1, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
-        >
-          <img src={mansourDeskImg} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-        </motion.div>
-
-        <div className="relative z-10 flex flex-col items-center justify-end min-h-screen text-center px-4 pb-16">
-          <motion.div
-            className="px-6 py-3 rounded-xl bg-black/50 backdrop-blur-md border border-white/10"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1 }}
-          >
-            <p className="text-muted-foreground text-sm" dir="rtl">مكتب أ. منصور — مدير المشاريع</p>
-          </motion.div>
-
-          <motion.button
-            onClick={() => setPhase("dialogue")}
-            className="mt-4 px-8 py-3 rounded-xl bg-card/60 backdrop-blur-md border border-border text-foreground font-bold hover:bg-card/80 transition-all"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 2 }}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-          >
-            ابدأ المحادثة
-          </motion.button>
         </div>
       </div>
     );
@@ -312,13 +274,18 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
     );
   }
 
-  // Dialogue phase
+  // Dialogue phase — starts directly with mansour-desk background
   return (
     <div className="min-h-screen bg-background relative">
-      <div className="absolute inset-0">
+      <motion.div
+        className="absolute inset-0"
+        initial={{ scale: 1.1, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 1.5, ease: "easeOut" }}
+      >
         <img src={mansourDeskImg} alt="" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
-      </div>
+      </motion.div>
 
       <motion.div
         className="relative z-10 pt-12 pb-4 text-center"

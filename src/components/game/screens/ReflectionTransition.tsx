@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import storeInsideImg from "@/assets/scenes/store-inside.png";
+import storeCounterImg from "@/assets/scenes/store-counter.png";
 
 interface ReflectionTransitionProps {
   onComplete: () => void;
@@ -16,13 +16,13 @@ export const ReflectionTransition = ({ onComplete }: ReflectionTransitionProps) 
     <div className="min-h-screen bg-background relative overflow-hidden">
       <motion.div
         className="absolute inset-0"
-        initial={{ opacity: 0.3 }}
-        animate={{ opacity: 0.2 }}
-        transition={{ duration: 3 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.4 }}
+        transition={{ duration: 2 }}
       >
-        <img src={storeInsideImg} alt="" className="w-full h-full object-cover blur-md" />
+        <img src={storeCounterImg} alt="" className="w-full h-full object-cover blur-sm" />
       </motion.div>
-      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/90 to-background/70" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/85 to-background/60" />
 
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-4">
         <motion.div

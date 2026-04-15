@@ -2,7 +2,6 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { FRAMING_OPTIONS } from "@/data/pf-scenario";
 import { EnhancedDialogue } from "../EnhancedDialogue";
 import storeInsideImg from "@/assets/scenes/store-inside.png";
 import storeCounterImg from "@/assets/scenes/store-counter.png";
@@ -10,6 +9,85 @@ import storeCounterImg from "@/assets/scenes/store-counter.png";
 interface PresentationScreenProps {
   onComplete: () => void;
 }
+
+// Custom dialogue scripts per framing choice — proper address form to Abu Saeed
+const PRESENTATION_SCRIPTS: Record<string, Array<{ characterId: string; text: string; mood: "neutral" | "happy" | "suspicious" | "angry" | "nervous" }>> = {
+  // F1 — Correct: conversion problem
+  F1: [
+    {
+      characterId: "detective",
+      text: "أبو سعيد… بعد الأسئلة اللي سألتها والكلام اللي قولتهولي، أنا شايف إن المتجر عندك مش عنده مشكلة إقبال. الناس بتدخل وبتتفرج وبتهتم فعلاً. المشكلة الأقرب إن الاهتمام ده — خصوصاً في قسم الحريمي عندكم — مش بيتحول لشراء فعلي بالنسبة المتوقعة. يعني الزبونة بتدخل، بتقيس، بتجرب… وبتمشي من غير ما تشتري.",
+      mood: "neutral",
+    },
+    {
+      characterId: "abuSaeed",
+      text: "والله فعلاً… أنا ما كنتش واخد بالي من ده بالشكل ده. فعلاً القسم شكله مليان بس مش كل اللي بيدخل بيشتري… يعني الحركة مش معناها بيع.",
+      mood: "happy",
+    },
+    {
+      characterId: "abuSaeed",
+      text: "أنا كنت حاسس إن المحل كله فيه مشكلة… بس أنت خلّيتني أشوف إن الموضوع أضيق من كده وأوضح. شكراً يا أستاذ… فعلاً فرق معايا.",
+      mood: "happy",
+    },
+  ],
+
+  // F2 — Wrong: competition
+  F2: [
+    {
+      characterId: "detective",
+      text: "أبو سعيد… بعد ما سمعت كل الكلام، أنا شايف إن المبيعات عندكم قلّت بسبب المنافسة من المحل اللي جنبكم. هم بيعملوا عروض قوية وبيسحبوا الزباين منكم. الناس بتيجي عندكم تتفرج بس بتروح تشتري من عندهم بسبب الأسعار الأحسن.",
+      mood: "neutral",
+    },
+    {
+      characterId: "abuSaeed",
+      text: "مش عارف يا أستاذ… أنا مش حاسس إن ده اللي بيحصل بالظبط. يعني الناس بتدخل عندي وبتهتم وبتقيس… لو كانوا بيروحوا للمنافس مش هيدخلوا عندي أصلاً. المنطق مش ماشي.",
+      mood: "suspicious",
+    },
+    {
+      characterId: "abuSaeed",
+      text: "يعني أنا مقدّر مجهودك… بس كنت متوقع الصورة تكون أوضح شوية. مش مشكلة… خلينا نشوف.",
+      mood: "neutral",
+    },
+  ],
+
+  // F3 — Wrong: market recession
+  F3: [
+    {
+      characterId: "detective",
+      text: "أبو سعيد… من اللي شفته، أنا شايف إن السوق بشكل عام في فترة ركود دلوقتي. الطلب على الملابس ضعيف في الوقت ده من السنة، ومش بس عندكم — كل المحلات بتعاني. الناس بتيجي تتفسح وتتفرج بس مش بتشتري بجدية.",
+      mood: "neutral",
+    },
+    {
+      characterId: "abuSaeed",
+      text: "بس يا أستاذ… نفس الوقت ده السنة اللي فاتت كان أحسن بكتير عندي. والناس مش بتتفسح — لا دي بتدخل وبتقيس وبتجرب فعلاً. مش حاسس إن الموضوع سوق.",
+      mood: "suspicious",
+    },
+    {
+      characterId: "abuSaeed",
+      text: "يعني التفسير ده ممكن يكون جزء من الموضوع… بس مش حاسس إنه الصورة الكاملة. كنت متأمل في تحليل أعمق شوية بصراحة.",
+      mood: "neutral",
+    },
+  ],
+
+  // F4 — Wrong: employees
+  F4: [
+    {
+      characterId: "detective",
+      text: "أبو سعيد… بعد التحليل، أنا شايف إن المشكلة عندكم في الموظفين. الناس بتدخل وبتهتم بس الموظفين مش بيعرفوا يساعدوا الزبون ياخد قرار الشراء، فالزبون بيمشي من غير ما ياخد حاجة.",
+      mood: "neutral",
+    },
+    {
+      characterId: "abuSaeed",
+      text: "لا يا أستاذ… أنا مش موافق على الكلام ده. خالد مدير الصالة معايا من سنين والناس بتحبه. مفيش شكاوى أبداً. مش عارف إزاي وصلت للنتيجة دي.",
+      mood: "angry",
+    },
+    {
+      characterId: "abuSaeed",
+      text: "يعني أنا مقدّر إنك جيت وسألت… بس حاسس إن التحليل لسه محتاج شغل أكتر. مش مشكلة… خلينا نشوف.",
+      mood: "neutral",
+    },
+  ],
+};
 
 export const PresentationScreen = ({ onComplete }: PresentationScreenProps) => {
   const { state, isFramingCorrect } = usePFGame();
@@ -19,50 +97,15 @@ export const PresentationScreen = ({ onComplete }: PresentationScreenProps) => {
 
   const playerName = profile?.display_name || "محلل";
   const g = (profile?.gender || "male") as "male" | "female";
-  const correct = isFramingCorrect();
-  const chosenFraming = FRAMING_OPTIONS.find((f) => f.id === state.chosenFramingId);
+  const chosenId = state.chosenFramingId || "F1";
 
-  // Alternate camera angles between analyst and abu saeed
+  const dialogues = PRESENTATION_SCRIPTS[chosenId] || PRESENTATION_SCRIPTS.F1;
+
+  // Alternate camera angles
   const getBackgroundForLine = (idx: number) => {
-    if (idx === 0) return storeInsideImg; // Analyst speaking - wide shot
-    return storeCounterImg; // Abu Saeed responding - counter shot
+    if (idx === 0) return storeInsideImg;
+    return storeCounterImg;
   };
-
-  const dialogues = correct
-    ? [
-        {
-          characterId: "detective",
-          text: `أبو سعيد… بعد الأسئلة اللي سألتها، أنا شايف إن المتجر مش عنده مشكلة إقبال. الناس بتدخل وبتهتم. المشكلة الأقرب إن الاهتمام ده مش بيتحول لشراء فعلي بالنسبة المتوقعة.`,
-          mood: "neutral" as const,
-        },
-        {
-          characterId: "abuSaeed",
-          text: "والله فعلاً… أنا ما كنتش واخد بالي من ده بالشكل ده. فعلاً القسم شكله مليان بس مش كل اللي بيدخل بيشتري… يعني الحركة مش معناها بيع.",
-          mood: "happy" as const,
-        },
-        {
-          characterId: "abuSaeed",
-          text: "أنا كنت حاسس إن المحل كله فيه مشكلة… بس أنت خلّيتني أشوف إن الموضوع أضيق من كده. شكراً يا أستاذ… فعلاً فرق معايا.",
-          mood: "happy" as const,
-        },
-      ]
-    : [
-        {
-          characterId: "detective",
-          text: `أبو سعيد… بعد الأسئلة اللي سألتها، أنا شايف إن ${chosenFraming?.text?.slice(0, 80) || "المشكلة"}.`,
-          mood: "neutral" as const,
-        },
-        {
-          characterId: "abuSaeed",
-          text: "مش عارف يا أستاذ… مش حاسس إن ده هو اللي بيحصل عندي بالظبط. يعني الكلام منطقي بس مش مطابق لإحساسي.",
-          mood: "suspicious" as const,
-        },
-        {
-          characterId: "abuSaeed",
-          text: "يعني أنا مقدّر مجهودك… بس كنت متوقع الصورة تكون أوضح شوية. مش مشكلة… خلينا نشوف.",
-          mood: "neutral" as const,
-        },
-      ];
 
   const currentBg = phase === "dialogue" ? getBackgroundForLine(dialogueIndex) : storeInsideImg;
 
