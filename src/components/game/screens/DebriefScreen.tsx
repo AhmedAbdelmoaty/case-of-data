@@ -16,7 +16,7 @@ export const DebriefScreen = ({ onComplete }: DebriefScreenProps) => {
   const { state, getPerformanceTier, isFramingCorrect } = usePFGame();
   const { profile } = useAuth();
   const { playSound } = useSound();
-  const [phase, setPhase] = useState<"hallway" | "establishing" | "dialogue">("hallway");
+  const [phase, setPhase] = useState<"hallway" | "dialogue">("hallway");
   const [dialogueIndex, setDialogueIndex] = useState(0);
 
   const playerName = profile?.display_name || "محلل";
@@ -26,9 +26,9 @@ export const DebriefScreen = ({ onComplete }: DebriefScreenProps) => {
 
   // Performance-based lighting overlay
   const getLightingOverlay = () => {
-    if (tier === "exceptional") return "bg-amber-900/20"; // warm golden
-    if (tier === "beginner") return "bg-blue-900/20"; // cold
-    return ""; // neutral
+    if (tier === "exceptional") return "bg-amber-900/20";
+    if (tier === "beginner") return "bg-blue-900/20";
+    return "";
   };
 
   const getDialogues = () => {
@@ -130,7 +130,7 @@ export const DebriefScreen = ({ onComplete }: DebriefScreenProps) => {
           <motion.button
             onClick={() => {
               try { playSound("door"); } catch {}
-              setPhase("establishing");
+              setPhase("dialogue");
             }}
             className="mt-8 px-8 py-3 rounded-xl bg-card/60 backdrop-blur-md border border-border text-foreground font-bold hover:bg-card/80 transition-all"
             initial={{ opacity: 0 }}
@@ -146,57 +146,19 @@ export const DebriefScreen = ({ onComplete }: DebriefScreenProps) => {
     );
   }
 
-  // Phase: Mansour desk establishing shot with performance-based lighting
-  if (phase === "establishing") {
-    return (
-      <div className="min-h-screen bg-background relative overflow-hidden">
-        <motion.div
-          className="absolute inset-0"
-          initial={{ scale: 1.1, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 1.5 }}
-        >
-          <img src={mansourDeskImg} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-          {/* Performance lighting overlay */}
-          <div className={`absolute inset-0 ${getLightingOverlay()}`} />
-        </motion.div>
-
-        <div className="relative z-10 flex flex-col items-center justify-end min-h-screen text-center px-4 pb-16">
-          <motion.div
-            className="px-6 py-3 rounded-xl bg-black/50 backdrop-blur-md border border-white/10"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-          >
-            <p className="text-muted-foreground text-sm" dir="rtl">
-              {tier === "exceptional" ? "منصور شكله مبسوط..." : tier === "beginner" ? "منصور شكله جاد..." : "منصور مستني يسمع..."}
-            </p>
-          </motion.div>
-
-          <motion.button
-            onClick={() => setPhase("dialogue")}
-            className="mt-4 px-8 py-3 rounded-xl bg-card/60 backdrop-blur-md border border-border text-foreground font-bold hover:bg-card/80 transition-all"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.5 }}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-          >
-            ابدأ التقييم
-          </motion.button>
-        </div>
-      </div>
-    );
-  }
-
+  // Dialogue — starts directly with mansour-desk + performance lighting
   return (
     <div className="min-h-screen bg-background relative">
-      <div className="absolute inset-0">
+      <motion.div
+        className="absolute inset-0"
+        initial={{ scale: 1.1, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 1.5 }}
+      >
         <img src={mansourDeskImg} alt="" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
         <div className={`absolute inset-0 ${getLightingOverlay()}`} />
-      </div>
+      </motion.div>
 
       {/* Confetti for exceptional */}
       {tier === "exceptional" && (

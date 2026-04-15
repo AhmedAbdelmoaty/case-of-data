@@ -24,7 +24,6 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
   const [dialogueIndex, setDialogueIndex] = useState(0);
   const [savedNoteIds, setSavedNoteIds] = useState<string[]>([]);
   const [dialogueKey, setDialogueKey] = useState(0);
-  const [transitionInfo, setTransitionInfo] = useState<{ bg: string; label: string; subtitle: string } | null>(null);
 
   const playerName = profile?.display_name || "محلل";
   const g = (profile?.gender || "male") as "male" | "female";
@@ -40,14 +39,6 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
 
   const currentBg = getBackgroundForRound(roundIndex);
   const overlayOpacity = roundIndex >= 4 ? "bg-black/70" : "bg-black/60";
-
-  // Gradual body language: Abu Saeed's scale changes based on cumulative trust
-  const trustScale = useMemo(() => {
-    const trust = state.trustLevel;
-    if (trust >= 7) return 1.05;
-    if (trust <= 3) return 0.95;
-    return 1;
-  }, [state.trustLevel]);
 
   const shuffledOptions = useMemo(() => {
     if (!round) return [];
@@ -108,24 +99,13 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
       const nextBg = getBackgroundForRound(nextRound);
       const currentBgNow = getBackgroundForRound(roundIndex);
 
-      // Scene transition when background changes
+      // Scene transition when background changes — just visual fade, no text
       if (nextBg !== currentBgNow) {
-        let label = "";
-        let subtitle = "";
-        if (nextRound === 2) {
-          label = "📍 قسم الحريمي";
-          subtitle = "أبو سعيد واخدك على قسم تاني...";
-        } else if (nextRound === 3) {
-          label = "📍 ركن الكاشير";
-          subtitle = "قعدت مع أبو سعيد عند الكاونتر...";
-        }
-        setTransitionInfo({ bg: nextBg === storeWomensSectionImg ? "womens" : "counter", label, subtitle });
         setPhase("scene-transition");
         setTimeout(() => {
           setRoundIndex(nextRound);
-          setTransitionInfo(null);
           setPhase("choosing");
-        }, 3000);
+        }, 2500);
       } else {
         setRoundIndex(nextRound);
         setPhase("choosing");
@@ -146,9 +126,10 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
 
   if (!round) return null;
 
-  // Scene transition between store areas
-  if (phase === "scene-transition" && transitionInfo) {
-    const transitionBgImg = transitionInfo.bg === "womens" ? storeWomensSectionImg : storeCounterImg;
+  // Scene transition — image only, no text or labels
+  if (phase === "scene-transition") {
+    const nextRound = roundIndex + 1;
+    const transitionBgImg = getBackgroundForRound(nextRound);
     return (
       <div className="min-h-screen bg-background relative overflow-hidden">
         <motion.div
@@ -158,31 +139,8 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
           transition={{ duration: 1.5 }}
         >
           <img src={transitionBgImg} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-black/60" />
+          <div className="absolute inset-0 bg-black/50" />
         </motion.div>
-
-        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="space-y-3"
-          >
-            <p className="text-muted-foreground text-sm tracking-widest">{transitionInfo.label}</p>
-            <h2 className="text-foreground text-lg font-bold" dir="rtl">
-              {transitionInfo.subtitle}
-            </h2>
-            <motion.p
-              className="text-muted-foreground text-xs"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.5 }}
-              dir="rtl"
-            >
-              الكلام بيتعمّق أكتر
-            </motion.p>
-          </motion.div>
-        </div>
       </div>
     );
   }
@@ -265,7 +223,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
         )}
       </AnimatePresence>
 
-      {/* EnhancedDialogue - rendered outside transform to preserve fixed positioning */}
+      {/* EnhancedDialogue */}
       {phase === "dialogue" && currentLines.length > 0 && (
         <EnhancedDialogue
           key={dialogueKey}

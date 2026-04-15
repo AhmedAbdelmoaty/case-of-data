@@ -101,8 +101,7 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
                     whileHover={!confirmed ? { scale: 1.01 } : {}}
                     whileTap={!confirmed ? { scale: 0.99 } : {}}
                   >
-                    <p className="text-foreground text-sm leading-relaxed font-bold mb-1">{option.text.slice(0, 60)}...</p>
-                    <p className="text-muted-foreground text-xs leading-relaxed">{option.text}</p>
+                    <p className="text-foreground text-sm leading-relaxed">{option.text}</p>
                   </motion.button>
                 );
               })}

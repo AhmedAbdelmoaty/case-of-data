@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { MapPin, DoorOpen } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -63,6 +63,23 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
     },
   ];
 
+  // Auto-advance entrance phase after 2.5s
+  useEffect(() => {
+    if (phase === "entrance") {
+      try { playSound("storeBell"); } catch {}
+      const timer = setTimeout(() => setPhase("greeting"), 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [phase, playSound]);
+
+  // Auto-advance greeting phase after 2.5s
+  useEffect(() => {
+    if (phase === "greeting") {
+      const timer = setTimeout(() => setPhase("dialogue"), 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [phase]);
+
   // Phase 1: Storefront from distance
   if (phase === "storefront") {
     return (
@@ -116,7 +133,7 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
             />
             <span className="relative z-10 flex items-center gap-2 text-white">
               <DoorOpen className="w-5 h-5" />
-              اقترب من الباب
+              ادخل المتجر
             </span>
           </motion.button>
         </div>
@@ -124,7 +141,7 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
     );
   }
 
-  // Phase 2: Store entrance close-up
+  // Phase 2: Store entrance — auto-advance, no text/buttons
   if (phase === "entrance") {
     return (
       <div className="relative h-screen overflow-hidden">
@@ -135,40 +152,13 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
           transition={{ duration: 1.5 }}
         >
           <img src={storeEntranceImg} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
         </motion.div>
-
-        <div className="relative z-10 flex flex-col items-center justify-end h-full px-4 pb-16">
-          <motion.p
-            className="text-muted-foreground text-sm mb-2"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            dir="rtl"
-          >
-            باب المتجر مفتوح... إضاءة دافئة من جوا
-          </motion.p>
-          <motion.button
-            className="px-8 py-3 rounded-xl text-base font-bold bg-card/70 backdrop-blur-md border border-border text-foreground hover:bg-card/90 transition-all flex items-center gap-2"
-            onClick={() => {
-              try { playSound("storeBell"); } catch {}
-              setPhase("greeting");
-            }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1 }}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-          >
-            <DoorOpen className="w-5 h-5" />
-            ادخل المتجر
-          </motion.button>
-        </div>
       </div>
     );
   }
 
-  // Phase 3: Abu Saeed greeting
+  // Phase 3: Abu Saeed greeting — auto-advance, no text/buttons
   if (phase === "greeting") {
     return (
       <div className="relative h-screen overflow-hidden">
@@ -179,53 +169,24 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
           transition={{ duration: 1 }}
         >
           <img src={abuSaeedGreetingImg} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
         </motion.div>
-
-        <div className="relative z-10 flex flex-col items-center justify-end h-full px-4 pb-16">
-          <motion.div
-            className="text-center space-y-2 mb-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-          >
-            <p className="text-accent font-bold text-lg">أبو سعيد</p>
-            <p className="text-foreground text-sm" dir="rtl">
-              "أهلاً وسهلاً… اتفضل يا أستاذ!"
-            </p>
-          </motion.div>
-
-          {/* Handshake interaction */}
-          <motion.button
-            className="px-8 py-3 rounded-xl text-base font-bold bg-card/70 backdrop-blur-md border border-border text-foreground hover:bg-card/90 transition-all flex items-center gap-2"
-            onClick={() => setPhase("dialogue")}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.5 }}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-          >
-            <motion.span
-              className="text-xl"
-              animate={{ rotate: [0, -15, 15, -10, 10, 0] }}
-              transition={{ duration: 0.6, delay: 2, repeat: 2 }}
-            >
-              🤝
-            </motion.span>
-            سلّم عليه وابدأ الكلام
-          </motion.button>
-        </div>
       </div>
     );
   }
 
-  // Phase 4: Dialogue
+  // Phase 4: Dialogue — starts automatically
   return (
     <div className="min-h-screen bg-background relative">
-      <div className="absolute inset-0">
+      <motion.div
+        className="absolute inset-0"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+      >
         <img src={abuSaeedGreetingImg} alt="" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
-      </div>
+      </motion.div>
 
       <motion.div
         className="relative z-10 pt-12 pb-4 text-center"
