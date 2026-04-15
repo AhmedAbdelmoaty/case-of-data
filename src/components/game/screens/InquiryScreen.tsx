@@ -265,22 +265,20 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
         )}
       </AnimatePresence>
 
-      {/* EnhancedDialogue with gradual trust-based scaling */}
+      {/* EnhancedDialogue - rendered outside transform to preserve fixed positioning */}
       {phase === "dialogue" && currentLines.length > 0 && (
-        <div style={{ transform: `scale(${trustScale})`, transition: "transform 2s ease" }} className="origin-bottom">
-          <EnhancedDialogue
-            key={dialogueKey}
-            dialogues={currentLines}
-            isActive={true}
-            onComplete={handleDialogueComplete}
-            currentIndex={dialogueIndex}
-            onIndexChange={setDialogueIndex}
-            onSaveNote={handleSaveNote}
-            savedNoteIds={savedNoteIds}
-            playerName={playerName}
-            playerGender={g}
-          />
-        </div>
+        <EnhancedDialogue
+          key={dialogueKey}
+          dialogues={currentLines}
+          isActive={true}
+          onComplete={handleDialogueComplete}
+          currentIndex={dialogueIndex}
+          onIndexChange={setDialogueIndex}
+          onSaveNote={handleSaveNote}
+          savedNoteIds={savedNoteIds}
+          playerName={playerName}
+          playerGender={g}
+        />
       )}
     </div>
   );
