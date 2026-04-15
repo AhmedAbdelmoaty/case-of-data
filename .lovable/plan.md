@@ -1,124 +1,136 @@
 
 
-# خطة تطوير المتعة والمحاكاة — المرحلة التالية
+# خطة التطوير الشاملة — المتعة والمحاكاة (النسخة المعتمدة)
 
-## المشكلة الحالية
+## تعليقك صح 100%
 
-الشاشات الحالية تفتقر للتغذية البصرية. مثلاً:
-- **CompanyBriefingScreen**: خلفية gradient فاضية + نص "مكتب الشركة 🏢" — مفيش صورة مكتب حقيقية
-- **DebriefScreen**: gradient فاضي بدون أي صورة خلفية
-- **TravelScreen / ReturnTravelScreen**: نقط بتتحرك + إيموجي 🚗 — مفيش إحساس سفر حقيقي
-- **InquiryScreen**: نفس صورة `store-front.png` طول الـ 5 جولات — مفيش تنوع بصري
-- كل المشاهد بتفتح مباشرة على المحادثة بدون "لحظة وصول" أو "مشهد تأسيسي"
+الـ green flash / red shake / ⭐ / ⚠️ كلها **تسريب مباشر** — بتقول للاعب "ده كان صح/غلط" فبيلغي التفكير. هنشيل كل ده ونستبدله بردود فعل **غير مباشرة** من أبو سعيد (لغة جسد تتغير تدريجياً مش فورياً، بدون ألوان تكشف).
 
-## الحل: 7 تحسينات مرتبة حسب التأثير
+---
 
-### 1. خلفيات سينمائية لكل شاشة (التأثير الأكبر)
+## ملخص التغييرات المعتمدة
 
-نولّد 5 صور AI backgrounds تتحط خلف كل مشهد:
+### المجموعة 1: مشاهد سينمائية (CompanyBriefing + Arrival)
 
-| صورة | الاستخدام | الوصف |
+**CompanyBriefingScreen — 3 مراحل بدل 2:**
+1. **ممر الشركة** — صورة `office-hallway.png` + زرار "ادخل المكتب" على الباب + أنيميشن zoom in
+2. **داخل المكتب** — صورة `mansour-desk.png` + fade in → المحادثة تبدأ
+3. **بعد المحادثة** — "المهمة بدأت" + transition للسفر
+
+**ArrivalScreen — 3 مراحل بدل 2:**
+1. **واجهة المتجر** (موجودة) — store-front.png
+2. **باب المتجر** — صورة `store-entrance.png` + زرار "ادخل المتجر" + صوت جرس
+3. **أبو سعيد مستقبلك** — صورة `abu-saeed-greeting.png` → المحادثة تبدأ
+
+### المجموعة 2: تحسينات InquiryScreen (بدون تسريب)
+
+**خلفيات متنوعة حسب الجولة:**
+- جولات 1-2: `store-inside.png`
+- جولة 3: `store-womens-section.png` + transition "أبو سعيد واخدك على قسم تاني..."
+- جولات 4-5: `store-counter.png`
+
+**ردود فعل بدون تسريب:**
+- لا green/red flash — **محذوف**
+- لا trust meter مرئي — **محذوف**
+- أبو سعيد: لغة جسده تتغير **تدريجياً** حسب الـ trust التراكمي (مش بعد كل سؤال مباشرة). لو الـ trust عالي بعد 3 جولات: يقرب (الصورة تكبر 5%). لو منخفض: يبعد (تصغر 5%). ده **تأثير بطيء وغير واضح** — مش هنت مباشر.
+
+### المجموعة 3: FramingScreen بطاقات + Stamp
+
+- الاختيارات تظهر **واحدة واحدة** مع delay (0.3s بين كل بطاقة)
+- كل اختيار = بطاقة كبيرة فيها عنوان + النص الكامل
+- لما تختار: باقي البطاقات تتحرك بعيد + البطاقة المختارة تكبر
+- زرار "أكّد اختيارك" → أنيميشن **ختم** (stamp) على البطاقة + صوت ختم
+
+### المجموعة 4: TravelScreen تحسينات
+
+- إضافة إطار "نافذة سيارة" شفاف حوالين الشاشة (border مع rounded corners)
+- **monologue داخلي**: نص بيظهر ببطء ويختفي: "يا ترى المشكلة فين..." (مش هنت — مجرد تفكير عام)
+- عناصر متحركة صغيرة: أشجار/عمارات silhouettes بتعدي
+
+### المجموعة 5: Notebook (بدون تسريب)
+
+- **محذوف**: ⭐ و ⚠️ على الملاحظات
+- **مضاف**: bounce + glow على الأيقونة لما تتضاف أي ملاحظة (بالتساوي لكل الملاحظات)
+- الملاحظات الجديدة highlighted بلون مختلف لمدة 5 ثواني فقط (عشان يعرف أنهي الجديدة)
+
+### المجموعة 6: Screen Transitions
+
+- مكون `ScreenTransition.tsx` — fade to black (0.4s) بين كل شاشة
+- iris transition (دائرة بتتفتح) عند بداية اللعبة
+
+### المجموعة 7: Progress Timeline
+
+- شريط أفقي صغير أعلى الشاشة يوضح المراحل
+- المرحلة الحالية مضيئة + pulse
+- السابقة ✓ ملونة، القادمة باهتة
+- **بدون أي إشارة للأداء** — مجرد مكان وين أنت
+
+### المجموعة 8: Mini-interactions
+
+- **طرق الباب** — قبل دخول مكتب منصور: زرار → صوت طرق → "اتفضل"
+- **مصافحة** — أول لقاء أبو سعيد: أنيميشن يدين + click
+- **ختم التقرير** — FramingScreen عند التأكيد
+
+### المجموعة 9: DebriefScreen حسب الأداء
+
+- إضاءة المكتب تتغير حسب الـ tier:
+  - Exceptional: إضاءة ذهبية دافئة
+  - Promising: إضاءة عادية
+  - Beginner: إضاءة باردة
+
+### المجموعة 10: PresentationScreen
+
+- camera angle يتبدل بين لقطة المحلل ولقطة أبو سعيد (مش ثابتة)
+- تأخير بسيط (1.5s) قبل رد أبو سعيد — suspense
+
+---
+
+## الصور AI المطلوبة (6 صور جديدة)
+
+| # | اسم الملف | الوصف |
 |---|---|---|
-| `office-briefing.png` | CompanyBriefingScreen + DebriefScreen | مكتب استشارات أنيق بإضاءة دافئة — مكتب خشبي، كراسي جلد، نافذة كبيرة |
-| `city-drive.png` | TravelScreen | منظر من داخل سيارة على طريق مدينة عربية — أبراج وشوارع |
-| `city-drive-return.png` | ReturnTravelScreen | نفس الطريق لكن بالعكس / وقت مختلف (غروب مثلاً) |
-| `store-inside.png` | InquiryScreen (جولات 1-3) + PresentationScreen | داخل متجر ملابس — رفوف وأقسام وإضاءة تجارية |
-| `store-counter.png` | InquiryScreen (جولات 4-5) + FramingScreen | كاونتر الكاشير / ركن أبو سعيد — أقرب وأكثر حميمية |
+| 1 | `office-hallway.png` | ممر مكتب استشارات حديث — أرضية رخام، إضاءة سقفية، باب زجاجي في النهاية |
+| 2 | `mansour-desk.png` | منصور قاعد ورا مكتب خشبي — نافذة خلفه، كراسي جلد |
+| 3 | `store-entrance.png` | باب متجر ملابس مفتوح — إضاءة دافئة من جوا |
+| 4 | `abu-saeed-greeting.png` | أبو سعيد واقف عند المدخل بابتسامة |
+| 5 | `store-womens-section.png` | قسم ملابس حريمي — ستاندات ومرايا تجربة |
+| 6 | `car-interior.png` | منظر من داخل سيارة — مدينة عربية من الزجاج الأمامي |
 
-ده هيحوّل كل شاشة من "gradient فاضي" لـ "مكان حقيقي" فوراً.
-
-### 2. "مشاهد تأسيسية" — Establishing Shots قبل كل محادثة
-
-بدل ما المحادثة تبدأ مباشرة، كل شاشة هتبدأ بـ **3-5 ثواني مشهد** فيه:
-- صورة الخلفية full-screen مع overlay خفيف
-- اسم المكان بيظهر بأنيميشن (مثل ArrivalScreen الحالية — نوسّع النمط ده)
-- نص قصير وصفي
-- زرار "ابدأ" أو auto-transition
-
-**أماكن التطبيق:**
-- **CompanyBriefingScreen**: مشهد المكتب → "مكتب Pinnacle Consulting — الطابق 12" → ثم المحادثة
-- **DebriefScreen**: مشهد المكتب → "رجعت المكتب — منصور مستنيك" → ثم المحادثة
-- **InquiryScreen**: عند الانتقال من جولة 3 لـ 4 — flash transition + تغيير الخلفية من المتجر للكاونتر → "قعدت مع أبو سعيد عند الكاشير"
-
-### 3. تطوير شاشات السفر
-
-**TravelScreen**: بدل النقط والإيموجي:
-- صورة `city-drive.png` full-screen
-- parallax خفيف (الصورة بتتحرك ببطء)
-- أسماء أماكن بتظهر وتختفي: "📍 وسط المدينة" → "📍 المنطقة التجارية" → "📍 Fashion House"
-- شريط تقدم أنيق
-
-**ReturnTravelScreen**: نفس الفكرة بصورة مختلفة ونص "في الطريق للمكتب..."
-
-### 4. تنوع بصري في الـ Inquiry
-
-بدل نفس الخلفية طول الـ 5 جولات:
-- **جولات 1-3**: خلفية `store-inside.png` (داخل المتجر — بنتكلم عن الحركة العامة)
-- **جولة 4**: transition سريع + خلفية `store-counter.png` (بنضيّق على الأقسام)
-- **جولة 5**: نفس `store-counter.png` لكن مع overlay أغمق (بنركّز أكتر)
-
-هيدي إحساس إن المحادثة بتتطور وبتتعمق — مش ثابتة.
-
-### 5. شاشة "التأمل" قبل الـ Framing
-
-بعد آخر سؤال في الـ Inquiry وقبل الـ FramingScreen:
-- شاشة 4 ثواني: صورة المحلل + خلفية المتجر blurred
-- نص: "بتراجع كل اللي سمعته... وبتحاول تصيغ المشكلة الحقيقية"
-- أنيميشن تفكير (نقط بتتحرك أو pulse)
-- auto-transition للـ FramingScreen
-
-ده هيخلي الانتقال من "أسئلة" لـ "قرار" يحس طبيعي ومدروس.
-
-### 6. تحسين الـ FramingScreen بصرياً
-
-- خلفية `store-counter.png` (مش store-front)
-- إضافة صورة المحلل واقف بيفكر في الجانب
-- الاختيارات تظهر كـ "بطاقات تقرير" مش مجرد buttons
-
-### 7. تحسين الـ PresentationScreen
-
-- إضافة "مشهد تأسيسي" قبل المحادثة: المحلل واقف قدام أبو سعيد بيقدم التقرير
-- خلفية `store-inside.png` أو `store-counter.png`
+كل الصور بأسلوب cartoon/illustrated يطابق الأصول الموجودة.
 
 ---
 
-## الصور المطلوب توليدها بالـ AI
+## الملفات
 
-5 صور بأسلوب cartoon/illustrated يشبه الأصول الموجودة:
-
-1. **`office-briefing.png`** — مكتب استشارات أنيق (warm lighting, wooden desk, leather chairs, city view window) — cartoon/illustrated style matching existing assets
-2. **`city-drive.png`** — منظر من داخل سيارة في مدينة عربية حديثة — cartoon style
-3. **`city-drive-return.png`** — نفس المنظر وقت الغروب/المساء — cartoon style
-4. **`store-inside.png`** — داخل متجر ملابس أنيق — أقسام وأرفف وإضاءة — cartoon style
-5. **`store-counter.png`** — كاونتر الكاشير في متجر ملابس — مكان أقرب وأكثر حميمية — cartoon style
-
----
-
-## التغييرات التقنية
-
-### ملفات تتعدل:
+### تتعدل:
 | ملف | التعديل |
 |---|---|
-| `CompanyBriefingScreen.tsx` | إضافة establishing shot + خلفية office-briefing.png |
-| `TravelScreen.tsx` | إعادة بناء بصرياً مع city-drive.png + parallax + waypoints |
-| `ReturnTravelScreen.tsx` | نفس التطوير مع city-drive-return.png |
-| `InquiryScreen.tsx` | تغيير الخلفية حسب الجولة (store-inside → store-counter) + transition بينهم |
-| `FramingScreen.tsx` | خلفية store-counter + تحسين بصري للبطاقات |
-| `PresentationScreen.tsx` | establishing shot + خلفية store-inside |
-| `DebriefScreen.tsx` | establishing shot + خلفية office-briefing.png |
+| `CompanyBriefingScreen.tsx` | 3 مراحل (ممر → مكتب → محادثة) + طرق باب |
+| `ArrivalScreen.tsx` | 3 مراحل (واجهة → باب → استقبال → محادثة) + مصافحة |
+| `TravelScreen.tsx` | إطار سيارة + monologue + عناصر متحركة |
+| `InquiryScreen.tsx` | 3 خلفيات حسب الجولة + **حذف triggerFlash** + لغة جسد تدريجية |
+| `FramingScreen.tsx` | بطاقات متحركة + stamp effect |
+| `PresentationScreen.tsx` | camera angles + suspense delay |
+| `DebriefScreen.tsx` | إضاءة حسب الأداء |
+| `PFNotebook.tsx` | bounce/glow عند الإضافة + highlight مؤقت |
+| `Index.tsx` | screen transitions + progress timeline |
 
-### شاشة جديدة (optional):
+### جديدة:
 | ملف | الوظيفة |
 |---|---|
-| `ReflectionTransition.tsx` | شاشة "التأمل" بين Inquiry و Framing (4 ثواني) |
+| `ScreenTransition.tsx` | fade/iris transitions |
+| `ProgressTimeline.tsx` | شريط التقدم الأفقي |
+| `StampEffect.tsx` | أنيميشن الختم |
 
-### Index.tsx:
-- إضافة شاشة "reflection" بين inquiry و framing (اختياري — ممكن ندمجها في InquiryScreen نفسها)
+---
 
-### ملفات لا تتغير:
-- `EnhancedDialogue.tsx` ✅
-- `PFGameContext.tsx` ✅
-- `pf-scenario.ts` ✅
-- `ResultScreen.tsx` ✅
-- `ArrivalScreen.tsx` ✅ (عندها establishing shot أصلاً)
+## الأولوية
+
+1. صور AI + مشاهد CompanyBriefing + Arrival (أكبر أثر بصري)
+2. InquiryScreen — حذف التسريب + خلفيات متنوعة + لغة جسد تدريجية
+3. FramingScreen بطاقات + stamp
+4. Screen transitions + Progress timeline
+5. Mini-interactions (طرق الباب، مصافحة)
+6. TravelScreen + Notebook polish
+7. PresentationScreen + DebriefScreen
 
