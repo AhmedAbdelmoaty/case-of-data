@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { FRAMING_OPTIONS } from "@/data/pf-scenario";
 import { EnhancedDialogue } from "../EnhancedDialogue";
 import storeInsideImg from "@/assets/scenes/store-inside.png";
+import storeCounterImg from "@/assets/scenes/store-counter.png";
 
 interface PresentationScreenProps {
   onComplete: () => void;
@@ -20,6 +21,12 @@ export const PresentationScreen = ({ onComplete }: PresentationScreenProps) => {
   const g = (profile?.gender || "male") as "male" | "female";
   const correct = isFramingCorrect();
   const chosenFraming = FRAMING_OPTIONS.find((f) => f.id === state.chosenFramingId);
+
+  // Alternate camera angles between analyst and abu saeed
+  const getBackgroundForLine = (idx: number) => {
+    if (idx === 0) return storeInsideImg; // Analyst speaking - wide shot
+    return storeCounterImg; // Abu Saeed responding - counter shot
+  };
 
   const dialogues = correct
     ? [
@@ -56,6 +63,8 @@ export const PresentationScreen = ({ onComplete }: PresentationScreenProps) => {
           mood: "neutral" as const,
         },
       ];
+
+  const currentBg = phase === "dialogue" ? getBackgroundForLine(dialogueIndex) : storeInsideImg;
 
   if (phase === "establishing") {
     return (
@@ -106,10 +115,19 @@ export const PresentationScreen = ({ onComplete }: PresentationScreenProps) => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      <div className="absolute inset-0">
-        <img src={storeInsideImg} alt="" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
-      </div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentBg}
+          className="absolute inset-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <img src={currentBg} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
+        </motion.div>
+      </AnimatePresence>
 
       <EnhancedDialogue
         dialogues={dialogues}

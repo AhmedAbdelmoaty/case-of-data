@@ -8,6 +8,7 @@ import { PFNotebook } from "../PFNotebook";
 import type { InquiryOption } from "@/data/pf-scenario";
 import storeInsideImg from "@/assets/scenes/store-inside.png";
 import storeCounterImg from "@/assets/scenes/store-counter.png";
+import storeWomensSectionImg from "@/assets/scenes/store-womens-section.jpg";
 
 interface InquiryScreenProps {
   onComplete: () => void;
@@ -23,16 +24,30 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
   const [dialogueIndex, setDialogueIndex] = useState(0);
   const [savedNoteIds, setSavedNoteIds] = useState<string[]>([]);
   const [dialogueKey, setDialogueKey] = useState(0);
-  const [flashColor, setFlashColor] = useState<string | null>(null);
+  const [transitionInfo, setTransitionInfo] = useState<{ bg: string; label: string; subtitle: string } | null>(null);
 
   const playerName = profile?.display_name || "محلل";
   const g = (profile?.gender || "male") as "male" | "female";
 
   const round = INQUIRY_ROUNDS[roundIndex];
 
-  // Switch background at round 4 (index 3)
-  const currentBg = roundIndex >= 3 ? storeCounterImg : storeInsideImg;
+  // Round-based backgrounds: 0-1 store-inside, 2 women's section, 3-4 counter
+  const getBackgroundForRound = (idx: number) => {
+    if (idx >= 3) return storeCounterImg;
+    if (idx === 2) return storeWomensSectionImg;
+    return storeInsideImg;
+  };
+
+  const currentBg = getBackgroundForRound(roundIndex);
   const overlayOpacity = roundIndex >= 4 ? "bg-black/70" : "bg-black/60";
+
+  // Gradual body language: Abu Saeed's scale changes based on cumulative trust
+  const trustScale = useMemo(() => {
+    const trust = state.trustLevel;
+    if (trust >= 7) return 1.05;
+    if (trust <= 3) return 0.95;
+    return 1;
+  }, [state.trustLevel]);
 
   const shuffledOptions = useMemo(() => {
     if (!round) return [];
@@ -44,18 +59,6 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
     return arr;
   }, [roundIndex, round]);
 
-  const triggerFlash = useCallback((tier: string) => {
-    if (tier === "strong") {
-      setFlashColor("bg-green-500/20");
-    } else if (tier === "weak") {
-      setFlashColor("bg-red-500/20");
-    } else {
-      setFlashColor(null);
-      return;
-    }
-    setTimeout(() => setFlashColor(null), 600);
-  }, []);
-
   const getMoodForTier = (tier: string): "neutral" | "happy" | "suspicious" => {
     if (tier === "strong") return "happy";
     if (tier === "weak") return "suspicious";
@@ -64,7 +67,6 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
 
   const handlePickQuestion = (option: InquiryOption) => {
     chooseQuestion(option);
-    triggerFlash(option.tier);
 
     const abuMood = getMoodForTier(option.tier);
 
@@ -103,11 +105,25 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
   const handleDialogueComplete = () => {
     if (roundIndex < INQUIRY_ROUNDS.length - 1) {
       const nextRound = roundIndex + 1;
-      // Scene transition when moving to round 4 (counter area)
-      if (nextRound === 3) {
+      const nextBg = getBackgroundForRound(nextRound);
+      const currentBgNow = getBackgroundForRound(roundIndex);
+
+      // Scene transition when background changes
+      if (nextBg !== currentBgNow) {
+        let label = "";
+        let subtitle = "";
+        if (nextRound === 2) {
+          label = "📍 قسم الحريمي";
+          subtitle = "أبو سعيد واخدك على قسم تاني...";
+        } else if (nextRound === 3) {
+          label = "📍 ركن الكاشير";
+          subtitle = "قعدت مع أبو سعيد عند الكاونتر...";
+        }
+        setTransitionInfo({ bg: nextBg === storeWomensSectionImg ? "womens" : "counter", label, subtitle });
         setPhase("scene-transition");
         setTimeout(() => {
           setRoundIndex(nextRound);
+          setTransitionInfo(null);
           setPhase("choosing");
         }, 3000);
       } else {
@@ -131,7 +147,8 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
   if (!round) return null;
 
   // Scene transition between store areas
-  if (phase === "scene-transition") {
+  if (phase === "scene-transition" && transitionInfo) {
+    const transitionBgImg = transitionInfo.bg === "womens" ? storeWomensSectionImg : storeCounterImg;
     return (
       <div className="min-h-screen bg-background relative overflow-hidden">
         <motion.div
@@ -140,7 +157,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
           animate={{ opacity: 1 }}
           transition={{ duration: 1.5 }}
         >
-          <img src={storeCounterImg} alt="" className="w-full h-full object-cover" />
+          <img src={transitionBgImg} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/60" />
         </motion.div>
 
@@ -151,9 +168,9 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
             transition={{ delay: 0.5 }}
             className="space-y-3"
           >
-            <p className="text-muted-foreground text-sm tracking-widest">📍 ركن الكاشير</p>
+            <p className="text-muted-foreground text-sm tracking-widest">{transitionInfo.label}</p>
             <h2 className="text-foreground text-lg font-bold" dir="rtl">
-              قعدت مع أبو سعيد عند الكاونتر...
+              {transitionInfo.subtitle}
             </h2>
             <motion.p
               className="text-muted-foreground text-xs"
@@ -184,19 +201,6 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
           <img src={currentBg} alt="" className="w-full h-full object-cover" />
           <div className={`absolute inset-0 ${overlayOpacity} backdrop-blur-[2px]`} />
         </motion.div>
-      </AnimatePresence>
-
-      {/* Flash overlay */}
-      <AnimatePresence>
-        {flashColor && (
-          <motion.div
-            className={`fixed inset-0 z-30 pointer-events-none ${flashColor}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          />
-        )}
       </AnimatePresence>
 
       {/* Round indicator */}
@@ -261,20 +265,22 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
         )}
       </AnimatePresence>
 
-      {/* EnhancedDialogue */}
+      {/* EnhancedDialogue with gradual trust-based scaling */}
       {phase === "dialogue" && currentLines.length > 0 && (
-        <EnhancedDialogue
-          key={dialogueKey}
-          dialogues={currentLines}
-          isActive={true}
-          onComplete={handleDialogueComplete}
-          currentIndex={dialogueIndex}
-          onIndexChange={setDialogueIndex}
-          onSaveNote={handleSaveNote}
-          savedNoteIds={savedNoteIds}
-          playerName={playerName}
-          playerGender={g}
-        />
+        <div style={{ transform: `scale(${trustScale})`, transition: "transform 2s ease" }} className="origin-bottom">
+          <EnhancedDialogue
+            key={dialogueKey}
+            dialogues={currentLines}
+            isActive={true}
+            onComplete={handleDialogueComplete}
+            currentIndex={dialogueIndex}
+            onIndexChange={setDialogueIndex}
+            onSaveNote={handleSaveNote}
+            savedNoteIds={savedNoteIds}
+            playerName={playerName}
+            playerGender={g}
+          />
+        </div>
       )}
     </div>
   );

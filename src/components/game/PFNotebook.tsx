@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, X, Trash2 } from "lucide-react";
 import { usePFGame } from "@/contexts/PFGameContext";
@@ -7,25 +7,58 @@ export const PFNotebook = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { state, removeNote } = usePFGame();
   const { notes } = state;
+  const prevCountRef = useRef(notes.length);
+  const [justAdded, setJustAdded] = useState(false);
+  const [newNoteIds, setNewNoteIds] = useState<Set<number>>(new Set());
+
+  // Bounce + glow when a note is added
+  useEffect(() => {
+    if (notes.length > prevCountRef.current) {
+      setJustAdded(true);
+      const newId = notes[notes.length - 1]?.roundId;
+      if (newId !== undefined) {
+        setNewNoteIds(prev => new Set(prev).add(newId));
+        // Remove highlight after 5 seconds
+        setTimeout(() => {
+          setNewNoteIds(prev => {
+            const next = new Set(prev);
+            next.delete(newId);
+            return next;
+          });
+        }, 5000);
+      }
+      setTimeout(() => setJustAdded(false), 1000);
+    }
+    prevCountRef.current = notes.length;
+  }, [notes.length]);
 
   return (
     <>
       {/* Floating button */}
       <motion.button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl bg-card/90 backdrop-blur-md border border-border text-foreground shadow-lg hover:border-primary/50 transition-all"
+        className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl bg-card/90 backdrop-blur-md border text-foreground shadow-lg transition-all ${
+          justAdded ? "border-primary shadow-primary/30 shadow-xl" : "border-border hover:border-primary/50"
+        }`}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         initial={{ y: 50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
+        animate={{
+          y: 0,
+          opacity: 1,
+          scale: justAdded ? [1, 1.2, 1] : 1,
+        }}
         transition={{ delay: 0.5 }}
       >
-        <BookOpen className="w-5 h-5 text-primary" />
+        <BookOpen className={`w-5 h-5 ${justAdded ? "text-primary animate-pulse" : "text-primary"}`} />
         <span className="text-sm font-bold">الدفتر</span>
         {notes.length > 0 && (
-          <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center font-bold">
+          <motion.span
+            className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center font-bold"
+            animate={justAdded ? { scale: [1, 1.4, 1] } : {}}
+          >
             {notes.length}
-          </span>
+          </motion.span>
         )}
       </motion.button>
 
@@ -73,28 +106,35 @@ export const PFNotebook = () => {
                     </p>
                   </div>
                 ) : (
-                  notes.map((note, i) => (
-                    <motion.div
-                      key={note.roundId}
-                      className="p-3 rounded-lg bg-muted/50 border border-border relative group"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.05 }}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="text-foreground text-sm leading-relaxed" dir="rtl">
-                          {note.text}
-                        </p>
-                        <button
-                          onClick={() => removeNote(note.roundId)}
-                          className="shrink-0 p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">جولة {note.roundId}</p>
-                    </motion.div>
-                  ))
+                  notes.map((note, i) => {
+                    const isNew = newNoteIds.has(note.roundId);
+                    return (
+                      <motion.div
+                        key={note.roundId}
+                        className={`p-3 rounded-lg border relative group transition-colors ${
+                          isNew
+                            ? "bg-primary/10 border-primary/30"
+                            : "bg-muted/50 border-border"
+                        }`}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.05 }}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-foreground text-sm leading-relaxed" dir="rtl">
+                            {note.text}
+                          </p>
+                          <button
+                            onClick={() => removeNote(note.roundId)}
+                            className="shrink-0 p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">جولة {note.roundId}</p>
+                      </motion.div>
+                    );
+                  })
                 )}
               </div>
             </motion.div>
