@@ -26,8 +26,9 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
   const dialogues = [
     {
       characterId: "mansour",
-      text: `أهلاً يا ${name}… ${gText("اتفضل اقعد", "اتفضلي اقعدي", g)}. ${gText("عامل", "عاملة", g)} إيه؟`,
+      text: gText("أهلًا بيك، اتفضل اقعد. أخبارك إيه؟", "أهلًا بيكي، اتفضلي اقعدي. أخبارك إيه؟", g),
       mood: "happy" as const,
+      audioSrc: "/voiceover/mansour/mansour_briefing_01_welcome.wav",
     },
     {
       characterId: "detective",
@@ -36,38 +37,46 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
     },
     {
       characterId: "mansour",
-      text: "عندنا مشروع جديد. وصلنا طلب استشارة من عميل اسمه أبو سعيد — عنده متجر ملابس في المنطقة التجارية اسمه Fashion House.",
+      text: "عندنا مشروع جديد. جالنا طلب استشارة من عميل اسمه أبو سعيد، عنده متجر ملابس في المنطقة التجارية، اسمه Fashion House.",
       mood: "neutral" as const,
+      audioSrc: "/voiceover/mansour/mansour_briefing_02_case_intro.wav",
     },
     {
       characterId: "mansour",
-      text: "الراجل ده شغال في المجال من أكتر من 12 سنة. عميل محترم ومحله ماشي كويس الحمد لله.",
+      text: "الراجل ده شغال في المجال من أكتر من اتناشر سنة. راجل محترم، ومحله ماشي كويس الحمد لله.",
       mood: "neutral" as const,
+      audioSrc: "/voiceover/mansour/mansour_briefing_03_client_background.wav",
+    },
+    {
+      characterId: "mansour",
+      text: "كلمني وقال إن فيه حاجة غريبة بتحصل عنده. حاسس إن الدنيا ماشية، والمحل فيه حركة... بس لما بييجي يحسب آخر الشهر، بيلاقي الأرقام أقل من المتوقع.",
+      mood: "neutral" as const,
+      audioSrc: "/voiceover/mansour/mansour_briefing_04_problem_intro.wav",
+    },
+    {
+      characterId: "mansour",
+      text: gText(
+        "الراجل محتار، ومش فاهم إيه اللي بيحصل بالضبط. عايزك تروح تقعد معاه، وتفهم الوضع.",
+        "الراجل محتار، ومش فاهم إيه اللي بيحصل بالضبط. عايزك تروحي تقعدي معاه، وتفهمي الوضع.",
+        g
+      ),
+      mood: "neutral" as const,
+      audioSrc: "/voiceover/mansour/mansour_briefing_05_task_handoff.wav",
     },
     {
       characterId: "detective",
-      text: "تمام. إيه الموضوع؟",
+      text: gText("ماشي يا أستاذ منصور. هروح أشوف إيه الحكاية.", "ماشي يا أستاذ منصور. هروح أشوف إيه الحكاية.", g),
       mood: "neutral" as const,
     },
     {
       characterId: "mansour",
-      text: "اتصل بينا وقال إن فيه حاجة غريبة بتحصل عنده. حاسس إن الدنيا ماشية والمحل فيه حركة… بس لما بييجي يحسب آخر الشهر بيلاقي الأرقام أقل من المتوقع.",
-      mood: "neutral" as const,
-    },
-    {
-      characterId: "mansour",
-      text: `الراجل محتار. مش فاهم إيه اللي بيحصل. و${gText("عايزك تروح", "عايزك تروحي", g)} ${gText("تقعد", "تقعدي", g)} معاه و${gText("تفهم", "تفهمي", g)} الوضع.`,
-      mood: "neutral" as const,
-    },
-    {
-      characterId: "detective",
-      text: `${gText("ماشي", "ماشي", g)} يا أستاذ منصور. ${gText("هروح أشوف", "هروح أشوف", g)} إيه الحكاية.`,
-      mood: "neutral" as const,
-    },
-    {
-      characterId: "mansour",
-      text: `تمام. يلا بالتوفيق يا ${name}. أنا ${gText("مستنيك", "مستنياكي", g)}.`,
+      text: gText(
+        "تمام. يلا بالتوفيق. أنا مستنيك ترجعلي بالصورة كاملة.",
+        "تمام. يلا بالتوفيق. أنا مستنيكي ترجعيلي بالصورة كاملة.",
+        g
+      ),
       mood: "happy" as const,
+      audioSrc: "/voiceover/mansour/mansour_briefing_06_sendoff.wav",
     },
   ];
 
