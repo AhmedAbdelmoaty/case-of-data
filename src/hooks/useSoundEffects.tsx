@@ -14,7 +14,8 @@ type SoundType =
   | "door"
   | "carEngine"
   | "storeBell"
-  | "confetti";
+  | "confetti"
+  | "doorKnock";
 
 interface SoundConfig {
   frequency: number;
@@ -145,6 +146,14 @@ const soundConfigs: Record<SoundType, SoundConfig> = {
     attack: 0.01,
     secondaryFreq: 900,
   },
+  doorKnock: {
+    frequency: 200,
+    duration: 0.12,
+    type: "sine",
+    volume: 0.3,
+    attack: 0.005,
+    decay: 0.08,
+  },
 };
 
 export const useSoundEffects = () => {
@@ -234,6 +243,13 @@ export const useSoundEffects = () => {
     }
   }, []);
 
+  const playDoorKnock = useCallback(() => {
+    // 3 rapid knocks
+    playSound("doorKnock");
+    setTimeout(() => playSound("doorKnock"), 150);
+    setTimeout(() => playSound("doorKnock"), 300);
+  }, [playSound]);
+
   const playDialogueTyping = useCallback(() => {
     playSound("dialogue");
   }, [playSound]);
@@ -244,6 +260,7 @@ export const useSoundEffects = () => {
 
   return {
     playSound,
+    playDoorKnock,
     playDialogueTyping,
     toggleSound,
     isEnabled: () => enabledRef.current,
@@ -252,6 +269,7 @@ export const useSoundEffects = () => {
 
 interface SoundContextType {
   playSound: (type: SoundType) => void;
+  playDoorKnock: () => void;
   playDialogueTyping: () => void;
   toggleSound: (enabled: boolean) => void;
   isSoundEnabled: boolean;
@@ -261,7 +279,7 @@ interface SoundContextType {
 const SoundContext = createContext<SoundContextType | null>(null);
 
 export const SoundProvider = ({ children }: { children: ReactNode }) => {
-  const { playSound, playDialogueTyping, toggleSound } = useSoundEffects();
+  const { playSound, playDoorKnock, playDialogueTyping, toggleSound } = useSoundEffects();
   const [isSoundEnabled, setIsSoundEnabled] = useState(true);
 
   const handleToggle = (enabled: boolean) => {
@@ -275,6 +293,12 @@ export const SoundProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [isSoundEnabled, playSound]);
 
+  const contextPlayDoorKnock = useCallback(() => {
+    if (isSoundEnabled) {
+      playDoorKnock();
+    }
+  }, [isSoundEnabled, playDoorKnock]);
+
   const contextPlayDialogueTyping = useCallback(() => {
     if (isSoundEnabled) {
       playDialogueTyping();
@@ -285,6 +309,7 @@ export const SoundProvider = ({ children }: { children: ReactNode }) => {
     <SoundContext.Provider
       value={{
         playSound: contextPlaySound,
+        playDoorKnock: contextPlayDoorKnock,
         playDialogueTyping: contextPlayDialogueTyping,
         toggleSound: handleToggle,
         isSoundEnabled,
