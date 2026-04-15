@@ -4,10 +4,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { gText } from "@/lib/gText";
 import { EnhancedDialogue } from "../EnhancedDialogue";
-import { Rocket, GraduationCap } from "lucide-react";
+import { Rocket, GraduationCap, DoorOpen } from "lucide-react";
 import analystImg from "@/assets/characters/analyst.png";
 import saraImg from "@/assets/characters/sara.png";
-import officeBriefingImg from "@/assets/scenes/office-briefing.png";
+import officeHallwayImg from "@/assets/scenes/office-hallway.jpg";
+import mansourDeskImg from "@/assets/scenes/mansour-desk.jpg";
 
 interface CompanyBriefingScreenProps {
   onComplete: () => void;
@@ -19,8 +20,8 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
   const name = profile?.display_name || "محلل";
   const g = profile?.gender || "male";
   const { playSound } = useSound();
-  const [phase, setPhase] = useState<"establishing" | "dialogue" | "transition">(
-    isReviewMode ? "dialogue" : "establishing"
+  const [phase, setPhase] = useState<"hallway" | "door-knock" | "office" | "dialogue" | "transition">(
+    isReviewMode ? "dialogue" : "hallway"
   );
 
   const dialogues = [
@@ -88,8 +89,8 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
     setPhase("transition");
   };
 
-  // Establishing shot
-  if (phase === "establishing") {
+  // Phase 1: Hallway with parallax zoom
+  if (phase === "hallway") {
     return (
       <div className="min-h-screen bg-background relative overflow-hidden">
         <motion.div
@@ -98,8 +99,8 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 2, ease: "easeOut" }}
         >
-          <img src={officeBriefingImg} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/40" />
+          <img src={officeHallwayImg} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/30" />
         </motion.div>
 
         <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-4">
@@ -122,30 +123,135 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
           </motion.div>
 
           <motion.button
-            onClick={() => {
-              try { playSound("door"); } catch {}
-              setPhase("dialogue");
-            }}
-            className="mt-10 px-8 py-3 rounded-xl bg-card/60 backdrop-blur-md border border-border text-foreground font-bold hover:bg-card/80 transition-all"
+            onClick={() => setPhase("door-knock")}
+            className="mt-10 px-8 py-3 rounded-xl bg-card/60 backdrop-blur-md border border-border text-foreground font-bold hover:bg-card/80 transition-all flex items-center gap-2"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 2 }}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
           >
-            ادخل المكتب
+            <DoorOpen className="w-5 h-5" />
+            اطرق باب المكتب
           </motion.button>
         </div>
       </div>
     );
   }
 
+  // Phase 2: Door knock interaction
+  if (phase === "door-knock") {
+    return (
+      <div className="min-h-screen bg-background relative overflow-hidden">
+        <motion.div
+          className="absolute inset-0"
+          initial={{ scale: 1 }}
+          animate={{ scale: 1.05 }}
+          transition={{ duration: 2, ease: "easeOut" }}
+        >
+          <img src={officeHallwayImg} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/40" />
+        </motion.div>
+
+        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-4">
+          <motion.div
+            className="space-y-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            {/* Knock animation */}
+            <motion.p
+              className="text-4xl"
+              animate={{ x: [0, -5, 5, -3, 3, 0] }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+            >
+              🚪
+            </motion.p>
+            <motion.p
+              className="text-foreground text-lg font-bold"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+              dir="rtl"
+            >
+              طق طق طق...
+            </motion.p>
+            <motion.p
+              className="text-accent text-base font-bold"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 2 }}
+              dir="rtl"
+            >
+              "اتفضل!"
+            </motion.p>
+            <motion.button
+              onClick={() => {
+                try { playSound("door"); } catch {}
+                setPhase("office");
+              }}
+              className="mt-4 px-8 py-3 rounded-xl bg-card/60 backdrop-blur-md border border-border text-foreground font-bold hover:bg-card/80 transition-all"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 3 }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              ادخل المكتب
+            </motion.button>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+
+  // Phase 3: Office establishing shot (mansour at desk)
+  if (phase === "office") {
+    return (
+      <div className="min-h-screen bg-background relative overflow-hidden">
+        <motion.div
+          className="absolute inset-0"
+          initial={{ scale: 1.1, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+        >
+          <img src={mansourDeskImg} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+        </motion.div>
+
+        <div className="relative z-10 flex flex-col items-center justify-end min-h-screen text-center px-4 pb-16">
+          <motion.div
+            className="px-6 py-3 rounded-xl bg-black/50 backdrop-blur-md border border-white/10"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1 }}
+          >
+            <p className="text-muted-foreground text-sm" dir="rtl">مكتب أ. منصور — مدير المشاريع</p>
+          </motion.div>
+
+          <motion.button
+            onClick={() => setPhase("dialogue")}
+            className="mt-4 px-8 py-3 rounded-xl bg-card/60 backdrop-blur-md border border-border text-foreground font-bold hover:bg-card/80 transition-all"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 2 }}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+          >
+            ابدأ المحادثة
+          </motion.button>
+        </div>
+      </div>
+    );
+  }
+
+  // Phase: Transition after dialogue
   if (phase === "transition") {
     const avatarImg = g === "female" ? saraImg : analystImg;
     return (
       <div className="min-h-screen bg-background relative">
         <div className="absolute inset-0">
-          <img src={officeBriefingImg} alt="" className="w-full h-full object-cover" />
+          <img src={mansourDeskImg} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
         </div>
         <div className="relative z-10 flex items-center justify-center min-h-screen px-4">
@@ -206,10 +312,11 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
     );
   }
 
+  // Dialogue phase
   return (
     <div className="min-h-screen bg-background relative">
       <div className="absolute inset-0">
-        <img src={officeBriefingImg} alt="" className="w-full h-full object-cover" />
+        <img src={mansourDeskImg} alt="" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
       </div>
 

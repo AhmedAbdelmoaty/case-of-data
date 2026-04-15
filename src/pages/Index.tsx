@@ -15,6 +15,8 @@ import { MusicProvider } from "@/hooks/useBackgroundMusic";
 import { SoundToggle } from "@/components/game/SoundToggle";
 import { PlayerSettingsPanel } from "@/components/game/PlayerSettingsPanel";
 import { PFGameProvider } from "@/contexts/PFGameContext";
+import { ScreenTransition } from "@/components/game/ScreenTransition";
+import { ProgressTimeline } from "@/components/game/ProgressTimeline";
 
 type Screen =
   | "company-briefing"
@@ -40,6 +42,8 @@ const GameContent = () => {
     return saved || "company-briefing";
   });
 
+  const [transitioning, setTransitioning] = useState(false);
+
   useEffect(() => {
     if (currentScreen !== "replay-briefing") {
       localStorage.setItem(storageKey, currentScreen);
@@ -47,7 +51,11 @@ const GameContent = () => {
   }, [currentScreen, storageKey]);
 
   const handleNavigate = useCallback((screen: string) => {
-    setCurrentScreen(screen as Screen);
+    setTransitioning(true);
+    setTimeout(() => {
+      setCurrentScreen(screen as Screen);
+      setTimeout(() => setTransitioning(false), 100);
+    }, 400);
   }, []);
 
   const handleReplayBriefing = useCallback(() => {
@@ -60,9 +68,14 @@ const GameContent = () => {
   }, [storageKey]);
 
   const showSettings = currentScreen !== "replay-briefing";
+  const showTimeline = !["company-briefing", "replay-briefing", "result"].includes(currentScreen);
 
   return (
     <div className="min-h-screen bg-background">
+      <ScreenTransition isActive={transitioning} />
+
+      {showTimeline && <ProgressTimeline currentScreen={currentScreen} />}
+
       {showSettings && (
         <>
           <SoundToggle />

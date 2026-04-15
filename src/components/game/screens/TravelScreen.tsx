@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSound } from "@/hooks/useSoundEffects";
-import cityDriveImg from "@/assets/scenes/city-drive.png";
+import carInteriorImg from "@/assets/scenes/car-interior.jpg";
 
 interface TravelScreenProps {
   onComplete: () => void;
@@ -13,13 +13,19 @@ const WAYPOINTS = [
   { label: "📍 Fashion House", delay: 3.0 },
 ];
 
+const MONOLOGUES = [
+  { text: "يا ترى المشكلة فين بالظبط...", delay: 1000, duration: 2000 },
+  { text: "لازم أسمع كويس وأفهم قبل ما أحكم...", delay: 3500, duration: 2000 },
+];
+
 export const TravelScreen = ({ onComplete }: TravelScreenProps) => {
   const { playSound } = useSound();
   const [activeWaypoint, setActiveWaypoint] = useState(0);
+  const [currentMonologue, setCurrentMonologue] = useState<string | null>(null);
 
   useEffect(() => {
     try { playSound("carEngine"); } catch {}
-    const timer = setTimeout(onComplete, 4500);
+    const timer = setTimeout(onComplete, 5500);
     return () => clearTimeout(timer);
   }, [onComplete, playSound]);
 
@@ -30,6 +36,15 @@ export const TravelScreen = ({ onComplete }: TravelScreenProps) => {
     return () => timers.forEach(clearTimeout);
   }, []);
 
+  useEffect(() => {
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    MONOLOGUES.forEach((m) => {
+      timers.push(setTimeout(() => setCurrentMonologue(m.text), m.delay));
+      timers.push(setTimeout(() => setCurrentMonologue(null), m.delay + m.duration));
+    });
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
   return (
     <div className="min-h-screen bg-background overflow-hidden relative">
       {/* Parallax background */}
@@ -37,13 +52,41 @@ export const TravelScreen = ({ onComplete }: TravelScreenProps) => {
         className="absolute inset-0"
         initial={{ scale: 1.1, x: 30 }}
         animate={{ scale: 1, x: -30 }}
-        transition={{ duration: 4.5, ease: "linear" }}
+        transition={{ duration: 5.5, ease: "linear" }}
       >
-        <img src={cityDriveImg} alt="" className="w-full h-full object-cover" />
+        <img src={carInteriorImg} alt="" className="w-full h-full object-cover" />
       </motion.div>
-      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
 
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-4">
+      {/* Car window frame */}
+      <div className="absolute inset-0 pointer-events-none z-20">
+        <div className="absolute inset-0 border-[12px] border-black/40 rounded-[2rem]" />
+        {/* Rearview mirror hint */}
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 w-16 h-6 bg-black/30 rounded-b-lg" />
+      </div>
+
+      {/* Floating city silhouettes */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-10">
+        {[...Array(5)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute text-2xl opacity-20"
+            style={{ top: `${20 + i * 10}%` }}
+            initial={{ right: "-10%" }}
+            animate={{ right: "110%" }}
+            transition={{
+              duration: 3 + i * 0.5,
+              delay: i * 0.8,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          >
+            {["🌴", "🏢", "🏬", "🌳", "🏗️"][i]}
+          </motion.div>
+        ))}
+      </div>
+
+      <div className="relative z-30 flex flex-col items-center justify-center min-h-screen text-center px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -61,6 +104,22 @@ export const TravelScreen = ({ onComplete }: TravelScreenProps) => {
             في الطريق لمتجر Fashion House...
           </h2>
         </motion.div>
+
+        {/* Internal monologue */}
+        <AnimatePresence>
+          {currentMonologue && (
+            <motion.div
+              className="mt-6 px-6 py-3 rounded-xl bg-card/40 backdrop-blur-sm border border-border/30"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <p className="text-muted-foreground text-sm italic" dir="rtl">
+                💭 {currentMonologue}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Waypoints */}
         <div className="mt-8 space-y-3">
@@ -87,7 +146,7 @@ export const TravelScreen = ({ onComplete }: TravelScreenProps) => {
             className="h-full bg-primary rounded-full"
             initial={{ width: "0%" }}
             animate={{ width: "100%" }}
-            transition={{ duration: 4, ease: "easeInOut" }}
+            transition={{ duration: 5, ease: "easeInOut" }}
           />
         </motion.div>
       </div>

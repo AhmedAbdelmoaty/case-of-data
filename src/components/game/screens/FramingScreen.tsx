@@ -4,6 +4,7 @@ import { Target, BookOpen } from "lucide-react";
 import { FRAMING_OPTIONS } from "@/data/pf-scenario";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { PFNotebook } from "../PFNotebook";
+import { StampEffect } from "../StampEffect";
 import storeCounterImg from "@/assets/scenes/store-counter.png";
 
 interface FramingScreenProps {
@@ -14,6 +15,7 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
   const { chooseFraming } = usePFGame();
   const [selected, setSelected] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(false);
+  const [showStamp, setShowStamp] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
 
   const [shuffled] = useState(() => {
@@ -29,7 +31,11 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
     if (!selected) return;
     chooseFraming(selected);
     setConfirmed(true);
-    setTimeout(onComplete, 800);
+    setShowStamp(true);
+    setTimeout(() => {
+      setShowStamp(false);
+      onComplete();
+    }, 1500);
   };
 
   return (
@@ -40,6 +46,7 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
       </div>
 
       <PFNotebook />
+      <StampEffect isVisible={showStamp} text="✓ تم التأكيد" />
 
       <div className="relative z-10 max-w-2xl mx-auto px-4 py-8">
         <motion.div
@@ -70,25 +77,35 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
         <AnimatePresence>
           {showOptions && (
             <div className="space-y-3">
-              {shuffled.map((option, i) => (
-                <motion.button
-                  key={option.id}
-                  onClick={() => !confirmed && setSelected(option.id)}
-                  className={`w-full p-4 rounded-xl border text-right transition-all ${
-                    selected === option.id
-                      ? "bg-primary/10 border-primary/50 ring-2 ring-primary/30"
-                      : "bg-card/80 backdrop-blur-sm border-border hover:border-primary/30"
-                  } ${confirmed ? "pointer-events-none opacity-80" : ""}`}
-                  dir="rtl"
-                  initial={{ opacity: 0, x: 40 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.15, type: "spring", damping: 20 }}
-                  whileHover={!confirmed ? { scale: 1.01 } : {}}
-                  whileTap={!confirmed ? { scale: 0.99 } : {}}
-                >
-                  <p className="text-foreground text-sm leading-relaxed">{option.text}</p>
-                </motion.button>
-              ))}
+              {shuffled.map((option, i) => {
+                const isSelected = selected === option.id;
+                const isOther = selected && !isSelected;
+
+                return (
+                  <motion.button
+                    key={option.id}
+                    onClick={() => !confirmed && setSelected(option.id)}
+                    className={`w-full p-5 rounded-xl border text-right transition-all ${
+                      isSelected
+                        ? "bg-primary/10 border-primary/50 ring-2 ring-primary/30"
+                        : "bg-card/80 backdrop-blur-sm border-border hover:border-primary/30"
+                    } ${confirmed ? "pointer-events-none" : ""}`}
+                    dir="rtl"
+                    initial={{ opacity: 0, x: 40 }}
+                    animate={{
+                      opacity: confirmed && isOther ? 0.3 : 1,
+                      x: confirmed && isOther ? 60 : 0,
+                      scale: confirmed && isSelected ? 1.03 : 1,
+                    }}
+                    transition={{ delay: i * 0.15, type: "spring", damping: 20 }}
+                    whileHover={!confirmed ? { scale: 1.01 } : {}}
+                    whileTap={!confirmed ? { scale: 0.99 } : {}}
+                  >
+                    <p className="text-foreground text-sm leading-relaxed font-bold mb-1">{option.text.slice(0, 60)}...</p>
+                    <p className="text-muted-foreground text-xs leading-relaxed">{option.text}</p>
+                  </motion.button>
+                );
+              })}
             </div>
           )}
         </AnimatePresence>
@@ -106,13 +123,13 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
               whileTap={{ scale: 0.98 }}
             >
               <Target className="w-5 h-5" />
-              تأكيد الاختيار وتقديم التقرير
+              أكّد اختيارك وقدّم التقرير
             </motion.button>
           )}
         </AnimatePresence>
 
         <AnimatePresence>
-          {confirmed && (
+          {confirmed && !showStamp && (
             <motion.div
               className="mt-8 text-center"
               initial={{ opacity: 0, scale: 0.8 }}
