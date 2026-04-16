@@ -26,7 +26,8 @@ const Auth = () => {
       if (error) {
         setError(error.message);
       } else {
-        navigate(isProfileComplete ? "/" : "/setup");
+        // Let AuthRedirect handle the navigation after profile loads
+        navigate("/");
       }
     } else {
       const { error } = await signUp(email, password);
