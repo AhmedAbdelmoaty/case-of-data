@@ -12,9 +12,8 @@ import { DebriefScreen } from "@/components/game/screens/DebriefScreen";
 import { ResultScreen } from "@/components/game/screens/ResultScreen";
 import { SoundProvider } from "@/hooks/useSoundEffects";
 import { MusicProvider } from "@/hooks/useBackgroundMusic";
-import { SoundToggle } from "@/components/game/SoundToggle";
 import { PlayerSettingsPanel } from "@/components/game/PlayerSettingsPanel";
-import { PFGameProvider } from "@/contexts/PFGameContext";
+import { PFGameProvider, usePFGame } from "@/contexts/PFGameContext";
 import { ScreenTransition } from "@/components/game/ScreenTransition";
 import { ProgressTimeline } from "@/components/game/ProgressTimeline";
 
@@ -33,6 +32,7 @@ type Screen =
 
 const GameContent = () => {
   const { user } = useAuth();
+  const { resetGame } = usePFGame();
   const userId = user?.id || "guest";
   const storageKey = `pf-game-screen-${userId}`;
 
@@ -53,10 +53,15 @@ const GameContent = () => {
   const handleNavigate = useCallback((screen: string) => {
     setTransitioning(true);
     setTimeout(() => {
+      // Reset game state when navigating back to the start (replay)
+      if (screen === "company-briefing") {
+        resetGame();
+        localStorage.removeItem(storageKey);
+      }
       setCurrentScreen(screen as Screen);
       setTimeout(() => setTransitioning(false), 100);
     }, 400);
-  }, []);
+  }, [resetGame, storageKey]);
 
   const handleReplayBriefing = useCallback(() => {
     setCurrentScreen("replay-briefing");
@@ -64,8 +69,13 @@ const GameContent = () => {
 
   const handleResetProgress = useCallback(() => {
     localStorage.removeItem(storageKey);
-    setCurrentScreen("company-briefing");
-  }, [storageKey]);
+    resetGame();
+    setTransitioning(true);
+    setTimeout(() => {
+      setCurrentScreen("company-briefing");
+      setTimeout(() => setTransitioning(false), 100);
+    }, 400);
+  }, [storageKey, resetGame]);
 
   const showSettings = currentScreen !== "replay-briefing";
   const showTimeline = !["company-briefing", "replay-briefing", "result"].includes(currentScreen);
@@ -77,13 +87,10 @@ const GameContent = () => {
       {showTimeline && <ProgressTimeline currentScreen={currentScreen} />}
 
       {showSettings && (
-        <>
-          <SoundToggle />
-          <PlayerSettingsPanel
-            onReplayBriefing={handleReplayBriefing}
-            onResetProgress={handleResetProgress}
-          />
-        </>
+        <PlayerSettingsPanel
+          onReplayBriefing={handleReplayBriefing}
+          onResetProgress={handleResetProgress}
+        />
       )}
 
       {currentScreen === "company-briefing" && (
