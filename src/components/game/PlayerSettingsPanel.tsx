@@ -175,6 +175,59 @@ export const PlayerSettingsPanel = ({ onReplayBriefing, onResetProgress }: Playe
                 )}
               </div>
 
+              {/* Audio controls */}
+              <div className="p-4 border-b border-border space-y-4">
+                <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                  <Volume2 className="w-4 h-4 text-accent" />
+                  الصوت والموسيقى
+                </h3>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground flex items-center gap-2">
+                    {isSoundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+                    المؤثرات الصوتية
+                  </span>
+                  <motion.button
+                    className={`w-12 h-6 rounded-full p-1 transition-colors ${isSoundEnabled ? "bg-primary" : "bg-muted"}`}
+                    onClick={handleSoundToggle}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <motion.div className="w-4 h-4 rounded-full bg-white shadow"
+                      animate={{ x: isSoundEnabled ? 24 : 0 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    />
+                  </motion.button>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground flex items-center gap-2">
+                    {isMusicEnabled ? <Music className="w-4 h-4" /> : <Music2 className="w-4 h-4 opacity-50" />}
+                    الموسيقى
+                  </span>
+                  <motion.button
+                    className={`w-12 h-6 rounded-full p-1 transition-colors ${isMusicEnabled ? "bg-accent" : "bg-muted"}`}
+                    onClick={toggleMusic}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <motion.div className="w-4 h-4 rounded-full bg-white shadow"
+                      animate={{ x: isMusicEnabled ? 24 : 0 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    />
+                  </motion.button>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">مستوى الصوت</span>
+                    <span className="text-xs font-mono text-foreground">{Math.round(volume * 100)}%</span>
+                  </div>
+                  <input type="range" min="0" max="1" step="0.05" value={volume}
+                    onChange={(e) => setVolume(parseFloat(e.target.value))}
+                    className="w-full h-2 bg-muted rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:shadow-lg"
+                  />
+                </div>
+              </div>
+
               {/* Actions */}
               <div className="p-4 space-y-2">
                 {/* Replay briefing */}
