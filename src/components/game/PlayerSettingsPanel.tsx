@@ -14,12 +14,20 @@ interface PlayerSettingsPanelProps {
 
 export const PlayerSettingsPanel = ({ onReplayBriefing, onResetProgress }: PlayerSettingsPanelProps) => {
   const { profile, signOut, updateProfile } = useAuth();
+  const { isSoundEnabled, setIsSoundEnabled, playSound } = useSound();
+  const { isMusicEnabled, toggleMusic, volume, setVolume } = useMusic();
   const [isOpen, setIsOpen] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editName, setEditName] = useState(profile?.display_name || "");
   const [editGender, setEditGender] = useState<"male" | "female">(profile?.gender as any || "male");
   const [saving, setSaving] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
+
+  const handleSoundToggle = () => {
+    const newState = !isSoundEnabled;
+    setIsSoundEnabled(newState);
+    if (newState) setTimeout(() => playSound("click"), 100);
+  };
 
   const handleSaveProfile = async () => {
     if (!editName.trim()) return;
