@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookmarkPlus, Check, X } from "lucide-react";
+import { BookmarkPlus, Check, X, ChevronRight } from "lucide-react";
 import { AnimatedCharacter, type CharacterId } from "./AnimatedCharacter";
 import analystImg from "@/assets/characters/analyst.png";
 import saraImg from "@/assets/characters/sara.png";
@@ -174,11 +174,36 @@ export const EnhancedDialogue = ({
     }
   };
 
+  const handlePrevious = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (currentIndex > 0) {
+      stopAudio();
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
+
   const handleBackdropClick = () => {
     if (allowClickOutside) {
       handleClose();
     }
   };
+
+  // Keyboard navigation: ← back, →/Space forward
+  useEffect(() => {
+    if (!isActive) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        handlePrevious();
+      } else if (e.key === "ArrowRight" || e.key === " ") {
+        e.preventDefault();
+        handleNext();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isActive, currentIndex, isTyping, currentDialogue]);
 
   if (!isActive || !currentDialogue) return null;
 
@@ -278,14 +303,33 @@ export const EnhancedDialogue = ({
           <AnimatePresence>
             {!isTyping && (
               <motion.div
-                className="flex items-center justify-between mt-4 pt-3 border-t border-border/30"
+                className="flex items-center justify-between mt-4 pt-3 border-t border-border/30 gap-3"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
               >
-                <span className="text-xs text-muted-foreground">
-                  {currentIndex + 1} / {dialogues.length}
-                </span>
+                <div className="flex items-center gap-2">
+                  <AnimatePresence>
+                    {currentIndex > 0 && (
+                      <motion.button
+                        onClick={handlePrevious}
+                        initial={{ opacity: 0, scale: 0.8, x: -8 }}
+                        animate={{ opacity: 1, scale: 1, x: 0 }}
+                        exit={{ opacity: 0, scale: 0.8, x: -8 }}
+                        whileHover={{ scale: 1.08 }}
+                        whileTap={{ scale: 0.92 }}
+                        title="رجوع للجملة السابقة (←)"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 hover:border-white/25 text-xs text-white/80 hover:text-white transition-all"
+                      >
+                        <ChevronRight className="w-3.5 h-3.5" />
+                        <span>رجوع</span>
+                      </motion.button>
+                    )}
+                  </AnimatePresence>
+                  <span className="text-xs text-muted-foreground">
+                    {currentIndex + 1} / {dialogues.length}
+                  </span>
+                </div>
                 <motion.span
                   className="text-sm text-primary flex items-center gap-2"
                   animate={{ x: [0, 5, 0] }}
