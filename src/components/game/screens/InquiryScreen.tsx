@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { INQUIRY_ROUNDS } from "@/data/pf-scenario";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSound } from "@/hooks/useSoundEffects";
 import { EnhancedDialogue } from "../EnhancedDialogue";
 import { PFNotebook } from "../PFNotebook";
 import type { InquiryOption } from "@/data/pf-scenario";
@@ -17,6 +18,7 @@ interface InquiryScreenProps {
 export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
   const { state, chooseQuestion, addNote } = usePFGame();
   const { profile } = useAuth();
+  const { playSound } = useSound();
 
   const [phase, setPhase] = useState<"choosing" | "dialogue" | "scene-transition">("choosing");
   const [roundIndex, setRoundIndex] = useState(0);
@@ -57,6 +59,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
   };
 
   const handlePickQuestion = (option: InquiryOption) => {
+    try { playSound("pageFlip"); } catch {}
     chooseQuestion(option);
 
     const abuMood = getMoodForTier(option.tier);
@@ -150,13 +153,13 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
       <AnimatePresence mode="wait">
         <motion.div
           key={currentBg}
-          className="absolute inset-0"
+          className="absolute inset-0 overflow-hidden"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <img src={currentBg} alt="" className="w-full h-full object-cover" />
+          <img src={currentBg} alt="" className="w-full h-full object-cover animate-ken-burns" />
           <div className={`absolute inset-0 ${overlayOpacity} backdrop-blur-[2px]`} />
         </motion.div>
       </AnimatePresence>
@@ -206,16 +209,17 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
                 <motion.button
                   key={option.id}
                   onClick={() => handlePickQuestion(option)}
-                  className="w-full p-4 rounded-xl bg-card/80 backdrop-blur-sm border border-border hover:border-primary/50 hover:bg-card transition-all text-right"
+                  onMouseEnter={() => { try { playSound("tick"); } catch {} }}
+                  className="w-full p-4 rounded-xl bg-card/80 backdrop-blur-sm border border-border hover:border-primary/60 hover:bg-card hover:shadow-[0_0_24px_hsl(var(--primary)/0.18)] transition-all text-right group"
                   dir="rtl"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.1 }}
-                  whileHover={{ scale: 1.01 }}
+                  whileHover={{ scale: 1.02, y: -2 }}
                   whileTap={{ scale: 0.98 }}
                   exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
                 >
-                  <p className="text-foreground text-sm leading-relaxed">{option.text}</p>
+                  <p className="text-foreground text-sm leading-relaxed group-hover:text-primary transition-colors">{option.text}</p>
                 </motion.button>
               ))}
             </div>

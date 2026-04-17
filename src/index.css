@@ -189,6 +189,66 @@
   to { width: 100%; }
 }
 
+/* Character idle breathing */
+@keyframes idle-breath {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.018); }
+}
+
+/* Character blink overlay */
+@keyframes blink {
+  0%, 92%, 100% { transform: scaleY(0); opacity: 0; }
+  94%, 98% { transform: scaleY(1); opacity: 0.85; }
+}
+
+/* Ken Burns slow camera move */
+@keyframes ken-burns {
+  0% { transform: scale(1.05) translate(0%, 0%); }
+  50% { transform: scale(1.12) translate(-1.5%, -1%); }
+  100% { transform: scale(1.05) translate(0%, 0%); }
+}
+
+/* Breathing glow for primary buttons */
+@keyframes breathing-glow {
+  0%, 100% { box-shadow: 0 0 14px hsl(var(--primary) / 0.25), 0 0 30px hsl(var(--primary) / 0.08); }
+  50% { box-shadow: 0 0 26px hsl(var(--primary) / 0.45), 0 0 55px hsl(var(--primary) / 0.18); }
+}
+
+/* Subtle screen shake (for trust drop) */
+@keyframes screen-shake {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-3px, 1px); }
+  40% { transform: translate(3px, -1px); }
+  60% { transform: translate(-2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+}
+
+/* Sparkle pop */
+@keyframes sparkle-pop {
+  0% { transform: scale(0) rotate(0deg); opacity: 0; }
+  50% { transform: scale(1.2) rotate(180deg); opacity: 1; }
+  100% { transform: scale(0) rotate(360deg); opacity: 0; }
+}
+
+.animate-idle-breath { animation: idle-breath 4s ease-in-out infinite; }
+.animate-ken-burns { animation: ken-burns 22s ease-in-out infinite; }
+.animate-breathing-glow { animation: breathing-glow 3.2s ease-in-out infinite; }
+.animate-screen-shake { animation: screen-shake 0.45s ease-in-out; }
+.animate-sparkle-pop { animation: sparkle-pop 0.9s ease-out forwards; }
+.animate-blink {
+  animation: blink 6s ease-in-out infinite;
+  transform-origin: center;
+}
+
+/* Custom hotspot cursor */
+.cursor-hotspot {
+  cursor: pointer;
+  transition: filter 0.2s ease;
+}
+.cursor-hotspot:hover {
+  filter: drop-shadow(0 0 8px hsl(var(--primary) / 0.6));
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;

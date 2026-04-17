@@ -41,8 +41,11 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
 
   // Animate score counting up
   useEffect(() => {
-    if (tier === "exceptional") {
-      try { playSound("confetti"); } catch {}
+    if (correct) {
+      try { playSound("fanfare"); } catch {}
+      setTimeout(() => { try { playSound("confetti"); } catch {} }, 350);
+    } else {
+      try { playSound("somber"); } catch {}
     }
     const duration = 1500;
     const steps = 30;
@@ -58,7 +61,7 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
       }
     }, duration / steps);
     return () => clearInterval(timer);
-  }, [state.score, tier, playSound]);
+  }, [state.score, correct, playSound]);
 
   const handleReplay = () => {
     resetGame();
