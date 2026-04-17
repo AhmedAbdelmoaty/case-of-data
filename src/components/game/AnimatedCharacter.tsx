@@ -112,8 +112,13 @@ export const AnimatedCharacter = ({
         <motion.img
           src={displayImage}
           alt={character.nameEn}
-          className={`${sizeClass.image} object-cover rounded-full`}
-          animate={isSpeaking ? { scale: [1, 1.02, 1], transition: { duration: 0.3, repeat: Infinity } } : {}}
+          className={`${sizeClass.image} object-cover rounded-full ${!isSpeaking ? "animate-idle-breath" : ""}`}
+          animate={isSpeaking ? { scale: [1, 1.025, 1], transition: { duration: 0.28, repeat: Infinity } } : {}}
+        />
+        {/* Blink overlay — subtle dark bar across the eyes */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-0 right-0 top-[38%] h-[12%] bg-black/70 rounded-sm animate-blink"
         />
         <AnimatePresence>
           {isSpeaking && (

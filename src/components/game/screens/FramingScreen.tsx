@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Target, BookOpen } from "lucide-react";
 import { FRAMING_OPTIONS } from "@/data/pf-scenario";
 import { usePFGame } from "@/contexts/PFGameContext";
+import { useSound } from "@/hooks/useSoundEffects";
 import { PFNotebook } from "../PFNotebook";
 import { StampEffect } from "../StampEffect";
 import storeCounterImg from "@/assets/scenes/store-counter.png";
@@ -13,10 +14,12 @@ interface FramingScreenProps {
 
 export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
   const { chooseFraming } = usePFGame();
+  const { playSound } = useSound();
   const [selected, setSelected] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(false);
   const [showStamp, setShowStamp] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
+  const [flash, setFlash] = useState(false);
 
   const [shuffled] = useState(() => {
     const arr = [...FRAMING_OPTIONS];
@@ -32,6 +35,9 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
     chooseFraming(selected);
     setConfirmed(true);
     setShowStamp(true);
+    setFlash(true);
+    try { playSound("stamp"); } catch {}
+    setTimeout(() => setFlash(false), 120);
     setTimeout(() => {
       setShowStamp(false);
       onComplete();
@@ -40,10 +46,23 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      <div className="absolute inset-0">
-        <img src={storeCounterImg} alt="" className="w-full h-full object-cover" />
+      <div className="absolute inset-0 overflow-hidden">
+        <img src={storeCounterImg} alt="" className="w-full h-full object-cover animate-ken-burns" />
         <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
       </div>
+
+      {/* White flash on confirm */}
+      <AnimatePresence>
+        {flash && (
+          <motion.div
+            className="fixed inset-0 z-[90] bg-white pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.6 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.12 }}
+          />
+        )}
+      </AnimatePresence>
 
       <PFNotebook />
       <StampEffect isVisible={showStamp} text="✓ تم التأكيد" />
