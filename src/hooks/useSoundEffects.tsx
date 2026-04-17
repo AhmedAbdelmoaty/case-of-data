@@ -15,7 +15,17 @@ type SoundType =
   | "carEngine"
   | "storeBell"
   | "confetti"
-  | "doorKnock";
+  | "doorKnock"
+  | "pageFlip"
+  | "stamp"
+  | "penWrite"
+  | "sparkle"
+  | "tick"
+  | "footstep"
+  | "doorCreak"
+  | "lowTension"
+  | "fanfare"
+  | "somber";
 
 interface SoundConfig {
   frequency: number;
@@ -153,6 +163,92 @@ const soundConfigs: Record<SoundType, SoundConfig> = {
     volume: 0.3,
     attack: 0.005,
     decay: 0.08,
+  },
+  pageFlip: {
+    frequency: 1800,
+    duration: 0.18,
+    type: "triangle",
+    volume: 0.12,
+    attack: 0.005,
+    decay: 0.15,
+    detune: -30,
+  },
+  stamp: {
+    frequency: 90,
+    duration: 0.22,
+    type: "square",
+    volume: 0.28,
+    attack: 0.001,
+    decay: 0.18,
+    secondaryFreq: 60,
+  },
+  penWrite: {
+    frequency: 2200,
+    duration: 0.08,
+    type: "sawtooth",
+    volume: 0.06,
+    attack: 0.003,
+    decay: 0.06,
+  },
+  sparkle: {
+    frequency: 1600,
+    duration: 0.35,
+    type: "sine",
+    volume: 0.15,
+    attack: 0.005,
+    decay: 0.3,
+    secondaryFreq: 2400,
+  },
+  tick: {
+    frequency: 1200,
+    duration: 0.04,
+    type: "sine",
+    volume: 0.07,
+    attack: 0.002,
+    decay: 0.03,
+  },
+  footstep: {
+    frequency: 110,
+    duration: 0.1,
+    type: "sine",
+    volume: 0.12,
+    attack: 0.005,
+    decay: 0.08,
+  },
+  doorCreak: {
+    frequency: 180,
+    duration: 0.7,
+    type: "sawtooth",
+    volume: 0.15,
+    attack: 0.1,
+    decay: 0.5,
+    detune: -40,
+  },
+  lowTension: {
+    frequency: 75,
+    duration: 1.2,
+    type: "sawtooth",
+    volume: 0.18,
+    attack: 0.15,
+    decay: 1,
+    detune: 15,
+  },
+  fanfare: {
+    frequency: 523.25,
+    duration: 0.6,
+    type: "triangle",
+    volume: 0.22,
+    attack: 0.01,
+    secondaryFreq: 783.99,
+  },
+  somber: {
+    frequency: 196,
+    duration: 0.9,
+    type: "sine",
+    volume: 0.2,
+    attack: 0.05,
+    decay: 0.7,
+    secondaryFreq: 164.81,
   },
 };
 
