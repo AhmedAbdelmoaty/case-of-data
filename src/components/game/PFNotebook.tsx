@@ -2,23 +2,26 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, X, Trash2 } from "lucide-react";
 import { usePFGame } from "@/contexts/PFGameContext";
+import { useSound } from "@/hooks/useSoundEffects";
 
 export const PFNotebook = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { state, removeNote } = usePFGame();
+  const { playSound } = useSound();
   const { notes } = state;
   const prevCountRef = useRef(notes.length);
   const [justAdded, setJustAdded] = useState(false);
   const [newNoteIds, setNewNoteIds] = useState<Set<number>>(new Set());
 
-  // Bounce + glow when a note is added
+  // Bounce + glow + sound when a note is added
   useEffect(() => {
     if (notes.length > prevCountRef.current) {
       setJustAdded(true);
+      try { playSound("penWrite"); } catch {}
+      setTimeout(() => { try { playSound("sparkle"); } catch {} }, 180);
       const newId = notes[notes.length - 1]?.roundId;
       if (newId !== undefined) {
         setNewNoteIds(prev => new Set(prev).add(newId));
-        // Remove highlight after 5 seconds
         setTimeout(() => {
           setNewNoteIds(prev => {
             const next = new Set(prev);
@@ -27,18 +30,18 @@ export const PFNotebook = () => {
           });
         }, 5000);
       }
-      setTimeout(() => setJustAdded(false), 1000);
+      setTimeout(() => setJustAdded(false), 1200);
     }
     prevCountRef.current = notes.length;
-  }, [notes.length]);
+  }, [notes.length, playSound]);
 
   return (
     <>
       {/* Floating button */}
       <motion.button
-        onClick={() => setIsOpen(true)}
+        onClick={() => { try { playSound("pageFlip"); } catch {} ; setIsOpen(true); }}
         className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl bg-card/90 backdrop-blur-md border text-foreground shadow-lg transition-all ${
-          justAdded ? "border-primary shadow-primary/30 shadow-xl" : "border-border hover:border-primary/50"
+          justAdded ? "border-primary shadow-primary/40 shadow-2xl animate-breathing-glow" : "border-border hover:border-primary/50"
         }`}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -46,20 +49,44 @@ export const PFNotebook = () => {
         animate={{
           y: 0,
           opacity: 1,
-          scale: justAdded ? [1, 1.2, 1] : 1,
+          scale: justAdded ? [1, 1.25, 0.95, 1.1, 1] : 1,
         }}
-        transition={{ delay: 0.5 }}
+        transition={{ delay: 0.5, duration: justAdded ? 0.8 : 0.3 }}
       >
         <BookOpen className={`w-5 h-5 ${justAdded ? "text-primary animate-pulse" : "text-primary"}`} />
         <span className="text-sm font-bold">الدفتر</span>
         {notes.length > 0 && (
           <motion.span
             className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center font-bold"
-            animate={justAdded ? { scale: [1, 1.4, 1] } : {}}
+            animate={justAdded ? { scale: [1, 1.6, 1], rotate: [0, 360] } : {}}
+            transition={{ duration: 0.6 }}
           >
             {notes.length}
           </motion.span>
         )}
+        {/* Sparkles */}
+        <AnimatePresence>
+          {justAdded && (
+            <>
+              {[0, 1, 2, 3, 4].map(i => (
+                <motion.span
+                  key={i}
+                  className="absolute w-1.5 h-1.5 rounded-full bg-primary pointer-events-none"
+                  initial={{ opacity: 1, scale: 0, x: 0, y: 0 }}
+                  animate={{
+                    opacity: 0,
+                    scale: 1.5,
+                    x: Math.cos((i / 5) * Math.PI * 2) * 40,
+                    y: Math.sin((i / 5) * Math.PI * 2) * 40,
+                  }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.9, ease: "easeOut" }}
+                  style={{ left: "50%", top: "50%" }}
+                />
+              ))}
+            </>
+          )}
+        </AnimatePresence>
       </motion.button>
 
       {/* Panel */}
