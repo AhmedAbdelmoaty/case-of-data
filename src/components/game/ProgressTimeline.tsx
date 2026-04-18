@@ -12,16 +12,12 @@ type Screen =
   | "debrief"
   | "result";
 
-const STAGES: { key: Screen; icon: string; label: string }[] = [
+const STAGES: { key: string; icon: string; label: string }[] = [
   { key: "company-briefing", icon: "🏢", label: "المكتب" },
   { key: "travel", icon: "🚗", label: "السفر" },
   { key: "arrival", icon: "🏪", label: "الوصول" },
-  { key: "inquiry", icon: "❓", label: "الأسئلة" },
-  { key: "reflection", icon: "🧠", label: "التأمل" },
+  { key: "inquiry", icon: "❓", label: "التحقيق" },
   { key: "framing", icon: "📋", label: "التأطير" },
-  { key: "presentation", icon: "📊", label: "التقديم" },
-  { key: "return-travel", icon: "🚗", label: "العودة" },
-  { key: "debrief", icon: "🏢", label: "التقييم" },
   { key: "result", icon: "⭐", label: "النتيجة" },
 ];
 
