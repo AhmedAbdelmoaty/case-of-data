@@ -1,238 +1,236 @@
 // ════════════════════════════════════════════════════════════════════════════
-// QuestionBankPanel — الواجهة الرئيسية للتحقيق
+// QuestionBankPanel — التحقيق التفاعلي (V3)
 // ════════════════════════════════════════════════════════════════════════════
-// تعرض:
-// - بنك الأسئلة لكل شخصية (تابات تبديل بين الشخصيات)
-// - الأسئلة المفتوحة (قابلة للنقر) والمقفولة (رمادية مع تلميح "اكتشف معلومة جديدة")
-// - عداد الميزانية
-// - الدفتر (الـ insights المكتشفة)
-// - عند النقر على سؤال → عرض الإجابة عبر EnhancedDialogue
+// • مفيش tabs لكل الأسئلة. بدلها: set ديناميكي من 5 أسئلة معروضة في كارت سفلي.
+// • مفيش تصنيفات/badges على الأسئلة (مفيش تسريب لنوع السؤال).
+// • خلفية = مشهد المتجر مع الشخصية الحالية.
+// • بعد كل سؤال: EnhancedDialogue بالإجابة → set جديد.
+// • زرار التبديل بين أبو سعيد وسلمى يظهر بعد ما سلمى تتفتح.
+// • زرار "قدّم التأطير" متاح في أي وقت بدون hint عن الجاهزية.
 // ════════════════════════════════════════════════════════════════════════════
 
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Lock, Sparkles, BookOpen, AlertCircle, CheckCircle2, Coins, MessageSquare } from "lucide-react";
+import { BookOpen, Coins, MessageSquare, ArrowRightLeft, FileCheck, Sparkles } from "lucide-react";
 import { usePFGameV2 } from "@/contexts/PFGameContextV2";
 import type { Character, Question } from "@/data/pf-scenario";
-import { QUESTIONS_BY_CHARACTER } from "@/data/pf-scenario";
 import { EnhancedDialogue } from "./EnhancedDialogue";
 import { useAuth } from "@/contexts/AuthContext";
+import storeFrontImg from "@/assets/scenes/store-front.png";
+import abuSaeedGreetingImg from "@/assets/scenes/abu-saeed-greeting.jpg";
 
-interface QuestionBankPanelProps {
-  /** الشخصيات المتاحة في هذه المرحلة (مثلاً ["abuSaeed", "salma"] في المتجر) */
+interface Props {
   availableCharacters: Character[];
-  /** هل اللاعب يقدر يقفل التحقيق ويروح للتأطير؟ */
   onProceedToFraming?: () => void;
-  /** الحد الأدنى من الأسئلة الذهبية المطلوبة قبل ما يقدر يقفل التحقيق */
-  minGoldenToFinish?: number;
 }
 
-const characterMeta: Record<Character, { name: string; role: string; color: string; bgGradient: string }> = {
-  mansour: {
-    name: "أ. منصور",
-    role: "مدير الاستشارات",
-    color: "text-emerald-400",
-    bgGradient: "from-emerald-500/20 to-emerald-600/10 border-emerald-500/40",
-  },
-  abuSaeed: {
-    name: "أبو سعيد",
-    role: "صاحب المتجر",
-    color: "text-teal-400",
-    bgGradient: "from-teal-500/20 to-teal-600/10 border-teal-500/40",
-  },
-  salma: {
-    name: "سلمى",
-    role: "محاسبة المتجر",
-    color: "text-purple-400",
-    bgGradient: "from-purple-500/20 to-purple-600/10 border-purple-500/40",
-  },
+const characterMeta: Record<Character, { name: string; role: string; bg: string }> = {
+  mansour: { name: "أ. منصور", role: "مدير الاستشارات", bg: storeFrontImg },
+  abuSaeed: { name: "أبو سعيد", role: "صاحب المتجر", bg: abuSaeedGreetingImg },
+  salma: { name: "سلمى", role: "محاسبة المتجر", bg: abuSaeedGreetingImg },
 };
 
-const categoryLabels: Record<string, { label: string; color: string }> = {
-  C: { label: "سياق", color: "bg-slate-500/20 text-slate-300 border-slate-500/40" },
-  B: { label: "مرجع المقارنة", color: "bg-amber-500/20 text-amber-300 border-amber-500/40" },
-  D: { label: "تفكيك", color: "bg-blue-500/20 text-blue-300 border-blue-500/40" },
-  E: { label: "عوامل خارجية", color: "bg-orange-500/20 text-orange-300 border-orange-500/40" },
-  V: { label: "شكل النجاح", color: "bg-pink-500/20 text-pink-300 border-pink-500/40" },
-};
-
-export const QuestionBankPanel = ({
-  availableCharacters,
-  onProceedToFraming,
-  minGoldenToFinish = 4,
-}: QuestionBankPanelProps) => {
-  const { user } = useAuth();
-  const playerName = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "المحلل";
-  const playerGender = (user?.user_metadata?.gender as "male" | "female") || "male";
+export const QuestionBankPanel = ({ availableCharacters, onProceedToFraming }: Props) => {
+  const { user, profile } = useAuth();
+  const playerName = profile?.display_name || user?.email?.split("@")[0] || "المحلل";
+  const playerGender = (profile?.gender as "male" | "female") || "male";
 
   const {
     state,
     askQuestion,
     isQuestionAsked,
-    getUnlockedQuestionsFor,
-    getLockedQuestionsFor,
+    getQuestionsForCurrentSet,
+    isCharacterUnlocked,
+    getResolvedQuestion,
+    clearLastAsked,
   } = usePFGameV2();
 
-  const [activeTab, setActiveTab] = useState<Character>(availableCharacters[0]);
+  // الشخصية النشطة — تبدأ بأبو سعيد، يقدر يحول لسلمى لما تتفتح
+  const [activeCharacter, setActiveCharacter] = useState<Character>(availableCharacters[0]);
   const [activeQuestion, setActiveQuestion] = useState<Question | null>(null);
   const [showNotebook, setShowNotebook] = useState(false);
+  const [showFramingConfirm, setShowFramingConfirm] = useState(false);
 
-  const goldenAskedCount = useMemo(
-    () =>
-      state.askedIds.filter((id) => {
-        const q = QUESTIONS_BY_CHARACTER[activeTab].find((qq) => qq.id === id);
-        return false; // فقط للحساب الإجمالي تحت
-      }).length,
-    [state.askedIds, activeTab]
-  );
-
-  const totalGoldenAsked = useMemo(
-    () =>
-      state.askedIds.filter((id) => {
-        const q = [
-          ...QUESTIONS_BY_CHARACTER.abuSaeed,
-          ...QUESTIONS_BY_CHARACTER.salma,
-          ...QUESTIONS_BY_CHARACTER.mansour,
-        ].find((qq) => qq.id === id);
-        return q?.isGolden;
-      }).length,
-    [state.askedIds]
+  const salmaUnlocked = isCharacterUnlocked("salma");
+  const currentSet = useMemo(
+    () => getQuestionsForCurrentSet(activeCharacter),
+    [getQuestionsForCurrentSet, activeCharacter]
   );
 
   const handleAskQuestion = (question: Question) => {
     if (isQuestionAsked(question.id)) {
-      // إذا متسأل قبل، اعرض الإجابة فقط بدون استهلاك
       setActiveQuestion(question);
       return;
     }
-    if (question.character !== "mansour" && state.budgetRemaining <= 0) return;
+    if (state.budgetRemaining <= 0) return;
     const asked = askQuestion(question.id);
     if (asked) setActiveQuestion(asked);
   };
 
-  const handleDialogueClose = () => setActiveQuestion(null);
-
-  const canFinish = totalGoldenAsked >= minGoldenToFinish;
-
-  const renderQuestion = (question: Question, isUnlocked: boolean) => {
-    const isAsked = isQuestionAsked(question.id);
-    const cat = categoryLabels[question.category];
-    const isLockedByBudget =
-      !isAsked && isUnlocked && question.character !== "mansour" && state.budgetRemaining <= 0;
-
-    return (
-      <motion.button
-        key={question.id}
-        onClick={() => isUnlocked && !isLockedByBudget && handleAskQuestion(question)}
-        disabled={!isUnlocked || isLockedByBudget}
-        whileHover={isUnlocked && !isLockedByBudget ? { scale: 1.01, x: -4 } : {}}
-        whileTap={isUnlocked && !isLockedByBudget ? { scale: 0.99 } : {}}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className={`
-          w-full text-right p-4 rounded-xl border transition-all relative overflow-hidden
-          ${
-            !isUnlocked
-              ? "bg-muted/20 border-border/30 cursor-not-allowed opacity-50"
-              : isAsked
-              ? "bg-emerald-500/10 border-emerald-500/40 hover:border-emerald-500/60"
-              : isLockedByBudget
-              ? "bg-red-500/5 border-red-500/30 cursor-not-allowed opacity-60"
-              : "bg-card/60 border-border hover:border-primary/60 hover:bg-card/90 cursor-pointer"
-          }
-        `}
-        dir="rtl"
-      >
-        <div className="flex items-start justify-between gap-3 mb-2">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className={`text-xs px-2 py-0.5 rounded-md border ${cat.color}`}>
-              {cat.label}
-            </span>
-            {isAsked && (
-              <span className="text-xs px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3" />
-                تم السؤال
-              </span>
-            )}
-            {!isUnlocked && (
-              <span className="text-xs px-2 py-0.5 rounded-md bg-muted/40 text-muted-foreground border border-border/50 flex items-center gap-1">
-                <Lock className="w-3 h-3" />
-                مقفول
-              </span>
-            )}
-          </div>
-        </div>
-
-        <p
-          className={`text-base leading-relaxed ${
-            isUnlocked ? "text-foreground" : "text-muted-foreground"
-          }`}
-        >
-          {!isUnlocked ? "❓ سؤال مقفول — اكتشف معلومة جديدة لفتحه" : question.text}
-        </p>
-
-        {isLockedByBudget && (
-          <p className="text-xs text-red-400 mt-2 flex items-center gap-1">
-            <AlertCircle className="w-3 h-3" />
-            مفيش ميزانية — استخدم اللي معاك بحكمة
-          </p>
-        )}
-      </motion.button>
-    );
+  const handleDialogueClose = () => {
+    setActiveQuestion(null);
+    clearLastAsked();
   };
 
-  const unlockedQuestions = getUnlockedQuestionsFor(activeTab);
-  const lockedQuestions = getLockedQuestionsFor(activeTab);
+  // عرض الإجابة المناسبة (لو premature بقى key، نستخدم النسخة الـ key)
+  const getDialogueForQuestion = (q: Question) => {
+    const resolved = getResolvedQuestion(q.id);
+    return resolved ? resolved.effectiveAnswer : q.answer;
+  };
+
+  const bg = characterMeta[activeCharacter].bg;
+  const noBudget = state.budgetRemaining <= 0;
 
   return (
-    <div className="min-h-screen bg-background pt-20 pb-8 px-4">
-      {/* Header — Budget + Notebook */}
-      <div className="max-w-5xl mx-auto mb-6 grid grid-cols-1 md:grid-cols-3 gap-3">
-        {/* Budget */}
-        <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/5 border border-amber-500/30 rounded-xl p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-amber-400">
-              <Coins className="w-5 h-5" />
-              <span className="font-bold">ميزانية الأسئلة</span>
+    <div className="relative min-h-screen overflow-hidden">
+      {/* الخلفية: مشهد المتجر */}
+      <div className="absolute inset-0">
+        <img src={bg} alt="" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/50 to-background/95" />
+      </div>
+
+      {/* Header — ميزانية + دفتر + تأطير */}
+      <div className="relative z-10 pt-20 px-4">
+        <div className="max-w-4xl mx-auto flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card/80 backdrop-blur-md border border-amber-500/40">
+              <Coins className="w-5 h-5 text-amber-400" />
+              <span className="font-bold text-foreground">{state.budgetRemaining}</span>
+              <span className="text-xs text-muted-foreground">/14 سؤال</span>
             </div>
-            <span className="text-2xl font-bold text-amber-300">{state.budgetRemaining}</span>
+            <button
+              onClick={() => setShowNotebook((v) => !v)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card/80 backdrop-blur-md border border-blue-500/40 hover:border-blue-500/70 transition-colors"
+            >
+              <BookOpen className="w-5 h-5 text-blue-400" />
+              <span className="font-bold text-foreground">{state.insights.length}</span>
+              <span className="text-xs text-muted-foreground">دفتر</span>
+            </button>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            (أسئلة المدير منصور مجانية)
-          </p>
+
+          <button
+            onClick={() => setShowFramingConfirm(true)}
+            className="px-5 py-2 rounded-xl bg-gradient-to-r from-primary to-accent text-white font-bold flex items-center gap-2 hover:scale-105 transition-transform shadow-lg"
+          >
+            <FileCheck className="w-4 h-4" />
+            قدّم التأطير
+          </button>
         </div>
+      </div>
 
-        {/* Insights collected */}
-        <button
-          onClick={() => setShowNotebook(!showNotebook)}
-          className="bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border border-blue-500/30 rounded-xl p-4 text-right hover:border-blue-500/60 transition-colors"
+      {/* محول الشخصيات (يظهر بعد سلمى) */}
+      {salmaUnlocked && availableCharacters.length > 1 && (
+        <div className="relative z-10 mt-6 px-4">
+          <div className="max-w-4xl mx-auto flex items-center justify-center gap-2">
+            {availableCharacters.map((char) => {
+              const isActive = activeCharacter === char;
+              const isLocked = !isCharacterUnlocked(char);
+              return (
+                <button
+                  key={char}
+                  disabled={isLocked}
+                  onClick={() => setActiveCharacter(char)}
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 backdrop-blur-md transition-all ${
+                    isActive
+                      ? "bg-primary/30 border-primary text-foreground"
+                      : isLocked
+                        ? "bg-muted/20 border-border text-muted-foreground opacity-50 cursor-not-allowed"
+                        : "bg-card/60 border-border text-foreground hover:border-primary/50"
+                  }`}
+                >
+                  <ArrowRightLeft className="w-4 h-4" />
+                  <span className="font-bold">{characterMeta[char].name}</span>
+                  <span className="text-xs text-muted-foreground">— {characterMeta[char].role}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* عنوان الشخصية الحالية */}
+      <div className="relative z-10 mt-8 text-center">
+        <motion.div
+          key={activeCharacter}
+          initial={{ y: -10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="inline-block px-6 py-3 rounded-2xl bg-card/80 backdrop-blur-md border border-border"
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-blue-400">
-              <BookOpen className="w-5 h-5" />
-              <span className="font-bold">الدفتر</span>
-            </div>
-            <span className="text-2xl font-bold text-blue-300">{state.insights.length}</span>
-          </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            اضغط لعرض المعلومات المكتشفة
-          </p>
-        </button>
+          <p className="text-sm text-muted-foreground">بتكلم</p>
+          <h2 className="text-2xl font-bold text-foreground">{characterMeta[activeCharacter].name}</h2>
+          <p className="text-xs text-muted-foreground">{characterMeta[activeCharacter].role}</p>
+        </motion.div>
+      </div>
 
-        {/* Golden indicator (no spoiler — just a strength meter) */}
-        <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border border-emerald-500/30 rounded-xl p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-emerald-400">
-              <Sparkles className="w-5 h-5" />
-              <span className="font-bold">قوة التحقيق</span>
-            </div>
-            <span className="text-2xl font-bold text-emerald-300">
-              {totalGoldenAsked}/{minGoldenToFinish}+
-            </span>
+      {/* بطاقة الأسئلة المعروضة (الـ Set) */}
+      <div className="relative z-10 mt-6 px-4 pb-32">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center gap-2 text-foreground/80 text-sm mb-3 justify-center" dir="rtl">
+            <MessageSquare className="w-4 h-4" />
+            <span>اختر سؤالك التالي بحكمة</span>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            {canFinish ? "✓ جاهز للتأطير" : "محتاج معلومات أكتر للتأطير"}
-          </p>
+
+          {currentSet.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              className="text-center p-8 rounded-2xl bg-card/70 backdrop-blur-md border border-border"
+              dir="rtl"
+            >
+              <Sparkles className="w-10 h-10 text-amber-400 mx-auto mb-3" />
+              <p className="text-foreground font-bold">سألت كل اللي تقدر تسأله من {characterMeta[activeCharacter].name}.</p>
+              {salmaUnlocked && availableCharacters.length > 1 ? (
+                <p className="text-muted-foreground text-sm mt-2">جرّب الشخصية التانية، أو قدّم التأطير.</p>
+              ) : (
+                <p className="text-muted-foreground text-sm mt-2">قدّم التأطير لما تكون جاهز.</p>
+              )}
+            </motion.div>
+          ) : (
+            <AnimatePresence mode="popLayout">
+              <div className="space-y-3">
+                {currentSet.map((q, idx) => {
+                  const asked = isQuestionAsked(q.id);
+                  return (
+                    <motion.button
+                      key={q.id}
+                      layout
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ delay: idx * 0.05 }}
+                      onClick={() => handleAskQuestion(q)}
+                      disabled={noBudget && !asked}
+                      whileHover={!noBudget || asked ? { scale: 1.01, x: -3 } : {}}
+                      whileTap={!noBudget || asked ? { scale: 0.99 } : {}}
+                      className={`w-full text-right p-4 rounded-xl border backdrop-blur-md transition-all ${
+                        asked
+                          ? "bg-emerald-500/10 border-emerald-500/40 text-foreground/70"
+                          : noBudget
+                            ? "bg-card/40 border-border opacity-50 cursor-not-allowed text-muted-foreground"
+                            : "bg-card/80 border-border hover:border-primary/60 text-foreground cursor-pointer"
+                      }`}
+                      dir="rtl"
+                    >
+                      <p className="text-base leading-relaxed">{q.text}</p>
+                      {asked && (
+                        <p className="text-xs text-emerald-400 mt-1">✓ سألت ده — اضغط لإعادة قراءة الإجابة</p>
+                      )}
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </AnimatePresence>
+          )}
+
+          {noBudget && (
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              className="mt-4 p-4 rounded-xl bg-destructive/10 border border-destructive/40 text-center"
+              dir="rtl"
+            >
+              <p className="text-destructive font-bold">خلصت ميزانيتك من الأسئلة.</p>
+              <p className="text-sm text-muted-foreground mt-1">قدّم التأطير بناءً على اللي اكتشفته.</p>
+            </motion.div>
+          )}
         </div>
       </div>
 
@@ -240,34 +238,40 @@ export const QuestionBankPanel = ({
       <AnimatePresence>
         {showNotebook && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="max-w-5xl mx-auto mb-6 bg-card/60 border border-border rounded-xl overflow-hidden"
+            initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 25 }}
+            className="fixed top-0 right-0 bottom-0 w-full sm:w-96 z-40 bg-card/95 backdrop-blur-xl border-l border-border overflow-y-auto"
           >
-            <div className="p-4">
-              <h3 className="font-bold text-foreground mb-3 flex items-center gap-2">
-                <BookOpen className="w-4 h-4" />
-                دفتر الملاحظات
-              </h3>
+            <div className="p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold text-foreground flex items-center gap-2 text-lg">
+                  <BookOpen className="w-5 h-5 text-blue-400" />
+                  الدفتر
+                </h3>
+                <button
+                  onClick={() => setShowNotebook(false)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  ✕
+                </button>
+              </div>
               {state.insights.length === 0 ? (
-                <p className="text-sm text-muted-foreground">لسه ما اكتشفتش أي معلومة. ابدأ بالسؤال.</p>
+                <p className="text-sm text-muted-foreground text-center py-8" dir="rtl">
+                  لسه ما اكتشفتش أي معلومة. ابدأ بالسؤال.
+                </p>
               ) : (
                 <div className="space-y-2">
-                  {state.insights.map((insight) => (
+                  {state.insights.map((ins) => (
                     <div
-                      key={insight.questionId}
+                      key={ins.questionId + ins.timestamp}
                       className={`p-3 rounded-lg border text-sm ${
-                        insight.isGolden
-                          ? "bg-amber-500/5 border-amber-500/30 text-foreground"
-                          : "bg-muted/30 border-border/40 text-muted-foreground"
+                        ins.isKey
+                          ? "bg-amber-500/10 border-amber-500/40 text-foreground"
+                          : "bg-muted/20 border-border/40 text-muted-foreground"
                       }`}
                       dir="rtl"
                     >
-                      <div className="flex items-start gap-2">
-                        {insight.isGolden && <Sparkles className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />}
-                        <span>{insight.text}</span>
-                      </div>
+                      {ins.text}
                     </div>
                   ))}
                 </div>
@@ -277,104 +281,55 @@ export const QuestionBankPanel = ({
         )}
       </AnimatePresence>
 
-      {/* Character tabs */}
-      <div className="max-w-5xl mx-auto mb-4">
-        <div className="flex gap-2 flex-wrap">
-          {availableCharacters.map((char) => {
-            const meta = characterMeta[char];
-            const isActive = activeTab === char;
-            const charQuestions = QUESTIONS_BY_CHARACTER[char];
-            const askedCount = charQuestions.filter((q) => isQuestionAsked(q.id)).length;
-            return (
-              <button
-                key={char}
-                onClick={() => setActiveTab(char)}
-                className={`
-                  px-4 py-3 rounded-xl border transition-all flex items-center gap-3
-                  ${
-                    isActive
-                      ? `bg-gradient-to-br ${meta.bgGradient} border-2`
-                      : "bg-card/40 border-border hover:border-primary/40"
-                  }
-                `}
-              >
-                <div className="text-right">
-                  <div className={`font-bold ${isActive ? meta.color : "text-foreground"}`}>
-                    {meta.name}
-                  </div>
-                  <div className="text-xs text-muted-foreground">{meta.role}</div>
-                </div>
-                <span className="text-xs px-2 py-1 rounded bg-background/40 text-muted-foreground">
-                  {askedCount}/{charQuestions.length}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Questions list */}
-      <div className="max-w-5xl mx-auto space-y-2">
-        <div className="flex items-center gap-2 text-muted-foreground text-sm mb-3" dir="rtl">
-          <MessageSquare className="w-4 h-4" />
-          <span>اختر سؤال لتطرحه على {characterMeta[activeTab].name}</span>
-        </div>
-
-        {unlockedQuestions.length === 0 && (
-          <p className="text-center text-muted-foreground py-8">
-            مفيش أسئلة مفتوحة دلوقتي — جرب شخصية تانية
-          </p>
-        )}
-
-        {unlockedQuestions.map((q) => renderQuestion(q, true))}
-
-        {lockedQuestions.length > 0 && (
-          <>
-            <div className="text-xs text-muted-foreground mt-6 mb-2 text-right" dir="rtl">
-              أسئلة مقفولة (تتفتح بناءً على معلومات تكتشفها):
-            </div>
-            {lockedQuestions.map((q) => renderQuestion(q, false))}
-          </>
-        )}
-      </div>
-
-      {/* Proceed to framing */}
-      {onProceedToFraming && (
-        <div className="max-w-5xl mx-auto mt-8 flex justify-center">
-          <button
-            onClick={onProceedToFraming}
-            disabled={!canFinish}
-            className={`
-              px-8 py-4 rounded-xl font-bold text-lg transition-all
-              ${
-                canFinish
-                  ? "bg-gradient-to-r from-primary to-amber-500 text-primary-foreground hover:scale-105 shadow-lg shadow-primary/30"
-                  : "bg-muted/30 text-muted-foreground cursor-not-allowed"
-              }
-            `}
+      {/* تأكيد التأطير */}
+      <AnimatePresence>
+        {showFramingConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setShowFramingConfirm(false)}
           >
-            {canFinish
-              ? "خلصت التحقيق — اعمل تأطير المشكلة ←"
-              : `اكتشف ${minGoldenToFinish - totalGoldenAsked} معلومة محورية كمان قبل التأطير`}
-          </button>
-        </div>
-      )}
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9 }}
+              onClick={(e) => e.stopPropagation()}
+              className="max-w-md w-full bg-card border border-border rounded-2xl p-6 text-right"
+              dir="rtl"
+            >
+              <FileCheck className="w-10 h-10 text-primary mb-3" />
+              <h3 className="text-xl font-bold text-foreground mb-2">جاهز للتأطير؟</h3>
+              <p className="text-muted-foreground text-sm mb-4">
+                هتقفل التحقيق وتنتقل لشاشة التأطير. مش هتقدر ترجع تسأل تاني.
+                {state.budgetRemaining > 0 && ` لسه فاضلك ${state.budgetRemaining} سؤال.`}
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowFramingConfirm(false)}
+                  className="flex-1 px-4 py-2.5 rounded-lg border border-border text-foreground hover:bg-muted/50"
+                >
+                  لسه
+                </button>
+                <button
+                  onClick={() => { setShowFramingConfirm(false); onProceedToFraming?.(); }}
+                  className="flex-1 px-4 py-2.5 rounded-lg bg-gradient-to-r from-primary to-accent text-white font-bold"
+                >
+                  أيوه، قدّم
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Active question dialogue */}
+      {/* Dialogue للسؤال النشط */}
       {activeQuestion && (
         <EnhancedDialogue
-          isActive={true}
+          isActive
           dialogues={[
-            {
-              characterId: "detective",
-              text: activeQuestion.text,
-              mood: "neutral",
-            },
+            { characterId: "detective", text: activeQuestion.text, mood: "neutral" },
             {
               characterId: activeQuestion.character,
-              text: activeQuestion.answer,
+              text: getDialogueForQuestion(activeQuestion),
               mood: "neutral",
-              isSaveable: false,
             },
           ]}
           onComplete={handleDialogueClose}
