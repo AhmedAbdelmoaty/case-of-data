@@ -714,3 +714,60 @@ export const SCORE_LEVELS: ScoreLevel[] = [
 export const getScoreLevel = (score: number): ScoreLevel => {
   return SCORE_LEVELS.find((l) => score >= l.min && score <= l.max) || SCORE_LEVELS[2];
 };
+
+// ════════════════════════════════════════════════════════════════════════════
+// 🔄 LEGACY COMPATIBILITY LAYER (مؤقت — للحفاظ على اشتغال الـ UI القديم)
+// ════════════════════════════════════════════════════════════════════════════
+// هذه الطبقة موجودة لحين بناء الـ UI الجديد (QuestionBankPanel + FramingTemplateScreen).
+// الـ UI القديم (InquiryScreen + FramingScreen) يعتمد على INQUIRY_ROUNDS و FRAMING_OPTIONS.
+// سيتم حذفها بمجرد إعادة بناء الشاشات.
+
+export interface InquiryOption {
+  id: string;
+  text: string;
+  tier: "strong" | "medium" | "weak";
+  points: number;
+  response: string;
+  explanation: string;
+}
+
+export interface InquiryRound {
+  id: number;
+  title: string;
+  options: InquiryOption[];
+}
+
+export interface FramingOption {
+  id: string;
+  text: string;
+  isCorrect: boolean;
+  explanation: string;
+}
+
+/** بنية شكلية للحفاظ على الـ UI القديم — سيتم استبدالها بالكامل */
+export const INQUIRY_ROUNDS: InquiryRound[] = [
+  {
+    id: 1,
+    title: "اللعبة في طور إعادة البناء",
+    options: [
+      {
+        id: "placeholder_1",
+        text: "اللعبة في طور إعادة البناء — المرحلة الجاية: بناء بنك الأسئلة التفاعلي.",
+        tier: "strong",
+        points: 0,
+        response: "بنك الأسئلة الكامل (24 سؤال) جاهز في الكود. الخطوة الجاية: بناء الـ UI الجديد.",
+        explanation: "اللعبة الحالية في مرحلة انتقالية.",
+      },
+    ],
+  },
+];
+
+export const FRAMING_OPTIONS: FramingOption[] = FRAMING_SLOTS[2].choices.map((c) => ({
+  id: c.id,
+  text: c.text,
+  isCorrect: c.isCorrect,
+  explanation: c.explanation,
+}));
+
+export const FRAMING_POINTS = 30;
+
