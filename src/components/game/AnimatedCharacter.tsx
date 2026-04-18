@@ -11,7 +11,7 @@ import amiraImg from "@/assets/characters/amira.png";
 import karimImg from "@/assets/characters/karim.png";
 import detectiveImg from "@/assets/characters/detective.png";
 
-export type CharacterId = "ahmed" | "sara" | "karim" | "detective" | "abuSaeed" | "khaled" | "noura" | "umFahd" | "mansour";
+export type CharacterId = "ahmed" | "sara" | "karim" | "detective" | "abuSaeed" | "khaled" | "noura" | "umFahd" | "mansour" | "salma";
 
 interface AnimatedCharacterProps {
   characterId: CharacterId;
@@ -37,6 +37,7 @@ const characterData: Record<CharacterId, { name: string; nameEn: string; role: s
   noura: { name: "نورة", nameEn: "Noura", role: "الكاشير", roleEn: "Cashier", image: nouraImg, color: "purple" },
   umFahd: { name: "أميرة", nameEn: "Amira", role: "زبونة دائمة", roleEn: "Regular Customer", image: amiraImg, color: "cyan" },
   mansour: { name: "أ. منصور", nameEn: "A. Mansour", role: "مدير الاستشارات", roleEn: "Consulting Manager", image: ahmedImg, color: "gold" },
+  salma: { name: "سلمى", nameEn: "Salma", role: "محاسبة المتجر", roleEn: "Store Accountant", image: nouraImg, color: "purple" },
 };
 
 const sizeClasses = {
