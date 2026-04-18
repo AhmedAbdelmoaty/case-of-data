@@ -1,107 +1,155 @@
 
 
-## فين احنا دلوقتي — تشخيص صريح
+# خطة تطوير شاملة — Sound Effects + Game Feel + Polish
 
-### اللي **اتعمل فعلاً** (موجود في الكود):
-1. ✅ **`src/data/pf-scenario.ts`** — اتعاد بناؤه بالكامل بسيناريو "الموسم اللي ما جاش" + 24 سؤال + شجرة الكشف + خانات التأطير + نظام التقييم.
-2. ✅ **`src/contexts/PFGameContextV2.tsx`** — Context جديد للعبة الجديدة (askedIds, budget, insights, framing).
-3. ✅ **`src/components/game/QuestionBankPanel.tsx`** — شاشة بنك الأسئلة الجديدة.
-4. ✅ **`AnimatedCharacter.tsx` + `EnhancedDialogue.tsx`** — اتضافت شخصية سلمى.
-
-### اللي **لسه ما اتعملش** (وده سبب إن مفيش أي تأثير في البريفيو):
-1. ❌ **`Index.tsx` لسه بيستخدم `PFGameContext` القديم** (مش V2) — يعني كل اللي بنيناه **معزول ومش متوصّل بأي صفحة**.
-2. ❌ **`main.tsx` / `App.tsx` لسه ملفّفين بـ `PFGameProvider` القديم** — مش `PFGameProviderV2`.
-3. ❌ **شاشات `CompanyBriefingScreen` و `ArrivalScreen` لسه بتستخدم نصوص ومنطق السيناريو القديم** (المرتجعات) — عشان كده محادثة منصور وأبو سعيد لسه زي ما هي.
-4. ❌ **شاشة `InquiryScreen` القديمة لسه هي اللي شغالة** — `QuestionBankPanel` الجديد مش متربوط بأي route أو phase.
-5. ❌ **شاشة التأطير (`FramingScreen`) لسه القديمة** بـ MCQ — مش الـ 4 خانات الجديدة.
-6. ❌ **شاشة النتيجة (`ResultScreen`)** لسه على نظام التقييم القديم.
-7. ❌ **localStorage** لسه بيحفظ على الـ keys القديمة — هيتعارض مع الجديد.
-
-### السبب المباشر إنك مش شايف أي تغيير:
-> اللي بنيناه عبارة عن **3 ملفات معزولة في جزيرة**. الـ `Index.tsx` (نقطة الدخول) ومجلد `screens/` كلهم لسه بيشتغلوا بالنظام القديم. المستخدم بيدخل من `Index.tsx` → بيلاقي الشاشات القديمة → فمفيش حاجة جديدة بتظهر.
+## 🎯 الهدف
+نقل اللعبة من "تجربة جيدة" لـ "تجربة لا تُنسى" — صوت غني، ردود فعل بصرية فورية، حركة حية، وتفاصيل صغيرة بتفرق جداً.
 
 ---
 
-## الـ Plan الكاملة لباقي التنفيذ
+## 1. 🔊 Sound Effects — توسعة كبيرة
 
-سأقسّم الباقي لـ **5 مراحل واضحة**، كل مرحلة لها مخرج ملموس في البريفيو:
+### أصوات بيئية (Ambient loops)
+- **داخل المتجر**: صوت خافت لمكيف + همهمة زباين بعيدة
+- **داخل المكتب**: صوت ساعة حائط + كيبورد بعيد
+- **شارع/سفر**: صوت سيارات وزحام خفيف
+- كل واحد بيشتغل loop خفيف (volume 0.05) ويتغير حسب المشهد
 
----
+### أصوات تفاعل (UI feedback)
+| الحدث | الصوت |
+|---|---|
+| Hover على زرار سؤال | tick خفيف |
+| اختيار سؤال | "page-flip" (ورقة بتتقلب) |
+| فتح الدفتر | "notebook-open" |
+| حفظ ملاحظة جديدة | "pen-write" + chime صغير |
+| اختيار تأطير | "stamp" (ختم خشبي) |
+| ظهور النتيجة (نجاح) | فانفير قصير |
+| ظهور النتيجة (فشل) | نغمة هابطة حزينة |
+| Trust ينخفض | نغمة منخفضة tense |
+| ظهور insight جديد | sparkle |
 
-### 🔧 المرحلة 1 — توصيل الـ Context الجديد (15 دقيقة)
-**الهدف:** خلي كل اللعبة تستخدم `PFGameProviderV2` بدل القديم.
+### أصوات شخصيات
+- **typing tick** أثناء الـ dialogue (موجود بس نخليه أحلى — pitch يتغير حسب الشخصية: منصور أعمق، أبو سعيد أوسط، اللاعبة أعلى)
+- **footsteps** عند الانتقال بين المشاهد
+- **door creak** عند فتح باب المكتب (مختلف عن knock)
 
-- استبدال `PFGameProvider` بـ `PFGameProviderV2` في `App.tsx` أو `main.tsx`.
-- مسح localStorage القديم تلقائيًا (key migration) عشان مفيش تعارض.
-- إعادة كتابة `Index.tsx` كـ **Router داخلي للـ phases الجديدة**:
-  ```
-  office-briefing → travel → store-arrival → investigation → framing → result
-  ```
-
-**المخرج:** اللعبة بتفتح وبتروح للـ phase الأول الجديد.
-
----
-
-### 🎬 المرحلة 2 — إعادة كتابة شاشات السرد (مكتب + سفر + وصول) (30 دقيقة)
-**الهدف:** محادثة منصور وأبو سعيد تتغيّر للسيناريو الجديد.
-
-- **`CompanyBriefingScreenV2`**: محادثة منصور الجديدة — بيقدّم قضية "مبيعات أبو سعيد نزلت 20% مقارنة بالموسم اللي فات، وعايز يعمل تخفيضات."
-- **`TravelScreen`**: تفضل زي ما هي (مشهد سفر محايد).
-- **`ArrivalScreenV2`**: محادثة أبو سعيد الافتتاحية الجديدة — بيشتكي من نزول المبيعات وعايز خصومات (بدون كشف الحقيقة).
-
-**المخرج:** كل النصوص الافتتاحية بقت متسقة مع السيناريو الجديد.
-
----
-
-### 🔍 المرحلة 3 — توصيل QuestionBankPanel كشاشة التحقيق (15 دقيقة)
-**الهدف:** اللاعب يدخل بنك الأسئلة الجديد بدل `InquiryScreen` القديم.
-
-- ربط `QuestionBankPanel` بـ phase `investigation` في `Index.tsx`.
-- زر "خلصت التحقيق — انتقل للتأطير" بيظهر لما اللاعب يجمع 4+ golden insights أو الميزانية تخلص.
-
-**المخرج:** ضغط زرار "ابدأ" → بيفتح بنك الأسئلة الكامل بكل الـ 24 سؤال.
+كل ده هيتعمل بـ Web Audio synthesis (زي اللي عندنا) — مفيش API خارجي.
 
 ---
 
-### 📋 المرحلة 4 — بناء شاشة التأطير الجديدة (FramingTemplateScreen) (30 دقيقة)
-**الهدف:** استبدال MCQ القديم بـ 4 خانات synthesis.
+## 2. ✨ Visual Feedback — Game Feel
 
-- شاشة جديدة فيها 4 خانات (Symptom / OwnerBelief / RootCause / Decision).
-- كل خانة فيها dropdown بـ 3-4 خيارات.
-- زرار "سلّم التأطير" → بيحفظ ويروح للنتيجة.
+### Screen shake & impact
+- شاشة بترتعش خفيف لما الـ trust ينخفض
+- "punch" zoom بسيط على البورتريه لما الشخصية تقول جملة مهمة
+- Flash أبيض خاطف (50ms) عند لحظات حاسمة (اختيار التأطير الصح)
 
-**المخرج:** اللاعب يقدر يكتب التأطير الكامل ويسلّمه.
+### Particle effects
+- **Sparkles** حوالين أيقونة الدفتر لما تتحفظ ملاحظة
+- **Dust motes** خفيفة في خلفيات المتجر (ذرات غبار طايرة)
+- **Confetti** عند نجاح التأطير (موجود بس نخليه أكتر وأطول)
+- **Smoke** خفيف من فنجان قهوة على مكتب منصور
 
----
-
-### 🏆 المرحلة 5 — شاشة النتيجة الجديدة + تنظيف (20 دقيقة)
-**الهدف:** عرض التقييم متعدد الأبعاد + حذف الكود القديم.
-
-- **`ResultScreenV2`**: عرض الـ 4 أبعاد (Golden / Efficiency / Sequencing / Framing) + Total /100 + feedback لكل بُعد.
-- حذف/أرشفة: `PFGameContext` القديم، `InquiryScreen`, `FramingScreen` القديمة، الـ`pf-scenario.ts` القديمة.
-- اختبار end-to-end كامل من البداية للنهاية.
-
-**المخرج:** لعبة كاملة شغالة من غير أي بقايا قديمة.
+### Cursor & hover polish
+- Cursor يبقى pointer مخصص فوق العناصر التفاعلية
+- Glow حوالين الزراير المهمة بيتنفس (breathing)
+- ripple effect عند الضغط
 
 ---
 
-## التوقيت المتوقع
-| المرحلة | وقت | مخرج مرئي |
+## 3. 🎬 Animation Upgrades
+
+### شخصيات حية
+- **Idle breathing**: الصور بتتنفس (scale 1.0 → 1.02 → 1.0) كل 4 ثواني
+- **Blink**: رمشة كل 5-7 ثواني (overlay سريع)
+- **Mouth movement**: bobbing أكتر synced مع الـ typing
+
+### Camera moves
+- **Ken Burns effect**: الخلفيات بتتحرك بطيء (zoom in/pan) بدل ما تكون ساكنة
+- **Parallax** بسيط على عناصر الخلفية لما الـ mouse يتحرك
+
+### Transitions أحلى
+- **Iris wipe** (دائرة بتقفل/تفتح) بدل fade عادي في لحظات معينة
+- **Push transition** بين المشاهد (المشهد القديم بيخرج من الشمال، الجديد داخل من اليمين) — بيدي إحساس حركة
+
+---
+
+## 4. 🎮 Micro-interactions جديدة
+
+### Trust meter (مخفي)
+- شريط ثقة صغير جدا في الكورنر (بدون أرقام، بس icon قلب/وجه)
+- بيتغير لون تدريجي (أخضر → أصفر → أحمر) — **بدون تسريب** للسؤال الصح
+- بيهتز شوية لما يتغير
+
+### Notebook breathing
+- لما تتحفظ ملاحظة جديدة: bounce + glow + counter يطلع بـ pop animation
+- الأيقونة بتتنفس بـ pulse خفيف لو فيه ملاحظات جديدة لسه ما اتقريتش
+
+### Question card hover
+- الكارت بيتحرك 3D tilt خفيف (mouse position based)
+- shadow بيتعمق
+- glow بيظهر من الأطراف
+
+### Voice-over indicator
+- waveform صغير بيتحرك جنب اسم الشخصية أثناء الكلام
+- لما تضغط رجوع، الـ waveform بيظهر أنه بيعيد
+
+---
+
+## 5. 🎵 Music Layering
+
+### Adaptive music
+- موسيقى خلفية بطبقات (layers) بتظهر/تختفي حسب الموقف:
+  - **Layer 1 (دايم)**: لحن هادئ
+  - **Layer 2 (في الأسئلة)**: إيقاع خفيف
+  - **Layer 3 (في التأطير)**: tension strings
+  - **Layer 4 (نتيجة)**: triumphant أو somber
+
+### Music transitions
+- بدل cut حاد، crossfade ناعم بين الموسيقات (3 ثواني)
+- duck الموسيقى تلقائياً (volume ينخفض 50%) لما الـ voice-over يشتغل
+
+---
+
+## 6. 📋 الأولوية (Implementation order)
+
+| المرحلة | الشغل | الأثر |
 |---|---|---|
-| 1 — توصيل Context | 15 د | اللعبة بتفتح بدون errors على الـ flow الجديد |
-| 2 — شاشات السرد | 30 د | محادثات منصور + أبو سعيد جديدة |
-| 3 — بنك الأسئلة | 15 د | شاشة التحقيق الجديدة شغالة |
-| 4 — شاشة التأطير | 30 د | 4 خانات synthesis |
-| 5 — النتيجة + تنظيف | 20 د | تقييم متعدد الأبعاد + كود نضيف |
-| **الإجمالي** | **~110 دقيقة** | لعبة كاملة جديدة شغالة end-to-end |
+| 1 | إضافة 8 أصوات UI جديدة (page-flip, stamp, pen-write, sparkle, tick, etc.) | 🔥🔥🔥 |
+| 2 | Idle breathing + blink للشخصيات | 🔥🔥🔥 |
+| 3 | Ambient loops (3 خلفيات صوتية) | 🔥🔥 |
+| 4 | Notebook polish (bounce + glow + counter pop) | 🔥🔥 |
+| 5 | Question card 3D tilt hover | 🔥🔥 |
+| 6 | Ken Burns على الخلفيات | 🔥🔥 |
+| 7 | Music ducking عند voice-over | 🔥🔥 |
+| 8 | Screen shake خفيف عند الـ trust drop | 🔥 |
+| 9 | Cursor مخصص على hotspots | 🔥 |
+| 10 | Particle dust في الخلفيات | 🔥 |
 
 ---
 
-## توصيتي
-ننفّذ الـ 5 مراحل **بالترتيب وفي رسالة واحدة متتالية** (مش نقطّعها) — لأن أي مرحلة لوحدها هتسيب اللعبة في حالة نص-نص. لما نخلص كله، تختبر اللعبة كاملة من الصفر للنهاية.
+## 7. 📁 الملفات اللي هتتعدل/تتضاف
 
-<lov-actions>
-<lov-suggestion message="ممتاز. نفّذ الـ 5 مراحل كلها بالترتيب في تنفيذ واحد متواصل (Context + شاشات السرد + بنك الأسئلة + التأطير + النتيجة + تنظيف). ابدأ دلوقتي.">نفّذ الـ 5 مراحل كلها متواصلة</lov-suggestion>
-<lov-suggestion message="ابدأ بالمرحلتين 1 و 2 بس (توصيل Context + شاشات السرد الجديدة)، وبعدها وقّفلي عشان أراجع قبل ما نكمل.">ابدأ بمرحلة 1 و 2 بس</lov-suggestion>
-<lov-suggestion message="قبل ما تبدأ، وريني نص محادثة منصور الجديدة ونص محادثة أبو سعيد الافتتاحية الجديدة عشان أراجعهم الأول.">راجع النصوص الأول</lov-suggestion>
-</lov-actions>
+| ملف | التعديل |
+|---|---|
+| `useSoundEffects.tsx` | إضافة 8 sound types جديدة (pageFlip, stamp, penWrite, sparkle, tick, footstep, doorCreak, lowTension) |
+| `useAmbientSound.tsx` (جديد) | Hook لتشغيل ambient loops حسب المشهد |
+| `useBackgroundMusic.tsx` | إضافة ducking + crossfade |
+| `AnimatedCharacter.tsx` | idle breathing + blink overlay |
+| `EnhancedDialogue.tsx` | waveform indicator + sound تشغيل عند الرجوع |
+| `PFNotebook.tsx` | bounce/glow عند ملاحظة جديدة + counter pop |
+| `InquiryScreen.tsx` | 3D tilt على question cards + Ken Burns + ambient |
+| `ArrivalScreen.tsx` / `CompanyBriefingScreen.tsx` | Ken Burns + ambient loops |
+| `FramingScreen.tsx` | stamp sound + screen flash عند الاختيار |
+| `ResultScreen.tsx` | confetti موسع + fanfare/somber music |
+| `index.css` | breathing keyframes + cursor styles |
+
+---
+
+## ⚠️ ضمانات (مهم)
+
+- **مفيش تسريب**: كل الأصوات والأنيميشنز محايدة — مفيش صوت "صح" أو "غلط" أثناء اختيار السؤال. الصوت الإيجابي/السلبي يظهر فقط بعد الـ result الفعلي.
+- **Performance**: كل الأنيميشنز CSS-based أو requestAnimationFrame خفيف — مش هيأثر على framerate.
+- **Sound toggle**: كل الأصوات الجديدة تحت نفس الـ toggle الموجود في settings.
+- **Mobile-friendly**: كل الـ hover effects عندها fallback للـ touch.
+
