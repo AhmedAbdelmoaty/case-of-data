@@ -1,5 +1,5 @@
 // ════════════════════════════════════════════════════════════════════════════
-// ArrivalScreenV2 — وصول المتجر + لقاء أبو سعيد الافتتاحي للسيناريو الجديد
+// ArrivalScreenV2 — وصول المتجر + لقاء أبو سعيد محايد (مفيش تسريب للمشكلة)
 // ════════════════════════════════════════════════════════════════════════════
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -19,40 +19,27 @@ export const ArrivalScreenV2 = ({ onComplete }: Props) => {
   const g = profile?.gender || "male";
   const [phase, setPhase] = useState<"storefront" | "entrance" | "greeting" | "dialogue" | "ready">("storefront");
 
+  // الحوار الافتتاحي = محايد تمامًا. أبو سعيد ميقولش حاجة عن المشكلة، الأرقام،
+  // المقارنة، أو رغبته في التخفيضات. اللاعب هو اللي لازم يستخرج كل ده.
   const dialogues = [
     {
       characterId: "abuSaeed",
-      text: "أهلاً وسهلاً يا أستاذ، نوّرت المتجر. منصور كلمني إنك جاي.",
+      text: "أهلاً وسهلاً يا أستاذ. منصور كلمني إنك جاي. اتفضل.",
+      mood: "neutral" as const,
+    },
+    {
+      characterId: "abuSaeed",
+      text: "أنا أبو سعيد. دي محلي. تشرب حاجة الأول؟",
       mood: "happy" as const,
     },
     {
-      characterId: "abuSaeed",
-      text: "أنا أبو سعيد. المحل ده بقاله 6 سنين، عملته من الصفر بإيدي.",
-      mood: "neutral" as const,
-    },
-    {
-      characterId: "abuSaeed",
-      text: "بصراحة أنا مضايق. الموسم ده وحش عليّ. المبيعات نزلت بشكل واضح.",
-      mood: "nervous" as const,
-    },
-    {
-      characterId: "abuSaeed",
-      text: "بقارن بالسنة اللي فاتت في نفس الوقت — الفرق حوالي 20% أقل. ده رقم كبير.",
-      mood: "nervous" as const,
-    },
-    {
-      characterId: "abuSaeed",
-      text: "أنا فكرت في الموضوع، وقلت لازم أعمل تخفيضات. ده الحل الوحيد عشان أرجّع الناس.",
-      mood: "neutral" as const,
-    },
-    {
-      characterId: "abuSaeed",
-      text: "بس منصور قالي استنى لحد ما تشوف أنت الموقف. ف اتفضل، اسأل اللي تحب — أنا ومحاسبتي سلمى تحت أمرك.",
-      mood: "neutral" as const,
-    },
-    {
       characterId: "detective",
-      text: "تمام يا أبو سعيد. خليني أفهم الصورة كاملة قبل ما نتكلم في أي حلول.",
+      text: "ميرسي، خليني أبدأ شغل على طول لو ما عندكش مانع.",
+      mood: "neutral" as const,
+    },
+    {
+      characterId: "abuSaeed",
+      text: "براحتك. أنا تحت أمرك، اسأل اللي تحب. سلمى المحاسبة موجودة كمان لو احتجت أرقام.",
       mood: "neutral" as const,
     },
   ];
@@ -60,11 +47,11 @@ export const ArrivalScreenV2 = ({ onComplete }: Props) => {
   useEffect(() => {
     if (phase === "entrance") {
       try { playSound("storeBell"); } catch {}
-      const t = setTimeout(() => setPhase("greeting"), 2500);
+      const t = setTimeout(() => setPhase("greeting"), 2200);
       return () => clearTimeout(t);
     }
     if (phase === "greeting") {
-      const t = setTimeout(() => setPhase("dialogue"), 2500);
+      const t = setTimeout(() => setPhase("dialogue"), 2200);
       return () => clearTimeout(t);
     }
   }, [phase, playSound]);
@@ -83,7 +70,7 @@ export const ArrivalScreenV2 = ({ onComplete }: Props) => {
               <span className="text-accent text-sm font-bold">وصلت المنصورة — متجر أبو سعيد</span>
             </div>
             <h1 className="text-2xl font-bold text-white drop-shadow-lg">متجر أبو سعيد للملابس</h1>
-            <p className="text-white/70 text-xs" dir="rtl">عميل قديم — والمحاسبة سلمى موجودة جوه</p>
+            <p className="text-white/70 text-xs" dir="rtl">العميل في انتظارك</p>
           </motion.div>
           <motion.button
             className="relative px-8 py-3 rounded-xl text-base font-bold"
@@ -135,7 +122,10 @@ export const ArrivalScreenV2 = ({ onComplete }: Props) => {
             <div className="p-6 rounded-xl bg-card/80 backdrop-blur-md border border-border space-y-3">
               <h2 className="text-xl font-bold text-foreground" dir="rtl">جاهز للتحقيق</h2>
               <p className="text-muted-foreground" dir="rtl">
-                دلوقتي تقدر تسأل أبو سعيد وسلمى أي سؤال من بنك الأسئلة. عندك ميزانية محدودة — استخدمها بحكمة.
+                اسأل بحكمة. عندك ميزانية محدودة من الأسئلة. كل سؤال يستهلك من ميزانيتك حتى لو كان غلط.
+              </p>
+              <p className="text-sm text-amber-400/80" dir="rtl">
+                💡 تذكّر: اسأل قبل ما تحكم. فكّك قبل ما تحلّ.
               </p>
             </div>
             <motion.button
