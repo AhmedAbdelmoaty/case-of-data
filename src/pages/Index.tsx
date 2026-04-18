@@ -1,90 +1,97 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { CompanyBriefingScreen } from "@/components/game/screens/CompanyBriefingScreen";
+import { CompanyBriefingScreenV2 } from "@/components/game/screens/CompanyBriefingScreenV2";
 import { TravelScreen } from "@/components/game/screens/TravelScreen";
-import { ArrivalScreen } from "@/components/game/screens/ArrivalScreen";
-import { InquiryScreen } from "@/components/game/screens/InquiryScreen";
-import { FramingScreen } from "@/components/game/screens/FramingScreen";
-import { ReflectionTransition } from "@/components/game/screens/ReflectionTransition";
-import { PresentationScreen } from "@/components/game/screens/PresentationScreen";
-import { ReturnTravelScreen } from "@/components/game/screens/ReturnTravelScreen";
-import { DebriefScreen } from "@/components/game/screens/DebriefScreen";
-import { ResultScreen } from "@/components/game/screens/ResultScreen";
+import { ArrivalScreenV2 } from "@/components/game/screens/ArrivalScreenV2";
+import { QuestionBankPanel } from "@/components/game/QuestionBankPanel";
+import { FramingTemplateScreen } from "@/components/game/screens/FramingTemplateScreen";
+import { ResultScreenV2 } from "@/components/game/screens/ResultScreenV2";
 import { SoundProvider } from "@/hooks/useSoundEffects";
 import { MusicProvider } from "@/hooks/useBackgroundMusic";
 import { PlayerSettingsPanel } from "@/components/game/PlayerSettingsPanel";
-import { PFGameProvider, usePFGame } from "@/contexts/PFGameContext";
+import { PFGameProviderV2, usePFGameV2 } from "@/contexts/PFGameContextV2";
 import { ScreenTransition } from "@/components/game/ScreenTransition";
 import { ProgressTimeline } from "@/components/game/ProgressTimeline";
 
-type Screen =
-  | "company-briefing"
+type Phase =
+  | "office-briefing"
   | "travel"
-  | "arrival"
-  | "inquiry"
-  | "reflection"
+  | "store-arrival"
+  | "investigation"
   | "framing"
-  | "presentation"
-  | "return-travel"
-  | "debrief"
   | "result"
   | "replay-briefing";
 
+const STORAGE_VERSION = "v2";
+
 const GameContent = () => {
   const { user } = useAuth();
-  const { resetGame } = usePFGame();
+  const { resetGame } = usePFGameV2();
   const userId = user?.id || "guest";
-  const storageKey = `pf-game-screen-${userId}`;
+  const storageKey = `pf-game-phase-${STORAGE_VERSION}-${userId}`;
 
-  const [currentScreen, setCurrentScreen] = useState<Screen>(() => {
-    const saved = localStorage.getItem(storageKey) as Screen | null;
-    if (saved === "replay-briefing") return "company-briefing";
-    return saved || "company-briefing";
+  // Migration: clear old keys
+  useEffect(() => {
+    const oldKey = `pf-game-screen-${userId}`;
+    if (localStorage.getItem(oldKey)) {
+      localStorage.removeItem(oldKey);
+    }
+  }, [userId]);
+
+  const [currentPhase, setCurrentPhase] = useState<Phase>(() => {
+    const saved = localStorage.getItem(storageKey) as Phase | null;
+    if (saved === "replay-briefing") return "office-briefing";
+    return saved || "office-briefing";
   });
-
   const [transitioning, setTransitioning] = useState(false);
 
   useEffect(() => {
-    if (currentScreen !== "replay-briefing") {
-      localStorage.setItem(storageKey, currentScreen);
+    if (currentPhase !== "replay-briefing") {
+      localStorage.setItem(storageKey, currentPhase);
     }
-  }, [currentScreen, storageKey]);
+  }, [currentPhase, storageKey]);
 
-  const handleNavigate = useCallback((screen: string) => {
-    setTransitioning(true);
-    setTimeout(() => {
-      // Reset game state when navigating back to the start (replay)
-      if (screen === "company-briefing") {
-        resetGame();
-        localStorage.removeItem(storageKey);
-      }
-      setCurrentScreen(screen as Screen);
-      setTimeout(() => setTransitioning(false), 100);
-    }, 400);
-  }, [resetGame, storageKey]);
+  const handleNavigate = useCallback(
+    (phase: string) => {
+      setTransitioning(true);
+      setTimeout(() => {
+        if (phase === "office-briefing") {
+          resetGame();
+          localStorage.removeItem(storageKey);
+        }
+        setCurrentPhase(phase as Phase);
+        setTimeout(() => setTransitioning(false), 100);
+      }, 400);
+    },
+    [resetGame, storageKey]
+  );
 
-  const handleReplayBriefing = useCallback(() => {
-    setCurrentScreen("replay-briefing");
-  }, []);
-
+  const handleReplayBriefing = useCallback(() => setCurrentPhase("replay-briefing"), []);
   const handleResetProgress = useCallback(() => {
     localStorage.removeItem(storageKey);
     resetGame();
     setTransitioning(true);
     setTimeout(() => {
-      setCurrentScreen("company-briefing");
+      setCurrentPhase("office-briefing");
       setTimeout(() => setTransitioning(false), 100);
     }, 400);
   }, [storageKey, resetGame]);
 
-  const showSettings = currentScreen !== "replay-briefing";
-  const showTimeline = !["company-briefing", "replay-briefing", "result"].includes(currentScreen);
+  const showSettings = currentPhase !== "replay-briefing";
+  const showTimeline = !["office-briefing", "replay-briefing", "result"].includes(currentPhase);
+
+  // Map new phases to old timeline keys for visual consistency
+  const timelineKey =
+    currentPhase === "office-briefing" ? "company-briefing"
+    : currentPhase === "store-arrival" ? "arrival"
+    : currentPhase === "investigation" ? "inquiry"
+    : currentPhase;
 
   return (
     <div className="min-h-screen bg-background">
       <ScreenTransition isActive={transitioning} />
 
-      {showTimeline && <ProgressTimeline currentScreen={currentScreen} />}
+      {showTimeline && <ProgressTimeline currentScreen={timelineKey} />}
 
       {showSettings && (
         <PlayerSettingsPanel
@@ -93,59 +100,48 @@ const GameContent = () => {
         />
       )}
 
-      {currentScreen === "company-briefing" && (
-        <CompanyBriefingScreen onComplete={() => handleNavigate("travel")} />
+      {currentPhase === "office-briefing" && (
+        <CompanyBriefingScreenV2 onComplete={() => handleNavigate("travel")} />
       )}
-      {currentScreen === "replay-briefing" && (
-        <CompanyBriefingScreen
+      {currentPhase === "replay-briefing" && (
+        <CompanyBriefingScreenV2
           onComplete={() => {
-            const saved = localStorage.getItem(storageKey) as Screen;
-            setCurrentScreen(saved || "company-briefing");
+            const saved = localStorage.getItem(storageKey) as Phase;
+            setCurrentPhase(saved || "office-briefing");
           }}
           isReviewMode
         />
       )}
-      {currentScreen === "travel" && (
-        <TravelScreen onComplete={() => handleNavigate("arrival")} />
+      {currentPhase === "travel" && (
+        <TravelScreen onComplete={() => handleNavigate("store-arrival")} />
       )}
-      {currentScreen === "arrival" && (
-        <ArrivalScreen onComplete={() => handleNavigate("inquiry")} />
+      {currentPhase === "store-arrival" && (
+        <ArrivalScreenV2 onComplete={() => handleNavigate("investigation")} />
       )}
-      {currentScreen === "inquiry" && (
-        <InquiryScreen onComplete={() => handleNavigate("reflection")} />
+      {currentPhase === "investigation" && (
+        <QuestionBankPanel
+          availableCharacters={["abuSaeed", "salma"]}
+          onProceedToFraming={() => handleNavigate("framing")}
+        />
       )}
-      {currentScreen === "reflection" && (
-        <ReflectionTransition onComplete={() => handleNavigate("framing")} />
+      {currentPhase === "framing" && (
+        <FramingTemplateScreen onComplete={() => handleNavigate("result")} />
       )}
-      {currentScreen === "framing" && (
-        <FramingScreen onComplete={() => handleNavigate("presentation")} />
-      )}
-      {currentScreen === "presentation" && (
-        <PresentationScreen onComplete={() => handleNavigate("return-travel")} />
-      )}
-      {currentScreen === "return-travel" && (
-        <ReturnTravelScreen onComplete={() => handleNavigate("debrief")} />
-      )}
-      {currentScreen === "debrief" && (
-        <DebriefScreen onComplete={() => handleNavigate("result")} />
-      )}
-      {currentScreen === "result" && (
-        <ResultScreen onNavigate={handleNavigate} />
+      {currentPhase === "result" && (
+        <ResultScreenV2 onNavigate={handleNavigate} />
       )}
     </div>
   );
 };
 
-const Index = () => {
-  return (
-    <PFGameProvider>
-      <MusicProvider>
-        <SoundProvider>
-          <GameContent />
-        </SoundProvider>
-      </MusicProvider>
-    </PFGameProvider>
-  );
-};
+const Index = () => (
+  <PFGameProviderV2>
+    <MusicProvider>
+      <SoundProvider>
+        <GameContent />
+      </SoundProvider>
+    </MusicProvider>
+  </PFGameProviderV2>
+);
 
 export default Index;
