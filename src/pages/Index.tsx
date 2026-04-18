@@ -1,151 +1,58 @@
-import { useState, useEffect, useCallback } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { CompanyBriefingScreen } from "@/components/game/screens/CompanyBriefingScreen";
-import { TravelScreen } from "@/components/game/screens/TravelScreen";
-import { ArrivalScreen } from "@/components/game/screens/ArrivalScreen";
-import { InquiryScreen } from "@/components/game/screens/InquiryScreen";
-import { FramingScreen } from "@/components/game/screens/FramingScreen";
-import { ReflectionTransition } from "@/components/game/screens/ReflectionTransition";
-import { PresentationScreen } from "@/components/game/screens/PresentationScreen";
-import { ReturnTravelScreen } from "@/components/game/screens/ReturnTravelScreen";
-import { DebriefScreen } from "@/components/game/screens/DebriefScreen";
-import { ResultScreen } from "@/components/game/screens/ResultScreen";
-import { SoundProvider } from "@/hooks/useSoundEffects";
-import { MusicProvider } from "@/hooks/useBackgroundMusic";
-import { PlayerSettingsPanel } from "@/components/game/PlayerSettingsPanel";
+// ============================================================================
+// Index — TEMPORARY scaffold during rebuild (Phase 2 complete)
+// Old screens are intentionally NOT mounted — they depend on a removed API
+// and will be replaced in Phase 3 (InvestigationHub, SynthesisScreen,
+// FramingBuilder, DebriefScreen).
+// ============================================================================
+
 import { PFGameProvider, usePFGame } from "@/contexts/PFGameContext";
-import { ScreenTransition } from "@/components/game/ScreenTransition";
-import { ProgressTimeline } from "@/components/game/ProgressTimeline";
 
-type Screen =
-  | "company-briefing"
-  | "travel"
-  | "arrival"
-  | "inquiry"
-  | "reflection"
-  | "framing"
-  | "presentation"
-  | "return-travel"
-  | "debrief"
-  | "result"
-  | "replay-briefing";
-
-const GameContent = () => {
-  const { user } = useAuth();
-  const { resetGame } = usePFGame();
-  const userId = user?.id || "guest";
-  const storageKey = `pf-game-screen-${userId}`;
-
-  const [currentScreen, setCurrentScreen] = useState<Screen>(() => {
-    const saved = localStorage.getItem(storageKey) as Screen | null;
-    if (saved === "replay-briefing") return "company-briefing";
-    return saved || "company-briefing";
-  });
-
-  const [transitioning, setTransitioning] = useState(false);
-
-  useEffect(() => {
-    if (currentScreen !== "replay-briefing") {
-      localStorage.setItem(storageKey, currentScreen);
-    }
-  }, [currentScreen, storageKey]);
-
-  const handleNavigate = useCallback((screen: string) => {
-    setTransitioning(true);
-    setTimeout(() => {
-      // Reset game state when navigating back to the start (replay)
-      if (screen === "company-briefing") {
-        resetGame();
-        localStorage.removeItem(storageKey);
-      }
-      setCurrentScreen(screen as Screen);
-      setTimeout(() => setTransitioning(false), 100);
-    }, 400);
-  }, [resetGame, storageKey]);
-
-  const handleReplayBriefing = useCallback(() => {
-    setCurrentScreen("replay-briefing");
-  }, []);
-
-  const handleResetProgress = useCallback(() => {
-    localStorage.removeItem(storageKey);
-    resetGame();
-    setTransitioning(true);
-    setTimeout(() => {
-      setCurrentScreen("company-briefing");
-      setTimeout(() => setTransitioning(false), 100);
-    }, 400);
-  }, [storageKey, resetGame]);
-
-  const showSettings = currentScreen !== "replay-briefing";
-  const showTimeline = !["company-briefing", "replay-briefing", "result"].includes(currentScreen);
+const RebuildNotice = () => {
+  const { caseData, state, remainingBudget, availableQuestions } = usePFGame();
 
   return (
-    <div className="min-h-screen bg-background">
-      <ScreenTransition isActive={transitioning} />
+    <div className="min-h-screen bg-background text-foreground p-8 flex items-center justify-center">
+      <div className="max-w-2xl w-full space-y-6 text-center">
+        <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+          Phase 2 / 5 — Context layer rebuilt
+        </div>
 
-      {showTimeline && <ProgressTimeline currentScreen={currentScreen} />}
+        <h1 className="text-3xl font-bold">{caseData.title}</h1>
+        <p className="text-muted-foreground leading-relaxed">
+          الـ Schema الجديد و PFGameContext تم بناؤهم. الشاشات الجديدة
+          (Investigation Hub، Synthesis، Framing Builder، Debrief) هتتبني في
+          المرحلة 3.
+        </p>
 
-      {showSettings && (
-        <PlayerSettingsPanel
-          onReplayBriefing={handleReplayBriefing}
-          onResetProgress={handleResetProgress}
-        />
-      )}
+        <div className="grid grid-cols-3 gap-4 text-sm">
+          <div className="rounded-lg border border-border p-4">
+            <div className="text-2xl font-bold text-primary">{caseData.questionBank.length}</div>
+            <div className="text-muted-foreground">سؤال في البنك</div>
+          </div>
+          <div className="rounded-lg border border-border p-4">
+            <div className="text-2xl font-bold text-primary">{remainingBudget}</div>
+            <div className="text-muted-foreground">ميزانية الأسئلة</div>
+          </div>
+          <div className="rounded-lg border border-border p-4">
+            <div className="text-2xl font-bold text-primary">{state.trust}</div>
+            <div className="text-muted-foreground">الثقة</div>
+          </div>
+        </div>
 
-      {currentScreen === "company-briefing" && (
-        <CompanyBriefingScreen onComplete={() => handleNavigate("travel")} />
-      )}
-      {currentScreen === "replay-briefing" && (
-        <CompanyBriefingScreen
-          onComplete={() => {
-            const saved = localStorage.getItem(storageKey) as Screen;
-            setCurrentScreen(saved || "company-briefing");
-          }}
-          isReviewMode
-        />
-      )}
-      {currentScreen === "travel" && (
-        <TravelScreen onComplete={() => handleNavigate("arrival")} />
-      )}
-      {currentScreen === "arrival" && (
-        <ArrivalScreen onComplete={() => handleNavigate("inquiry")} />
-      )}
-      {currentScreen === "inquiry" && (
-        <InquiryScreen onComplete={() => handleNavigate("reflection")} />
-      )}
-      {currentScreen === "reflection" && (
-        <ReflectionTransition onComplete={() => handleNavigate("framing")} />
-      )}
-      {currentScreen === "framing" && (
-        <FramingScreen onComplete={() => handleNavigate("presentation")} />
-      )}
-      {currentScreen === "presentation" && (
-        <PresentationScreen onComplete={() => handleNavigate("return-travel")} />
-      )}
-      {currentScreen === "return-travel" && (
-        <ReturnTravelScreen onComplete={() => handleNavigate("debrief")} />
-      )}
-      {currentScreen === "debrief" && (
-        <DebriefScreen onComplete={() => handleNavigate("result")} />
-      )}
-      {currentScreen === "result" && (
-        <ResultScreen onNavigate={handleNavigate} />
-      )}
+        <div className="text-xs text-muted-foreground">
+          المرحلة الحالية: <span className="font-mono text-foreground">{state.phase}</span>
+          {" · "}
+          أسئلة متاحة: <span className="font-mono text-foreground">{availableQuestions.length}</span>
+        </div>
+      </div>
     </div>
   );
 };
 
-const Index = () => {
-  return (
-    <PFGameProvider>
-      <MusicProvider>
-        <SoundProvider>
-          <GameContent />
-        </SoundProvider>
-      </MusicProvider>
-    </PFGameProvider>
-  );
-};
+const Index = () => (
+  <PFGameProvider>
+    <RebuildNotice />
+  </PFGameProvider>
+);
 
 export default Index;
