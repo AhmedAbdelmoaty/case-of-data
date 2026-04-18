@@ -1,85 +1,73 @@
 // ════════════════════════════════════════════════════════════════════════════
-// PFGameContextV2 — السياق الجديد للعبة الجديدة "الموسم اللي ما جاش"
-// ════════════════════════════════════════════════════════════════════════════
-// مسؤول عن:
-// - تتبع الأسئلة المسؤولة (askedIds) لكل شخصية
-// - حساب الأسئلة المفتوحة/المقفولة بناءً على شجرة الكشف
-// - إدارة ميزانية الأسئلة (questionsRemaining)
-// - حفظ المعلومات المكتشفة (insights)
-// - إدارة اختيارات شاشة التأطير
-// - حساب التقييم النهائي
+// PFGameContextV2 — السياق المحدّث (V3) — يدير: المراحل، الميزانية،
+// المضللات، الـ Premature، فتح الشخصيات، اختيارات التأطير، التقييم.
 // ════════════════════════════════════════════════════════════════════════════
 
 import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from "react";
 import {
   ALL_QUESTIONS,
   QUESTIONS_BY_CHARACTER,
-  isQuestionUnlocked,
   getQuestionById,
+  getQuestionsForSet,
+  computeCurrentPhase,
+  isCharacterUnlocked as checkCharacterUnlocked,
+  resolveQuestionState,
   QUESTION_BUDGET,
   GOLDEN_QUESTION_IDS,
   calculateTotalScore,
   type Character,
   type Question,
   type ScoreBreakdown,
+  type GamePhase,
 } from "@/data/pf-scenario";
 
 export type PFGamePhase =
-  | "office-briefing"   // لقاء منصور في المكتب
-  | "travel"            // السفر للمنصورة
-  | "store-arrival"     // الوصول للمتجر
-  | "investigation"     // التحقيق (بنك الأسئلة)
-  | "framing"           // شاشة التأطير
-  | "result";           // النتيجة
+  | "office-briefing"
+  | "travel"
+  | "store-arrival"
+  | "investigation"
+  | "framing"
+  | "result";
 
 export interface PFInsight {
   questionId: string;
   character: Character;
   text: string;
-  isGolden: boolean;
+  isKey: boolean;
   timestamp: number;
 }
 
 interface PFGameStateV2 {
   phase: PFGamePhase;
-  /** كل الأسئلة اللي اللاعب ساءلها (شامل منصور) */
   askedIds: string[];
-  /** المعلومات المكتشفة بترتيب الكشف */
   insights: PFInsight[];
-  /** الميزانية المتبقية (من QUESTION_BUDGET، لا يحسب أسئلة منصور) */
   budgetRemaining: number;
-  /** الشخصية النشطة حاليًا (لما اللاعب يكون بيتكلم مع حد محدد) */
   activeCharacter: Character | null;
-  /** اختيارات شاشة التأطير: slotId → choiceId */
   framingChoices: Record<string, string>;
-  /** هل تم تسليم التأطير؟ */
   framingSubmitted: boolean;
+  /** آخر سؤال اتسأل — للعرض الفوري في الـ dialogue */
+  lastAskedId: string | null;
 }
 
 interface PFGameContextV2Value {
   state: PFGameStateV2;
+  currentInvestigationPhase: GamePhase;
 
-  // Phase
   setPhase: (phase: PFGamePhase) => void;
-
-  // Character
   setActiveCharacter: (character: Character | null) => void;
 
-  // Questions
   askQuestion: (questionId: string) => Question | null;
   isQuestionAsked: (questionId: string) => boolean;
-  getUnlockedQuestionsFor: (character: Character) => Question[];
-  getLockedQuestionsFor: (character: Character) => Question[];
+  getQuestionsForCurrentSet: (character: Character) => Question[];
+  isCharacterUnlocked: (character: Character) => boolean;
+  getResolvedQuestion: (questionId: string) => { effectiveAnswer: string; effectiveInsight: string | null; isEffectivelyKey: boolean } | null;
   canAskMore: () => boolean;
+  clearLastAsked: () => void;
 
-  // Framing
   setFramingChoice: (slotId: string, choiceId: string) => void;
   submitFraming: () => void;
 
-  // Score
   getScoreBreakdown: () => ScoreBreakdown;
-
-  // Reset
   resetGame: () => void;
 }
 
@@ -91,6 +79,7 @@ const initialState: PFGameStateV2 = {
   activeCharacter: null,
   framingChoices: {},
   framingSubmitted: false,
+  lastAskedId: null,
 };
 
 const PFGameContextV2 = createContext<PFGameContextV2Value | null>(null);
@@ -103,6 +92,11 @@ export const usePFGameV2 = () => {
 
 export const PFGameProviderV2 = ({ children }: { children: ReactNode }) => {
   const [state, setState] = useState<PFGameStateV2>(initialState);
+
+  const currentInvestigationPhase = useMemo(
+    () => computeCurrentPhase(state.askedIds),
+    [state.askedIds]
+  );
 
   const setPhase = useCallback((phase: PFGamePhase) => {
     setState((prev) => ({ ...prev, phase }));
@@ -117,35 +111,41 @@ export const PFGameProviderV2 = ({ children }: { children: ReactNode }) => {
     if (!question) return null;
 
     setState((prev) => {
-      // لو السؤال متسأل قبل كده — لا تكرر
-      if (prev.askedIds.includes(questionId)) return prev;
+      if (prev.askedIds.includes(questionId)) {
+        return { ...prev, lastAskedId: questionId };
+      }
 
-      // لو السؤال مش مفتوح — لا تسأله
-      if (!isQuestionUnlocked(question, prev.askedIds)) return prev;
-
-      // أسئلة منصور لا تستهلك من الميزانية
       const consumesBudget = question.character !== "mansour";
       if (consumesBudget && prev.budgetRemaining <= 0) return prev;
 
-      const newInsight: PFInsight = {
-        questionId: question.id,
-        character: question.character,
-        text: question.insight,
-        isGolden: question.isGolden,
-        timestamp: Date.now(),
-      };
+      // resolve insight (لو premature بقى key)
+      const resolved = resolveQuestionState(question, prev.askedIds);
+
+      const newInsights = [...prev.insights];
+      if (resolved.effectiveInsight) {
+        newInsights.push({
+          questionId: question.id,
+          character: question.character,
+          text: resolved.effectiveInsight,
+          isKey: resolved.isEffectivelyKey,
+          timestamp: Date.now(),
+        });
+      }
 
       return {
         ...prev,
         askedIds: [...prev.askedIds, questionId],
-        insights: [...prev.insights, newInsight],
-        budgetRemaining: consumesBudget
-          ? prev.budgetRemaining - 1
-          : prev.budgetRemaining,
+        insights: newInsights,
+        budgetRemaining: consumesBudget ? prev.budgetRemaining - 1 : prev.budgetRemaining,
+        lastAskedId: questionId,
       };
     });
 
     return question;
+  }, []);
+
+  const clearLastAsked = useCallback(() => {
+    setState((prev) => ({ ...prev, lastAskedId: null }));
   }, []);
 
   const isQuestionAsked = useCallback(
@@ -153,18 +153,23 @@ export const PFGameProviderV2 = ({ children }: { children: ReactNode }) => {
     [state.askedIds]
   );
 
-  const getUnlockedQuestionsFor = useCallback(
-    (character: Character): Question[] => {
-      const charQuestions = QUESTIONS_BY_CHARACTER[character];
-      return charQuestions.filter((q) => isQuestionUnlocked(q, state.askedIds));
-    },
+  const getQuestionsForCurrentSet = useCallback(
+    (character: Character): Question[] => getQuestionsForSet(character, state.askedIds),
     [state.askedIds]
   );
 
-  const getLockedQuestionsFor = useCallback(
-    (character: Character): Question[] => {
-      const charQuestions = QUESTIONS_BY_CHARACTER[character];
-      return charQuestions.filter((q) => !isQuestionUnlocked(q, state.askedIds));
+  const isCharacterUnlocked = useCallback(
+    (character: Character) => checkCharacterUnlocked(character, state.askedIds),
+    [state.askedIds]
+  );
+
+  const getResolvedQuestion = useCallback(
+    (questionId: string) => {
+      const q = getQuestionById(questionId);
+      if (!q) return null;
+      // resolve based on state BEFORE this question was asked (use askedIds excluding it)
+      const priorAsked = state.askedIds.filter((id) => id !== questionId);
+      return resolveQuestionState(q, priorAsked);
     },
     [state.askedIds]
   );
@@ -182,50 +187,41 @@ export const PFGameProviderV2 = ({ children }: { children: ReactNode }) => {
     setState((prev) => ({ ...prev, framingSubmitted: true }));
   }, []);
 
-  const getScoreBreakdown = useCallback((): ScoreBreakdown => {
-    return calculateTotalScore(
-      state.askedIds,
-      state.budgetRemaining,
-      state.framingChoices
-    );
-  }, [state.askedIds, state.budgetRemaining, state.framingChoices]);
+  const getScoreBreakdown = useCallback(
+    (): ScoreBreakdown =>
+      calculateTotalScore(state.askedIds, state.budgetRemaining, state.framingChoices),
+    [state.askedIds, state.budgetRemaining, state.framingChoices]
+  );
 
   const resetGame = useCallback(() => setState(initialState), []);
 
   const value = useMemo<PFGameContextV2Value>(
     () => ({
       state,
+      currentInvestigationPhase,
       setPhase,
       setActiveCharacter,
       askQuestion,
       isQuestionAsked,
-      getUnlockedQuestionsFor,
-      getLockedQuestionsFor,
+      getQuestionsForCurrentSet,
+      isCharacterUnlocked,
+      getResolvedQuestion,
       canAskMore,
+      clearLastAsked,
       setFramingChoice,
       submitFraming,
       getScoreBreakdown,
       resetGame,
     }),
     [
-      state,
-      setPhase,
-      setActiveCharacter,
-      askQuestion,
-      isQuestionAsked,
-      getUnlockedQuestionsFor,
-      getLockedQuestionsFor,
-      canAskMore,
-      setFramingChoice,
-      submitFraming,
-      getScoreBreakdown,
-      resetGame,
+      state, currentInvestigationPhase, setPhase, setActiveCharacter, askQuestion,
+      isQuestionAsked, getQuestionsForCurrentSet, isCharacterUnlocked, getResolvedQuestion,
+      canAskMore, clearLastAsked, setFramingChoice, submitFraming, getScoreBreakdown, resetGame,
     ]
   );
 
   return <PFGameContextV2.Provider value={value}>{children}</PFGameContextV2.Provider>;
 };
 
-// Re-export types for convenience
-export type { Character, Question, ScoreBreakdown };
-export { ALL_QUESTIONS, GOLDEN_QUESTION_IDS };
+export type { Character, Question, ScoreBreakdown, GamePhase };
+export { ALL_QUESTIONS, GOLDEN_QUESTION_IDS, QUESTIONS_BY_CHARACTER };
