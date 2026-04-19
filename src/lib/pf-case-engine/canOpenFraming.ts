@@ -7,6 +7,6 @@ export function canOpenFraming(knowledge: KnowledgeState): boolean {
     knowledge.baselineKnown &&
     knowledge.realityChecked &&
     knowledge.baselineQuestioned &&
-    (knowledge.exceptionalYearKnown || knowledge.exceptionalCauseKnown)
+    knowledge.exceptionalCauseKnown
   );
 }
