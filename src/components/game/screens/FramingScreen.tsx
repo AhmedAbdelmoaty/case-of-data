@@ -1,12 +1,10 @@
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Target, BookOpen, CheckCircle2 } from "lucide-react";
-import { usePFGame } from "@/contexts/PFGameContext";
+import { usePFGame, FRAMING_SECTIONS } from "@/contexts/PFGameContext";
 import { useSound } from "@/hooks/useSoundEffects";
 import { PFNotebook } from "../PFNotebook";
 import { StampEffect } from "../StampEffect";
-import { FRAMING_BUILDER_SECTIONS } from "@/data/pf-case";
-import type { FramingSubmission } from "@/data/pf-case";
 import storeCounterImg from "@/assets/scenes/store-counter.png";
 
 interface FramingScreenProps {
@@ -14,15 +12,8 @@ interface FramingScreenProps {
 }
 
 export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
-  const { state, submitFramingParts } = usePFGame();
+  const { state, setFramingSelection, submitFraming } = usePFGame();
   const { playSound } = useSound();
-
-  const [submission, setSubmission] = useState<FramingSubmission>({
-    clientViewId: state.framingPart1,
-    flawId: state.framingPart2,
-    trueFrameId: state.framingPart3,
-    nextDecisionId: state.framingPart4,
-  });
 
   const [confirmed, setConfirmed] = useState(false);
   const [showStamp, setShowStamp] = useState(false);
@@ -30,46 +21,26 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
 
   const allSelected = useMemo(() => {
     return (
-      !!submission.clientViewId &&
-      !!submission.flawId &&
-      !!submission.trueFrameId &&
-      !!submission.nextDecisionId
+      !!state.framing.client_view &&
+      !!state.framing.hypothesis &&
+      !!state.framing.true_frame &&
+      !!state.framing.next_decision
     );
-  }, [submission]);
+  }, [state.framing]);
 
-  const handleSelect = (sectionId: string, optionId: string) => {
+  const handleSelect = (sectionId: keyof typeof state.framing, optionId: string) => {
     if (confirmed) return;
-
-    setSubmission((prev) => {
-      if (sectionId === "client_view") {
-        return { ...prev, clientViewId: optionId };
-      }
-      if (sectionId === "flaw_in_view") {
-        return { ...prev, flawId: optionId };
-      }
-      if (sectionId === "true_frame") {
-        return { ...prev, trueFrameId: optionId };
-      }
-      return { ...prev, nextDecisionId: optionId };
-    });
-
-    try {
-      playSound("tick");
-    } catch {}
+    setFramingSelection(sectionId, optionId);
+    try { playSound("tick"); } catch {}
   };
 
   const handleConfirm = () => {
     if (!allSelected || confirmed) return;
-
-    submitFramingParts(submission);
+    submitFraming();
     setConfirmed(true);
     setShowStamp(true);
     setFlash(true);
-
-    try {
-      playSound("stamp");
-    } catch {}
-
+    try { playSound("stamp"); } catch {}
     setTimeout(() => setFlash(false), 120);
     setTimeout(() => {
       setShowStamp(false);
@@ -100,11 +71,7 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
       <StampEffect isVisible={showStamp} text="✓ تم التأكيد" />
 
       <div className="relative z-10 max-w-3xl mx-auto px-4 py-8">
-        <motion.div
-          className="text-center mb-8"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
+        <motion.div className="text-center mb-8" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
           <motion.div
             className="text-5xl mb-4"
             animate={{ scale: [1, 1.08, 1], rotate: [0, -4, 4, 0] }}
@@ -112,24 +79,18 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
           >
             🧠
           </motion.div>
-
-          <h1 className="text-xl font-bold text-foreground mb-2" dir="rtl">
-            وقت التأطير
-          </h1>
-
+          <h1 className="text-xl font-bold text-foreground mb-2" dir="rtl">وقت التأطير</h1>
           <p className="text-muted-foreground text-sm max-w-xl mx-auto leading-relaxed" dir="rtl">
-            دلوقتي محتاج تبني فهمك للمشكلة بشكل واضح.  
-            مش المطلوب تختار حل... المطلوب تحدد: أبو سعيد كان شايف المشكلة إزاي، والخلل الحقيقي كان فين.
+            دلوقتي محتاج تبني فهمك للمشكلة بشكل واضح. اختار من كل قسم اللي تشوفه الأقرب.
           </p>
-
           <p className="text-muted-foreground text-xs mt-3 flex items-center justify-center gap-1" dir="rtl">
             <BookOpen className="w-3.5 h-3.5" />
-            راجع الدفتر قبل ما تعتمد الـframing النهائي
+            راجع الدفتر قبل ما تعتمد التأطير
           </p>
         </motion.div>
 
         <div className="space-y-5">
-          {FRAMING_BUILDER_SECTIONS.map((section, sectionIndex) => (
+          {FRAMING_SECTIONS.map((section, sectionIndex) => (
             <motion.div
               key={section.id}
               className="rounded-2xl border border-border bg-card/80 backdrop-blur-sm p-4"
@@ -138,22 +99,12 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
               transition={{ delay: sectionIndex * 0.1 }}
             >
               <div className="mb-4 text-right" dir="rtl">
-                <div className="flex items-center justify-end gap-2 mb-1">
-                  <span className="text-xs text-primary font-bold">
-                    جزء {sectionIndex + 1}
-                  </span>
-                </div>
                 <h2 className="text-foreground font-bold text-base">{section.title}</h2>
               </div>
 
               <div className="space-y-3">
                 {section.options.map((option, optionIndex) => {
-                  const selected =
-                    (section.id === "client_view" && submission.clientViewId === option.id) ||
-                    (section.id === "flaw_in_view" && submission.flawId === option.id) ||
-                    (section.id === "true_frame" && submission.trueFrameId === option.id) ||
-                    (section.id === "next_decision" && submission.nextDecisionId === option.id);
-
+                  const selected = state.framing[section.id] === option.id;
                   return (
                     <motion.button
                       key={option.id}
@@ -203,27 +154,6 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
               <Target className="w-5 h-5" />
               أكّد التأطير وقدّم التقرير
             </motion.button>
-          )}
-        </AnimatePresence>
-
-        <AnimatePresence>
-          {confirmed && !showStamp && (
-            <motion.div
-              className="mt-8 text-center"
-              initial={{ opacity: 0, scale: 0.85 }}
-              animate={{ opacity: 1, scale: 1 }}
-            >
-              <motion.div
-                className="text-4xl"
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 1, repeat: Infinity }}
-              >
-                📋
-              </motion.div>
-              <p className="text-muted-foreground text-sm mt-2" dir="rtl">
-                بتجمع التأطير النهائي عشان تقدمه لأبو سعيد...
-              </p>
-            </motion.div>
           )}
         </AnimatePresence>
       </div>
