@@ -1,102 +1,219 @@
+import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Trophy, Star, RotateCcw, CheckCircle, XCircle, ChevronDown, MessageSquare, Briefcase, Target, Brain, Sparkles } from "lucide-react";
-import { usePFGame, type PerformanceTier } from "@/contexts/PFGameContext";
+import {
+  Trophy,
+  RotateCcw,
+  CheckCircle,
+  AlertTriangle,
+  Brain,
+  Target,
+  NotebookPen,
+  Sparkles,
+  ChevronDown,
+} from "lucide-react";
+import { usePFGame } from "@/contexts/PFGameContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { FRAMING_OPTIONS, getScoreLevel, MAX_SCORE } from "@/data/pf-scenario";
-import { useSound } from "@/hooks/useSoundEffects";
 import { cn } from "@/lib/utils";
-import { useState, useEffect } from "react";
 import analystImg from "@/assets/characters/analyst.png";
 import saraImg from "@/assets/characters/sara.png";
+import storeCounterImg from "@/assets/scenes/store-counter.png";
+import officeHallwayImg from "@/assets/scenes/office-hallway.jpg";
 
 interface ResultScreenProps {
   onNavigate: (screen: string) => void;
 }
 
-const tierConfig: Record<PerformanceTier, { rank: string; rankEn: string; badgeColor: string; badgeIcon: string; glowColor: string }> = {
-  exceptional: { rank: "محلل استثنائي", rankEn: "Exceptional Analyst", badgeColor: "from-yellow-400 to-amber-600", badgeIcon: "🏆", glowColor: "shadow-amber-500/40" },
-  promising: { rank: "محلل واعد", rankEn: "Promising Analyst", badgeColor: "from-slate-300 to-slate-500", badgeIcon: "🥈", glowColor: "shadow-slate-400/30" },
-  beginner: { rank: "محلل مبتدئ", rankEn: "Getting Started", badgeColor: "from-amber-600 to-amber-800", badgeIcon: "📚", glowColor: "shadow-amber-700/20" },
+type SummaryItem = {
+  label: string;
+  value: string;
+  icon: React.ReactNode;
+};
+
+const outcomeConfig = {
+  strong: {
+    title: "تأطير قوي جدًا",
+    subtitle: "مسكت لبّ المشكلة ووقفت قبل الحل في الوقت الصح",
+    badge: "🏆",
+    gradient: "from-yellow-400 to-amber-600",
+    ring: "border-amber-400/50 shadow-amber-500/20",
+    panel: "bg-amber-500/10 border-amber-500/30",
+    text: "text-amber-300",
+  },
+  medium: {
+    title: "فهم جيد... لكن لسه محتاج حسم أكتر",
+    subtitle: "اتحركت في الاتجاه الصح، لكن framingك كان محتاج وضوح وربط أقوى",
+    badge: "🥈",
+    gradient: "from-slate-300 to-slate-500",
+    ring: "border-slate-400/40 shadow-slate-400/15",
+    panel: "bg-slate-500/10 border-slate-400/25",
+    text: "text-slate-200",
+  },
+  weak: {
+    title: "المشكلة ما اتمسكتش صح",
+    subtitle: "وصلت لحل أو تفسير قبل ما تثبت أصل المشكلة ومرجع المقارنة",
+    badge: "⚠️",
+    gradient: "from-amber-700 to-orange-800",
+    ring: "border-orange-500/40 shadow-orange-500/15",
+    panel: "bg-orange-500/10 border-orange-500/25",
+    text: "text-orange-200",
+  },
 };
 
 export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
-  const { state, resetGame, getPerformanceTier, isFramingCorrect } = usePFGame();
+  const { state } = usePFGame();
   const { profile } = useAuth();
-  const { playSound } = useSound();
-  const [showDetails, setShowDetails] = useState(false);
-  const [scoreAnimated, setScoreAnimated] = useState(0);
 
-  const level = getScoreLevel(state.score);
-  const tier = getPerformanceTier();
-  const tierInfo = tierConfig[tier];
-  const correct = isFramingCorrect();
-  const chosenFraming = FRAMING_OPTIONS.find((f) => f.id === state.chosenFramingId);
-  const correctFraming = FRAMING_OPTIONS.find((f) => f.isCorrect);
+  const [showDetails, setShowDetails] = useState(false);
+  const [animatedQuestions, setAnimatedQuestions] = useState(0);
+
   const playerName = profile?.display_name || "محلل";
   const g = profile?.gender || "male";
   const avatarImg = g === "female" ? saraImg : analystImg;
 
-  const clientSatisfaction = correct ? "راضي ✅" : "مش مقتنع ⚠️";
-  const managerRating = tier === "exceptional" ? "فخور 🌟" : tier === "promising" ? "يشجّع 👍" : "يعاتب ⚡";
+  const outcome = state.finalOutcome || "medium";
+  const framingQuality = state.framingQuality || "medium";
+  const config = outcomeConfig[outcome];
 
-  // Animate score counting up
   useEffect(() => {
-    if (correct) {
-      try { playSound("fanfare"); } catch {}
-      setTimeout(() => { try { playSound("confetti"); } catch {} }, 350);
-    } else {
-      try { playSound("somber"); } catch {}
+    let frame = 0;
+    const target = state.totalQuestionsAsked;
+    const interval = setInterval(() => {
+      frame += 1;
+      setAnimatedQuestions((prev) => {
+        if (prev >= target) {
+          clearInterval(interval);
+          return target;
+        }
+        return Math.min(target, prev + 1);
+      });
+    }, 80);
+
+    return () => clearInterval(interval);
+  }, [state.totalQuestionsAsked]);
+
+  const notesCount = state.savedNoteIds.length;
+
+  const framingCompletion = useMemo(() => {
+    const parts = [
+      !!state.framingPart1,
+      !!state.framingPart2,
+      !!state.framingPart3,
+      !!state.framingPart4,
+    ].filter(Boolean).length;
+
+    return `${parts}/4`;
+  }, [state.framingPart1, state.framingPart2, state.framingPart3, state.framingPart4]);
+
+  const trustLabel =
+    state.trustLevel >= 8
+      ? "ثقة قوية"
+      : state.trustLevel >= 6
+      ? "ثقة جيدة"
+      : state.trustLevel >= 4
+      ? "ثقة متوسطة"
+      : "ثقة ضعيفة";
+
+  const inquiryLabel =
+    state.recoveryUsed === 0
+      ? "مسار نظيف"
+      : state.recoveryUsed === 1
+      ? "مسار جيد مع تصحيح واحد"
+      : "المسار احتاج أكثر من تصحيح";
+
+  const topSummary: SummaryItem[] = [
+    {
+      label: "عدد الأسئلة",
+      value: `${animatedQuestions}`,
+      icon: <Target className="w-4 h-4" />,
+    },
+    {
+      label: "عدد الملاحظات المحفوظة",
+      value: `${notesCount}`,
+      icon: <NotebookPen className="w-4 h-4" />,
+    },
+    {
+      label: "جودة الـframing",
+      value: framingQuality === "strong" ? "قوية" : framingQuality === "weak" ? "ضعيفة" : "متوسطة",
+      icon: <Brain className="w-4 h-4" />,
+    },
+    {
+      label: "الثقة",
+      value: trustLabel,
+      icon: <Sparkles className="w-4 h-4" />,
+    },
+  ];
+
+  const notesByType = useMemo(() => {
+    const grouped = new Map<string, number>();
+
+    for (const note of state.notes) {
+      const key = note.type || "other";
+      grouped.set(key, (grouped.get(key) || 0) + 1);
     }
-    const duration = 1500;
-    const steps = 30;
-    const increment = state.score / steps;
-    let current = 0;
-    const timer = setInterval(() => {
-      current += increment;
-      if (current >= state.score) {
-        setScoreAnimated(state.score);
-        clearInterval(timer);
-      } else {
-        setScoreAnimated(Math.round(current));
-      }
-    }, duration / steps);
-    return () => clearInterval(timer);
-  }, [state.score, correct, playSound]);
+
+    return Array.from(grouped.entries());
+  }, [state.notes]);
+
+  const highlightedStrengths = useMemo(() => {
+    if (outcome === "strong") {
+      return [
+        "ما بلعتش تعريف العميل للمشكلة زي ما هو.",
+        "فصلت بين المشكلة اللي شايفها أبو سعيد والحل اللي كان ناوي عليه.",
+        "راجعت baseline قبل ما تقفز لتفسير أو قرار.",
+      ];
+    }
+
+    if (outcome === "medium") {
+      return [
+        "بدأت تشك في المقارنة ودي خطوة مهمة.",
+        "فيه فهم حقيقي ظهر في النص، لكن الـframing النهائية كانت محتاجة حسم أوضح.",
+        "فيه أساس جيد، لكن لسه محتاج discipline أقوى في ترتيب الأسئلة.",
+      ];
+    }
+
+    return [
+      "أسرعت تجاه التفسير أو الحل قبل ما تثبت أصل المشكلة.",
+      "ما استخدمتش baseline بالشكل الكافي لتعيد تعريف الموقف.",
+      "النتيجة النهائية كانت أضعف من المعلومات اللي كان ممكن توصل لها.",
+    ];
+  }, [outcome]);
 
   const handleReplay = () => {
-    resetGame();
     onNavigate("company-briefing");
   };
 
-  const badges = [
-    ...(correct ? [{ icon: "🎯", label: "تأطير دقيق", desc: "اختار التأطير الصحيح" }] : []),
-    ...(state.score >= 20 ? [{ icon: "🧠", label: "أسئلة حادة", desc: "سأل أسئلة قوية" }] : []),
-    ...(tier === "exceptional" ? [{ icon: "⭐", label: "عميل راضي", desc: "أبو سعيد مبسوط" }] : []),
-    ...(state.trustLevel >= 8 ? [{ icon: "🤝", label: "ثقة عالية", desc: "بنى ثقة مع العميل" }] : []),
-  ];
-
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Golden confetti for exceptional */}
-      {tier === "exceptional" && (
-        <div className="absolute inset-0 pointer-events-none z-20">
-          {[...Array(30)].map((_, i) => (
+      <motion.div
+        className="absolute inset-0"
+        initial={{ scale: 1.1, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 1.5 }}
+      >
+        <img
+          src={outcome === "strong" ? storeCounterImg : officeHallwayImg}
+          alt=""
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/75 backdrop-blur-md" />
+      </motion.div>
+
+      {outcome === "strong" && (
+        <div className="absolute inset-0 pointer-events-none">
+          {[...Array(20)].map((_, i) => (
             <motion.div
               key={i}
-              className="absolute"
+              className="absolute w-2 h-2 rounded-full"
               style={{
                 left: `${Math.random() * 100}%`,
-                width: i % 3 === 0 ? "8px" : "6px",
-                height: i % 3 === 0 ? "8px" : "6px",
-                borderRadius: i % 2 === 0 ? "50%" : "2px",
-                backgroundColor: ["#FFD700", "#FFA500", "#FFE066", "#DAA520", "#F5D442"][i % 5],
+                backgroundColor: ["#FFD700", "#FFA000", "#FFF176", "#E53935", "#43A047"][i % 5],
               }}
               initial={{ top: "-5%", opacity: 1, rotate: 0 }}
               animate={{
                 top: "110%",
-                opacity: [1, 1, 0.5, 0],
+                opacity: [1, 1, 0],
                 rotate: Math.random() * 720,
-                x: [0, (Math.random() - 0.5) * 120],
+                x: [0, (Math.random() - 0.5) * 90],
               }}
               transition={{
                 duration: 3 + Math.random() * 2,
@@ -106,250 +223,236 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
               }}
             />
           ))}
-          {/* Golden shimmer overlay */}
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-b from-amber-400/5 to-transparent"
-            animate={{ opacity: [0, 0.15, 0] }}
-            transition={{ duration: 3, repeat: Infinity }}
-          />
         </div>
       )}
 
-      {/* Subtle particles for non-exceptional */}
-      {tier !== "exceptional" && (
-        <div className="absolute inset-0">
-          {[...Array(8)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-1.5 h-1.5 rounded-full bg-primary/15"
-              style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%` }}
-              animate={{ y: [0, -20, 0], opacity: [0.1, 0.4, 0.1] }}
-              transition={{ duration: 4 + Math.random() * 2, repeat: Infinity, delay: Math.random() * 2 }}
-            />
-          ))}
-        </div>
-      )}
-
-      <div className="relative z-10 container mx-auto px-4 py-6 max-w-lg">
-        {/* Analyst Profile Card */}
+      <div className="relative z-10 container mx-auto px-4 py-6 max-w-xl">
         <motion.div
           className={cn(
-            "p-5 rounded-2xl bg-card/70 backdrop-blur-sm border border-border mb-4",
-            tier === "exceptional" && "border-amber-500/40 shadow-lg shadow-amber-500/10"
+            "p-5 rounded-2xl bg-card/75 backdrop-blur-sm border shadow-xl mb-5",
+            config.ring
           )}
-          initial={{ y: -50, opacity: 0 }}
+          initial={{ y: -40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
         >
           <div className="flex items-center gap-4 mb-4" dir="rtl">
-            {/* Avatar with tier glow */}
             <motion.div
               className={cn(
-                "relative w-18 h-18 rounded-full overflow-hidden border-3 shadow-lg",
-                tier === "exceptional" ? "border-amber-400" : tier === "promising" ? "border-slate-400" : "border-muted",
-                tierInfo.glowColor
+                "relative w-20 h-20 rounded-full overflow-hidden border-4 bg-background/40",
+                config.ring
               )}
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: "spring", damping: 10 }}
             >
               <img src={avatarImg} alt={playerName} className="w-full h-full object-cover" />
-              {tier === "exceptional" && (
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-t from-amber-400/20 to-transparent"
-                  animate={{ opacity: [0, 0.4, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                />
-              )}
             </motion.div>
+
             <div className="flex-1">
-              <h2 className="text-lg font-bold text-foreground">{playerName}</h2>
-              <div className="flex items-center gap-1.5">
-                <span className={cn(
+              <h2 className="text-xl font-bold text-foreground">{playerName}</h2>
+              <p
+                className={cn(
                   "text-sm font-bold bg-clip-text text-transparent bg-gradient-to-r",
-                  tierInfo.badgeColor
-                )}>
-                  {tierInfo.rank}
-                </span>
-              </div>
-              <p className="text-xs text-muted-foreground">{tierInfo.rankEn}</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">Pinnacle Consulting</p>
+                  config.gradient
+                )}
+              >
+                {config.title}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">{config.subtitle}</p>
             </div>
-            <div className="text-3xl">{tierInfo.badgeIcon}</div>
+
+            <div className="text-4xl">{config.badge}</div>
           </div>
 
-          {/* Score with animation */}
-          <div className="flex items-center justify-center gap-2 mb-3 p-3 rounded-xl bg-background/40">
-            <Star className="w-5 h-5 text-amber-400" />
-            <motion.span
-              className="text-3xl font-bold text-amber-400 tabular-nums"
-              key={scoreAnimated}
-            >
-              {scoreAnimated}
-            </motion.span>
-            <span className="text-muted-foreground text-lg">/ {MAX_SCORE}</span>
-          </div>
-
-          {/* Ratings row */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="p-2.5 rounded-lg bg-background/50 text-center" dir="rtl">
-              <div className="flex items-center justify-center gap-1 mb-1">
-                <MessageSquare className="w-3.5 h-3.5 text-teal-400" />
-                <span className="text-xs text-muted-foreground">تقييم العميل</span>
-              </div>
-              <p className="text-sm font-bold text-foreground">{clientSatisfaction}</p>
-            </div>
-            <div className="p-2.5 rounded-lg bg-background/50 text-center" dir="rtl">
-              <div className="flex items-center justify-center gap-1 mb-1">
-                <Briefcase className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="text-xs text-muted-foreground">تقييم المدير</span>
-              </div>
-              <p className="text-sm font-bold text-foreground">{managerRating}</p>
-            </div>
-          </div>
-
-          {/* Trust level bar */}
-          <div className="mt-3 p-2.5 rounded-lg bg-background/50" dir="rtl">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                <Target className="w-3 h-3" /> مستوى الثقة
+          <div className={cn("p-4 rounded-xl border text-center", config.panel)}>
+            <div className="flex items-center justify-center gap-2 mb-2">
+              {outcome === "weak" ? (
+                <AlertTriangle className="w-5 h-5 text-orange-300" />
+              ) : (
+                <Trophy className="w-5 h-5 text-amber-300" />
+              )}
+              <span className={cn("font-bold text-sm", config.text)}>
+                {outcome === "strong"
+                  ? "النتيجة النهائية: قوية"
+                  : outcome === "weak"
+                  ? "النتيجة النهائية: ضعيفة"
+                  : "النتيجة النهائية: متوسطة"}
               </span>
-              <span className="text-xs font-bold text-foreground">{state.trustLevel}/10</span>
             </div>
-            <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
-              <motion.div
-                className="h-full rounded-full bg-gradient-to-r from-primary to-accent"
-                initial={{ width: 0 }}
-                animate={{ width: `${(state.trustLevel / 10) * 100}%` }}
-                transition={{ duration: 1.2, delay: 0.5 }}
-              />
-            </div>
+
+            <p className="text-xs text-muted-foreground leading-relaxed" dir="rtl">
+              {outcome === "strong"
+                ? "قدّمت فهم واضح للمشكلة الحقيقية، وربطت بين baseline الخاطئة وخطر قرار الخصومات."
+                : outcome === "weak"
+                ? "النهاية وضحت إن المشكلة ما اتمسكتش بالشكل الكافي قبل ما يتم التفكير في الحل."
+                : "فيه فهم حقيقي حصل، لكن لسه محتاج دقة أعلى في إعادة تعريف المشكلة وصياغة القرار التالي."}
+            </p>
           </div>
         </motion.div>
 
-        {/* Badges */}
-        {badges.length > 0 && (
-          <motion.div
-            className="flex flex-wrap justify-center gap-2 mb-4"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.4, type: "spring" }}
-          >
-            {badges.map((badge, i) => (
+        <motion.div
+          className="grid grid-cols-2 gap-3 mb-5"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+        >
+          {topSummary.map((item, i) => (
+            <motion.div
+              key={item.label}
+              className="p-3 rounded-xl bg-card/55 backdrop-blur-sm border border-border"
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 + i * 0.06 }}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-primary">{item.icon}</span>
+                <span className="text-xs text-muted-foreground">{item.label}</span>
+              </div>
+              <p className="text-sm font-bold text-foreground" dir="rtl">
+                {item.value}
+              </p>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <motion.div
+          className="p-4 rounded-xl bg-card/50 border border-border mb-4"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+        >
+          <div className="flex items-center gap-2 mb-3" dir="rtl">
+            <Brain className="w-4 h-4 text-primary" />
+            <h3 className="text-sm font-bold text-foreground">ملخص الأداء</h3>
+          </div>
+
+          <div className="space-y-2 text-sm text-foreground" dir="rtl">
+            <p>
+              <span className="text-muted-foreground">المسار:</span>{" "}
+              <span className="font-bold">{inquiryLabel}</span>
+            </p>
+            <p>
+              <span className="text-muted-foreground">Recovery مستخدمة:</span>{" "}
+              <span className="font-bold">{state.recoveryUsed} / 2</span>
+            </p>
+            <p>
+              <span className="text-muted-foreground">الـFraming Builder:</span>{" "}
+              <span className="font-bold">{framingCompletion}</span>
+            </p>
+            <p>
+              <span className="text-muted-foreground">الأسئلة القوية / الجيدة / الضعيفة:</span>{" "}
+              <span className="font-bold">
+                {state.strongQuestionsCount} / {state.goodQuestionsCount} / {state.weakQuestionsCount}
+              </span>
+            </p>
+          </div>
+        </motion.div>
+
+        <motion.div
+          className="p-4 rounded-xl bg-card/50 border border-border mb-4"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.42 }}
+        >
+          <div className="flex items-center gap-2 mb-3" dir="rtl">
+            <CheckCircle className="w-4 h-4 text-green-400" />
+            <h3 className="text-sm font-bold text-foreground">ماذا كشف أداؤك؟</h3>
+          </div>
+
+          <div className="space-y-2" dir="rtl">
+            {highlightedStrengths.map((line, i) => (
               <motion.div
                 key={i}
-                className={cn(
-                  "flex flex-col items-center gap-1 p-2.5 rounded-lg border",
-                  tier === "exceptional"
-                    ? "bg-amber-500/10 border-amber-500/30"
-                    : "bg-primary/5 border-primary/20"
-                )}
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.5 + i * 0.1 }}
-                title={badge.desc}
+                className="p-3 rounded-lg bg-background/40 border border-border"
+                initial={{ opacity: 0, x: 16 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.48 + i * 0.05 }}
               >
-                <span className="text-lg">{badge.icon}</span>
-                <span className={cn(
-                  "text-[10px] font-bold",
-                  tier === "exceptional" ? "text-amber-400" : "text-primary"
-                )}>{badge.label}</span>
+                <p className="text-sm text-foreground leading-relaxed">{line}</p>
               </motion.div>
             ))}
-          </motion.div>
-        )}
-
-        {/* Level description */}
-        <motion.div
-          className="p-4 rounded-xl bg-card/40 border border-border mb-4 text-center"
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.3 }}
-        >
-          <p className="text-foreground text-sm leading-relaxed" dir="rtl">
-            {level.description}
-          </p>
-        </motion.div>
-
-        {/* Framing result */}
-        <motion.div
-          className={cn(
-            "p-4 rounded-xl border mb-4",
-            correct ? "bg-green-500/10 border-green-500/30" : "bg-red-500/10 border-red-500/30"
-          )}
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.4 }}
-        >
-          <div className="flex items-start gap-2 mb-2">
-            {correct ? (
-              <CheckCircle className="w-5 h-5 text-green-400 shrink-0 mt-0.5" />
-            ) : (
-              <XCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
-            )}
-            <div>
-              <p className="text-sm font-bold text-foreground" dir="rtl">
-                {correct ? "التأطير صح! 🎯" : "التأطير مش دقيق"}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1" dir="rtl">
-                اختيارك: {chosenFraming?.text?.slice(0, 80)}...
-              </p>
-            </div>
           </div>
-          {!correct && correctFraming && (
-            <div className="mt-3 pt-3 border-t border-border">
-              <p className="text-xs font-bold text-green-400 mb-1" dir="rtl">التأطير الصح:</p>
-              <p className="text-xs text-foreground leading-relaxed" dir="rtl">
-                {correctFraming.text}
-              </p>
-            </div>
-          )}
         </motion.div>
 
-        {/* Round details toggle */}
         <motion.button
-          onClick={() => setShowDetails(!showDetails)}
+          onClick={() => setShowDetails((prev) => !prev)}
           className="w-full p-3 rounded-xl bg-card/50 border border-border flex items-center justify-between mb-4"
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
         >
-          <span className="text-sm font-bold text-foreground">📋 مراجعة الأسئلة</span>
-          <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform", showDetails && "rotate-180")} />
+          <span className="text-sm font-bold text-foreground">📋 مراجعة الدفتر والمسار</span>
+          <ChevronDown
+            className={cn("w-4 h-4 text-muted-foreground transition-transform", showDetails && "rotate-180")}
+          />
         </motion.button>
 
         {showDetails && (
           <motion.div
-            className="space-y-2 mb-6"
+            className="space-y-3 mb-6"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
           >
-            {state.choices.map((choice, i) => {
-              const tierLabel = choice.tier === "strong" ? "🟢 قوي" : choice.tier === "medium" ? "🟡 متوسط" : "🔴 ضعيف";
-              return (
-                <div key={i} className="p-3 rounded-lg bg-card/30 border border-border">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs text-muted-foreground">جولة {i + 1}</span>
-                    <span className="text-xs font-bold">{tierLabel} (+{choice.points})</span>
-                  </div>
-                  <p className="text-xs text-foreground mb-1" dir="rtl">{choice.text.slice(0, 60)}...</p>
-                  <p className="text-xs text-muted-foreground" dir="rtl">{choice.explanation}</p>
+            <div className="p-4 rounded-xl bg-card/45 border border-border">
+              <h4 className="text-sm font-bold text-foreground mb-3" dir="rtl">
+                الملاحظات المحفوظة حسب النوع
+              </h4>
+
+              {notesByType.length === 0 ? (
+                <p className="text-xs text-muted-foreground" dir="rtl">
+                  ما فيش ملاحظات محفوظة في الدفتر.
+                </p>
+              ) : (
+                <div className="space-y-2" dir="rtl">
+                  {notesByType.map(([type, count]) => (
+                    <div
+                      key={type}
+                      className="flex items-center justify-between p-2 rounded-lg bg-background/35 border border-border"
+                    >
+                      <span className="text-xs text-foreground">{type}</span>
+                      <span className="text-xs font-bold text-primary">{count}</span>
+                    </div>
+                  ))}
                 </div>
-              );
-            })}
+              )}
+            </div>
+
+            <div className="p-4 rounded-xl bg-card/45 border border-border">
+              <h4 className="text-sm font-bold text-foreground mb-3" dir="rtl">
+                آخر الملاحظات المحفوظة
+              </h4>
+
+              {state.notes.length === 0 ? (
+                <p className="text-xs text-muted-foreground" dir="rtl">
+                  ما اتحفظتش ملاحظات لسه.
+                </p>
+              ) : (
+                <div className="space-y-2" dir="rtl">
+                  {state.notes.slice(-5).reverse().map((note) => (
+                    <div
+                      key={`${note.roundId}-${note.text}`}
+                      className="p-3 rounded-lg bg-background/35 border border-border"
+                    >
+                      <p className="text-sm text-foreground leading-relaxed">{note.text}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </motion.div>
         )}
 
-        {/* Actions */}
         <motion.div
           className="space-y-3"
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.6 }}
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.58 }}
         >
           <motion.button
             onClick={handleReplay}
             className="w-full flex items-center justify-center gap-3 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold"
             whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
             <RotateCcw className="w-5 h-5" />
             العب مرة أخرى
