@@ -1,38 +1,64 @@
 import type { KnowledgeState, RunState } from "@/data/pf-case";
-import { QUESTION_BUNDLES } from "@/data/pf-case";
+
+function shouldUseRecoveryBundle(
+  normalBundleId: string,
+  recoveryBundleId: string,
+  run: RunState
+): boolean {
+  const alreadySawNormal =
+    run.seenBundleIds.includes(normalBundleId) || run.currentBundleId === normalBundleId;
+
+  const alreadyInRecovery = run.currentBundleId === recoveryBundleId;
+
+  return alreadySawNormal || alreadyInRecovery;
+}
 
 export function getAvailableBundle(knowledge: KnowledgeState, run: RunState): string {
   if (!knowledge.claimOpened) {
-    return run.recoveryUsed > 0 ? "bundle_1_recovery" : "bundle_1_opening";
+    return shouldUseRecoveryBundle("bundle_1_opening", "bundle_1_recovery", run)
+      ? "bundle_1_recovery"
+      : "bundle_1_opening";
   }
 
   if (!knowledge.claimDefined) {
-    return run.recoveryUsed > 0 ? "bundle_2_recovery" : "bundle_2_claim_definition";
+    return shouldUseRecoveryBundle("bundle_2_claim_definition", "bundle_2_recovery", run)
+      ? "bundle_2_recovery"
+      : "bundle_2_claim_definition";
   }
 
   if (!knowledge.requestKnown) {
-    return run.recoveryUsed > 0 ? "bundle_3_recovery" : "bundle_3_request_bias";
+    return shouldUseRecoveryBundle("bundle_3_request_bias", "bundle_3_recovery", run)
+      ? "bundle_3_recovery"
+      : "bundle_3_request_bias";
   }
 
   if (!knowledge.baselineKnown) {
-    return run.recoveryUsed > 0 ? "bundle_4_recovery" : "bundle_4_baseline";
+    return shouldUseRecoveryBundle("bundle_4_baseline", "bundle_4_recovery", run)
+      ? "bundle_4_recovery"
+      : "bundle_4_baseline";
   }
 
   if (!knowledge.realityChecked) {
-    return run.recoveryUsed > 0 ? "bundle_5_recovery" : "bundle_5_reality_check";
+    return shouldUseRecoveryBundle("bundle_5_reality_check", "bundle_5_recovery", run)
+      ? "bundle_5_recovery"
+      : "bundle_5_reality_check";
   }
 
   if (!knowledge.baselineQuestioned) {
-    return run.recoveryUsed > 0 ? "bundle_6_recovery" : "bundle_6_baseline_validity";
+    return shouldUseRecoveryBundle("bundle_6_baseline_validity", "bundle_6_recovery", run)
+      ? "bundle_6_recovery"
+      : "bundle_6_baseline_validity";
   }
 
   if (!knowledge.exceptionalYearKnown) {
-    return run.recoveryUsed > 0 ? "bundle_7_recovery" : "bundle_7_exceptional_factor";
+    return shouldUseRecoveryBundle("bundle_7_exceptional_factor", "bundle_7_recovery", run)
+      ? "bundle_7_recovery"
+      : "bundle_7_exceptional_factor";
   }
 
   if (!knowledge.exceptionalCauseKnown) {
     return "bundle_7a_followup";
   }
 
-  return QUESTION_BUNDLES.bundle_7a_followup.id;
+  return "bundle_7a_followup";
 }
