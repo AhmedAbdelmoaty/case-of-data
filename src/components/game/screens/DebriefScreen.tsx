@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSound } from "@/hooks/useSoundEffects";
+import { useAmbientSound } from "@/hooks/useAmbientSound";
 import { EnhancedDialogue } from "../EnhancedDialogue";
 import { gText } from "@/lib/gText";
 import officeHallwayImg from "@/assets/scenes/office-hallway.jpg";
@@ -16,6 +17,7 @@ export const DebriefScreen = ({ onComplete }: DebriefScreenProps) => {
   const { state, getPerformanceTier, isFramingCorrect } = usePFGame();
   const { profile } = useAuth();
   const { playSound } = useSound();
+  useAmbientSound("office");
   const [phase, setPhase] = useState<"hallway" | "dialogue">("hallway");
   const [dialogueIndex, setDialogueIndex] = useState(0);
 

@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { useSound } from "@/hooks/useSoundEffects";
+import { useAmbientSound } from "@/hooks/useAmbientSound";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { gText } from "@/lib/gText";
@@ -20,6 +21,7 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
   const name = profile?.display_name || "محلل";
   const g = profile?.gender || "male";
   const { playSound, playDoorKnock } = useSound();
+  useAmbientSound("office");
   const [phase, setPhase] = useState<"hallway" | "door-knock" | "dialogue" | "transition">(
     isReviewMode ? "dialogue" : "hallway"
   );
