@@ -1,5 +1,28 @@
 import type { DialogueLine } from "./types";
 
+export const ABU_SAEED_GREETING: DialogueLine[] = [
+  {
+    characterId: "abuSaeed",
+    text: "أهلاً وسهلاً يا فندم، نورت المحل. اتفضل اقعد.",
+    mood: "happy",
+  },
+  {
+    characterId: "detective",
+    text: "أهلاً بيك يا أبو سعيد. أستاذ منصور بعتني عشان نتكلم في موضوع المبيعات.",
+    mood: "neutral",
+  },
+  {
+    characterId: "abuSaeed",
+    text: "آه والله، أنا قلقان من شهر تقريبًا. حاسس إن في حاجة مش متمام بس مش عارف أحطّ إيدي عليها.",
+    mood: "concerned",
+  },
+  {
+    characterId: "detective",
+    text: "ماشي، خلينا نهدّي ونفهم سوا. هسألك كام سؤال، جاوبني براحتك.",
+    mood: "confident",
+  },
+];
+
 export const MANSOUR_INTRO_DIALOGUES: DialogueLine[] = [
   {
     characterId: "mansour",
