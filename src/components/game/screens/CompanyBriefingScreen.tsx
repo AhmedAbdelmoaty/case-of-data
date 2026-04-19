@@ -1,87 +1,65 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useSound } from "@/hooks/useSoundEffects";
 import { useAmbientSound } from "@/hooks/useAmbientSound";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
-import { gText } from "@/lib/gText";
 import { EnhancedDialogue } from "../EnhancedDialogue";
 import { Rocket, GraduationCap, DoorOpen } from "lucide-react";
 import analystImg from "@/assets/characters/analyst.png";
 import saraImg from "@/assets/characters/sara.png";
 import officeHallwayImg from "@/assets/scenes/office-hallway.jpg";
 import mansourDeskImg from "@/assets/scenes/mansour-desk.jpg";
+import { MANSOUR_INTRO_DIALOGUES } from "@/data/pf-case";
 
 interface CompanyBriefingScreenProps {
   onComplete: () => void;
   isReviewMode?: boolean;
 }
 
-export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: CompanyBriefingScreenProps) => {
+type EnhancedDialogueMood = "neutral" | "happy" | "nervous" | "angry" | "suspicious";
+
+const mapMood = (mood?: string): EnhancedDialogueMood => {
+  switch (mood) {
+    case "happy":
+      return "happy";
+    case "concerned":
+      return "nervous";
+    case "serious":
+      return "neutral";
+    case "confident":
+      return "neutral";
+    case "impressed":
+      return "happy";
+    case "disappointed":
+      return "angry";
+    case "uncertain":
+      return "suspicious";
+    default:
+      return "neutral";
+  }
+};
+
+export const CompanyBriefingScreen = ({
+  onComplete,
+  isReviewMode = false,
+}: CompanyBriefingScreenProps) => {
   const { profile } = useAuth();
   const name = profile?.display_name || "محلل";
   const g = profile?.gender || "male";
   const { playSound, playDoorKnock } = useSound();
+
   useAmbientSound("office");
+
   const [phase, setPhase] = useState<"hallway" | "door-knock" | "dialogue" | "transition">(
     isReviewMode ? "dialogue" : "hallway"
   );
 
-  const dialogues = [
-    {
-      characterId: "mansour",
-      text: gText("أهلًا بيك، اتفضل اقعد. أخبارك إيه؟", "أهلًا بيكي، اتفضلي اقعدي. أخبارك إيه؟", g),
-      mood: "happy" as const,
-      audioSrc: "/voiceover/mansour/mansour_briefing_01_welcome.wav",
-    },
-    {
-      characterId: "detective",
-      text: "الحمد لله يا أستاذ منصور، تمام.",
-      mood: "happy" as const,
-    },
-    {
-      characterId: "mansour",
-      text: "عندنا مشروع جديد. جالنا طلب استشارة من عميل اسمه أبو سعيد، عنده متجر ملابس في المنطقة التجارية، اسمه Fashion House.",
-      mood: "neutral" as const,
-      audioSrc: "/voiceover/mansour/mansour_briefing_02_case_intro.wav",
-    },
-    {
-      characterId: "mansour",
-      text: "الراجل ده شغال في المجال من أكتر من اتناشر سنة. راجل محترم، ومحله ماشي كويس الحمد لله.",
-      mood: "neutral" as const,
-      audioSrc: "/voiceover/mansour/mansour_briefing_03_client_background.wav",
-    },
-    {
-      characterId: "mansour",
-      text: "كلمني وقال إن فيه حاجة غريبة بتحصل عنده. حاسس إن الدنيا ماشية، والمحل فيه حركة... بس لما بييجي يحسب آخر الشهر، بيلاقي الأرقام أقل من المتوقع.",
-      mood: "neutral" as const,
-      audioSrc: "/voiceover/mansour/mansour_briefing_04_problem_intro.wav",
-    },
-    {
-      characterId: "mansour",
-      text: gText(
-        "الراجل محتار، ومش فاهم إيه اللي بيحصل بالضبط. عايزك تروح تقعد معاه، وتفهم الوضع.",
-        "الراجل محتار، ومش فاهم إيه اللي بيحصل بالضبط. عايزك تروحي تقعدي معاه، وتفهمي الوضع.",
-        g
-      ),
-      mood: "neutral" as const,
-      audioSrc: "/voiceover/mansour/mansour_briefing_05_task_handoff.wav",
-    },
-    {
-      characterId: "detective",
-      text: gText("ماشي يا أستاذ منصور. هروح أشوف إيه الحكاية.", "ماشي يا أستاذ منصور. هروح أشوف إيه الحكاية.", g),
-      mood: "neutral" as const,
-    },
-    {
-      characterId: "mansour",
-      text: gText(
-        "تمام. يلا بالتوفيق. أنا مستنيك ترجعلي بالصورة كاملة.",
-        "تمام. يلا بالتوفيق. أنا مستنيكي ترجعيلي بالصورة كاملة.",
-        g
-      ),
-      mood: "happy" as const,
-      audioSrc: "/voiceover/mansour/mansour_briefing_06_sendoff.wav",
-    },
-  ];
+  const dialogues = MANSOUR_INTRO_DIALOGUES.map((line) => ({
+    characterId: line.characterId,
+    text: line.text,
+    mood: mapMood(line.mood),
+    audioSrc: line.audioSrc,
+  }));
 
   const handleDialogueComplete = () => {
     if (isReviewMode) {
@@ -91,7 +69,6 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
     setPhase("transition");
   };
 
-  // Phase 1: Hallway
   if (phase === "hallway") {
     return (
       <div className="min-h-screen bg-background relative overflow-hidden">
@@ -144,7 +121,6 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
     );
   }
 
-  // Phase 2: Door knock → then auto-enter dialogue
   if (phase === "door-knock") {
     return (
       <div className="min-h-screen bg-background relative overflow-hidden">
@@ -159,11 +135,7 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
         </motion.div>
 
         <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-4">
-          <motion.div
-            className="space-y-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
+          <motion.div className="space-y-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <motion.p
               className="text-4xl"
               animate={{ x: [0, -5, 5, -3, 3, 0] }}
@@ -191,7 +163,9 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
             </motion.p>
             <motion.button
               onClick={() => {
-                try { playSound("door"); } catch {}
+                try {
+                  playSound("door");
+                } catch {}
                 setPhase("dialogue");
               }}
               className="mt-4 px-8 py-3 rounded-xl bg-card/60 backdrop-blur-md border border-border text-foreground font-bold hover:bg-card/80 transition-all"
@@ -209,15 +183,16 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
     );
   }
 
-  // Phase: Transition after dialogue
   if (phase === "transition") {
     const avatarImg = g === "female" ? saraImg : analystImg;
+
     return (
       <div className="min-h-screen bg-background relative">
         <div className="absolute inset-0">
           <img src={mansourDeskImg} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
         </div>
+
         <div className="relative z-10 flex items-center justify-center min-h-screen px-4">
           <motion.div
             className="max-w-md w-full text-center space-y-6"
@@ -242,11 +217,7 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
             >
               <GraduationCap className="w-8 h-8 text-accent mx-auto" />
               <p className="text-foreground text-lg font-bold leading-relaxed" dir="rtl">
-                {gText(
-                  "قدامك مهمة جديدة — عميل محتار ومش فاهم إيه اللي بيحصل في متجره. روح اسمع وافهم.",
-                  "قدامك مهمة جديدة — عميل محتار ومش فاهم إيه اللي بيحصل في متجره. روحي اسمعي وافهمي.",
-                  g
-                )}
+                قدامك عميل داخل على قرار، ودورك الأول إنك تفهم الصورة صح قبل أي اقتراح.
               </p>
             </motion.div>
 
@@ -276,7 +247,6 @@ export const CompanyBriefingScreen = ({ onComplete, isReviewMode = false }: Comp
     );
   }
 
-  // Dialogue phase — starts directly with mansour-desk background
   return (
     <div className="min-h-screen bg-background relative">
       <motion.div
