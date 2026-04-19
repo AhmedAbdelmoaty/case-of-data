@@ -1,127 +1,45 @@
-// ============================================================================
-// PFGameContext — rebuilt from scratch on the new Case Schema
-// Manages: question budget (7), trust, discovered evidence, framing selections,
-// game phase, and answered-question history.
-// ============================================================================
+import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { INQUIRY_ROUNDS, FRAMING_OPTIONS, FRAMING_POINTS, type InquiryOption } from "@/data/pf-scenario";
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useMemo,
-  type ReactNode,
-} from "react";
-import { baselineCase } from "@/data/cases/baseline-case";
-import type {
-  Case,
-  Question,
-  Evidence,
-  FramingCombo,
-  PerformanceTier,
-} from "@/types/case";
-
-// ----------------------------------------------------------------------------
-// Phases
-// ----------------------------------------------------------------------------
-export type GamePhase =
-  | "briefing"
-  | "travel"
-  | "arrival"
-  | "investigation"
-  | "synthesis"
-  | "framing"
-  | "debrief"
-  | "result";
-
-// ----------------------------------------------------------------------------
-// Answered question record (for replay/debrief)
-// ----------------------------------------------------------------------------
-export interface AnsweredQuestion {
-  questionId: string;
-  order: number; // 1..budget
-  trustBefore: number;
-  trustAfter: number;
-  newEvidenceIds: string[];
+interface NoteEntry {
+  roundId: number;
+  text: string;
 }
 
-// ----------------------------------------------------------------------------
-// Framing selection
-// ----------------------------------------------------------------------------
-export interface FramingSelection {
-  symptomId: string | null;
-  rootCauseId: string | null;
-  recommendationId: string | null;
+export type PerformanceTier = "exceptional" | "promising" | "beginner";
+
+interface PFGameState {
+  currentRound: number;
+  choices: InquiryOption[];
+  score: number;
+  notes: NoteEntry[];
+  chosenFramingId: string | null;
+  gamePhase: "briefing" | "travel" | "arrival" | "inquiry" | "framing" | "presentation" | "return-travel" | "debrief" | "result";
+  trustLevel: number; // 0-10, starts at 5
 }
 
-// ----------------------------------------------------------------------------
-// Game State
-// ----------------------------------------------------------------------------
-export interface PFGameState {
-  caseId: string;
-  phase: GamePhase;
-
-  // Investigation
-  askedQuestionIds: string[];        // ordered (most recent last)
-  answeredHistory: AnsweredQuestion[];
-  discoveredEvidenceIds: string[];   // dedup, in discovery order
-  trust: number;
-  lastQuestionId: string | null;
-
-  // Framing
-  framing: FramingSelection;
-  framingSubmitted: boolean;
-
-  // Notes (player-curated; subset of discoveredEvidenceIds)
-  pinnedEvidenceIds: string[];
-}
-
-const buildInitialState = (c: Case): PFGameState => ({
-  caseId: c.id,
-  phase: "briefing",
-  askedQuestionIds: [],
-  answeredHistory: [],
-  discoveredEvidenceIds: [],
-  trust: c.trustMechanics.initial,
-  lastQuestionId: null,
-  framing: { symptomId: null, rootCauseId: null, recommendationId: null },
-  framingSubmitted: false,
-  pinnedEvidenceIds: [],
-});
-
-// ----------------------------------------------------------------------------
-// Context value
-// ----------------------------------------------------------------------------
 interface PFGameContextValue {
-  caseData: Case;
   state: PFGameState;
-
-  // Derived
-  remainingBudget: number;
-  isBudgetExhausted: boolean;
-  isTrustCollapsed: boolean;
-  availableQuestions: Question[];      // not-yet-asked
-  discoveredEvidence: Evidence[];      // resolved objects
-  lastQuestion: Question | null;
-  lastAnswer: AnsweredQuestion | null;
-  framingComplete: boolean;
-  matchedCombo: FramingCombo | null;   // null if incoherent
-
-  // Actions
-  setPhase: (phase: GamePhase) => void;
-  askQuestion: (questionId: string) => void;
-  endInvestigation: () => void;        // moves to synthesis
-  togglePinEvidence: (evidenceId: string) => void;
-  setFramingComponent: (
-    kind: "symptom" | "root-cause" | "recommendation",
-    componentId: string
-  ) => void;
-  submitFraming: () => void;
+  chooseQuestion: (option: InquiryOption) => void;
+  addNote: (roundId: number, text: string) => void;
+  removeNote: (roundId: number) => void;
+  chooseFraming: (framingId: string) => void;
+  getFinalScore: () => number;
   resetGame: () => void;
-
-  // Evaluation helper (lightweight; full evaluator lives in case-evaluator)
+  setPhase: (phase: PFGameState["gamePhase"]) => void;
   getPerformanceTier: () => PerformanceTier;
+  isFramingCorrect: () => boolean;
 }
+
+const initialState: PFGameState = {
+  currentRound: 0,
+  choices: [],
+  score: 0,
+  notes: [],
+  chosenFramingId: null,
+  gamePhase: "briefing",
+  trustLevel: 5,
+};
 
 const PFGameContext = createContext<PFGameContextValue | null>(null);
 
@@ -131,220 +49,73 @@ export const usePFGame = () => {
   return ctx;
 };
 
-// ----------------------------------------------------------------------------
-// Provider
-// ----------------------------------------------------------------------------
-interface PFGameProviderProps {
-  children: ReactNode;
-  caseData?: Case;
-}
+export const PFGameProvider = ({ children }: { children: ReactNode }) => {
+  const [state, setState] = useState<PFGameState>(initialState);
 
-export const PFGameProvider = ({
-  children,
-  caseData = baselineCase,
-}: PFGameProviderProps) => {
-  const [state, setState] = useState<PFGameState>(() => buildInitialState(caseData));
-
-  // ----- Lookup helpers (memoized maps) -----
-  const questionMap = useMemo(
-    () => new Map(caseData.questionBank.map((q) => [q.id, q])),
-    [caseData]
-  );
-  const evidenceMap = useMemo(
-    () => new Map(caseData.evidencePool.map((e) => [e.id, e])),
-    [caseData]
-  );
-
-  // ----- Derived state -----
-  const remainingBudget = caseData.questionBudget - state.askedQuestionIds.length;
-  const isBudgetExhausted = remainingBudget <= 0;
-  const isTrustCollapsed = state.trust <= 0;
-
-  const availableQuestions = useMemo(
-    () =>
-      caseData.questionBank.filter((q) => !state.askedQuestionIds.includes(q.id)),
-    [caseData, state.askedQuestionIds]
-  );
-
-  const discoveredEvidence = useMemo(
-    () =>
-      state.discoveredEvidenceIds
-        .map((id) => evidenceMap.get(id))
-        .filter((e): e is Evidence => Boolean(e)),
-    [state.discoveredEvidenceIds, evidenceMap]
-  );
-
-  const lastQuestion = state.lastQuestionId
-    ? questionMap.get(state.lastQuestionId) ?? null
-    : null;
-
-  const lastAnswer =
-    state.answeredHistory.length > 0
-      ? state.answeredHistory[state.answeredHistory.length - 1]
-      : null;
-
-  const framingComplete =
-    state.framing.symptomId !== null &&
-    state.framing.rootCauseId !== null &&
-    state.framing.recommendationId !== null;
-
-  const matchedCombo = useMemo<FramingCombo | null>(() => {
-    if (!framingComplete) return null;
-    return (
-      caseData.validFramingCombinations.find(
-        (c) =>
-          c.symptomId === state.framing.symptomId &&
-          c.rootCauseId === state.framing.rootCauseId &&
-          c.recommendationId === state.framing.recommendationId
-      ) ?? null
-    );
-  }, [framingComplete, state.framing, caseData]);
-
-  // ----- Actions -----
-  const setPhase = useCallback((phase: GamePhase) => {
-    setState((prev) => ({ ...prev, phase }));
-  }, []);
-
-  const askQuestion = useCallback(
-    (questionId: string) => {
-      const q = questionMap.get(questionId);
-      if (!q) return;
-
-      setState((prev) => {
-        // Guards
-        if (prev.askedQuestionIds.includes(questionId)) return prev;
-        if (prev.askedQuestionIds.length >= caseData.questionBudget) return prev;
-        if (prev.trust <= 0) return prev;
-
-        // Trust delta: prefer per-question impact; fallback to category trigger
-        const categoryTrigger = caseData.trustMechanics.triggers.find(
-          (t) => t.category === q.category
-        );
-        const delta = q.trustImpact ?? categoryTrigger?.delta ?? 0;
-        const trustAfter = Math.max(
-          caseData.trustMechanics.min,
-          Math.min(caseData.trustMechanics.max, prev.trust + delta)
-        );
-
-        // New evidence (dedup)
-        const newEvidenceIds = q.reveals.filter(
-          (eid) => !prev.discoveredEvidenceIds.includes(eid) && evidenceMap.has(eid)
-        );
-
-        const order = prev.askedQuestionIds.length + 1;
-        const record: AnsweredQuestion = {
-          questionId,
-          order,
-          trustBefore: prev.trust,
-          trustAfter,
-          newEvidenceIds,
-        };
-
-        return {
-          ...prev,
-          askedQuestionIds: [...prev.askedQuestionIds, questionId],
-          answeredHistory: [...prev.answeredHistory, record],
-          discoveredEvidenceIds: [
-            ...prev.discoveredEvidenceIds,
-            ...newEvidenceIds,
-          ],
-          trust: trustAfter,
-          lastQuestionId: questionId,
-        };
-      });
-    },
-    [questionMap, evidenceMap, caseData]
-  );
-
-  const endInvestigation = useCallback(() => {
-    setState((prev) => ({ ...prev, phase: "synthesis" }));
-  }, []);
-
-  const togglePinEvidence = useCallback((evidenceId: string) => {
+  const chooseQuestion = useCallback((option: InquiryOption) => {
     setState((prev) => {
-      if (!prev.discoveredEvidenceIds.includes(evidenceId)) return prev;
-      const isPinned = prev.pinnedEvidenceIds.includes(evidenceId);
+      const trustDelta = option.tier === "strong" ? 1 : option.tier === "weak" ? -1 : 0;
+      const newTrust = Math.max(0, Math.min(10, prev.trustLevel + trustDelta));
       return {
         ...prev,
-        pinnedEvidenceIds: isPinned
-          ? prev.pinnedEvidenceIds.filter((id) => id !== evidenceId)
-          : [...prev.pinnedEvidenceIds, evidenceId],
+        choices: [...prev.choices, option],
+        score: prev.score + option.points,
+        currentRound: prev.currentRound + 1,
+        trustLevel: newTrust,
       };
     });
   }, []);
 
-  const setFramingComponent = useCallback(
-    (kind: "symptom" | "root-cause" | "recommendation", componentId: string) => {
-      setState((prev) => {
-        if (prev.framingSubmitted) return prev;
-        const next = { ...prev.framing };
-        if (kind === "symptom") next.symptomId = componentId;
-        else if (kind === "root-cause") next.rootCauseId = componentId;
-        else next.recommendationId = componentId;
-        return { ...prev, framing: next };
-      });
-    },
-    []
-  );
-
-  const submitFraming = useCallback(() => {
+  const addNote = useCallback((roundId: number, text: string) => {
     setState((prev) => {
-      if (
-        prev.framing.symptomId === null ||
-        prev.framing.rootCauseId === null ||
-        prev.framing.recommendationId === null
-      ) {
-        return prev;
-      }
-      return { ...prev, framingSubmitted: true, phase: "debrief" };
+      if (prev.notes.some((n) => n.roundId === roundId)) return prev;
+      return { ...prev, notes: [...prev.notes, { roundId, text }] };
     });
   }, []);
 
-  const resetGame = useCallback(() => {
-    setState(buildInitialState(caseData));
-  }, [caseData]);
+  const removeNote = useCallback((roundId: number) => {
+    setState((prev) => ({
+      ...prev,
+      notes: prev.notes.filter((n) => n.roundId !== roundId),
+    }));
+  }, []);
 
-  // ----- Lightweight performance tier (final scoring lives in case-evaluator) -----
+  const chooseFraming = useCallback((framingId: string) => {
+    const framing = FRAMING_OPTIONS.find((f) => f.id === framingId);
+    const bonus = framing?.isCorrect ? FRAMING_POINTS : 0;
+    setState((prev) => ({
+      ...prev,
+      chosenFramingId: framingId,
+      score: prev.score + bonus,
+    }));
+  }, []);
+
+  const getFinalScore = useCallback(() => state.score, [state.score]);
+
   const getPerformanceTier = useCallback((): PerformanceTier => {
-    if (!matchedCombo) return "missed-the-frame";
-    switch (matchedCombo.tier) {
-      case "gold":
-        return "master-framer";
-      case "silver":
-        return "solid-analyst";
-      case "bronze":
-        return "promising";
-      case "trap-baseline-ignored":
-      case "trap-jumped-to-solution":
-      case "trap-internal-cause":
-        return "missed-the-frame";
-      case "incoherent":
-      default:
-        return "failed";
-    }
-  }, [matchedCombo]);
+    if (state.score >= 20) return "exceptional";
+    if (state.score >= 10) return "promising";
+    return "beginner";
+  }, [state.score]);
 
-  const value: PFGameContextValue = {
-    caseData,
-    state,
-    remainingBudget,
-    isBudgetExhausted,
-    isTrustCollapsed,
-    availableQuestions,
-    discoveredEvidence,
-    lastQuestion,
-    lastAnswer,
-    framingComplete,
-    matchedCombo,
-    setPhase,
-    askQuestion,
-    endInvestigation,
-    togglePinEvidence,
-    setFramingComponent,
-    submitFraming,
-    resetGame,
-    getPerformanceTier,
-  };
+  const isFramingCorrect = useCallback(() => {
+    const framing = FRAMING_OPTIONS.find((f) => f.id === state.chosenFramingId);
+    return framing?.isCorrect || false;
+  }, [state.chosenFramingId]);
 
-  return <PFGameContext.Provider value={value}>{children}</PFGameContext.Provider>;
+  const resetGame = useCallback(() => {
+    setState(initialState);
+  }, []);
+
+  const setPhase = useCallback((phase: PFGameState["gamePhase"]) => {
+    setState((prev) => ({ ...prev, gamePhase: phase }));
+  }, []);
+
+  return (
+    <PFGameContext.Provider
+      value={{ state, chooseQuestion, addNote, removeNote, chooseFraming, getFinalScore, resetGame, setPhase, getPerformanceTier, isFramingCorrect }}
+    >
+      {children}
+    </PFGameContext.Provider>
+  );
 };

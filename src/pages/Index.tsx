@@ -1,43 +1,151 @@
-// ============================================================================
-// Index — Session 1: InvestigationHub mounted directly so the user can play.
-// Briefing/Travel/Arrival linking comes in Session 3.
-// ============================================================================
-
-import { useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { CompanyBriefingScreen } from "@/components/game/screens/CompanyBriefingScreen";
+import { TravelScreen } from "@/components/game/screens/TravelScreen";
+import { ArrivalScreen } from "@/components/game/screens/ArrivalScreen";
+import { InquiryScreen } from "@/components/game/screens/InquiryScreen";
+import { FramingScreen } from "@/components/game/screens/FramingScreen";
+import { ReflectionTransition } from "@/components/game/screens/ReflectionTransition";
+import { PresentationScreen } from "@/components/game/screens/PresentationScreen";
+import { ReturnTravelScreen } from "@/components/game/screens/ReturnTravelScreen";
+import { DebriefScreen } from "@/components/game/screens/DebriefScreen";
+import { ResultScreen } from "@/components/game/screens/ResultScreen";
+import { SoundProvider } from "@/hooks/useSoundEffects";
+import { MusicProvider } from "@/hooks/useBackgroundMusic";
+import { PlayerSettingsPanel } from "@/components/game/PlayerSettingsPanel";
 import { PFGameProvider, usePFGame } from "@/contexts/PFGameContext";
-import { InvestigationHub } from "@/components/game/screens/InvestigationHub";
-import { Card, CardContent } from "@/components/ui/card";
+import { ScreenTransition } from "@/components/game/ScreenTransition";
+import { ProgressTimeline } from "@/components/game/ProgressTimeline";
 
-const PhaseRouter = () => {
-  const { state, setPhase } = usePFGame();
+type Screen =
+  | "company-briefing"
+  | "travel"
+  | "arrival"
+  | "inquiry"
+  | "reflection"
+  | "framing"
+  | "presentation"
+  | "return-travel"
+  | "debrief"
+  | "result"
+  | "replay-briefing";
 
-  // Temporary: skip briefing/travel/arrival until Session 3 wires the old screens
+const GameContent = () => {
+  const { user } = useAuth();
+  const { resetGame } = usePFGame();
+  const userId = user?.id || "guest";
+  const storageKey = `pf-game-screen-${userId}`;
+
+  const [currentScreen, setCurrentScreen] = useState<Screen>(() => {
+    const saved = localStorage.getItem(storageKey) as Screen | null;
+    if (saved === "replay-briefing") return "company-briefing";
+    return saved || "company-briefing";
+  });
+
+  const [transitioning, setTransitioning] = useState(false);
+
   useEffect(() => {
-    if (state.phase === "briefing") setPhase("investigation");
-  }, [state.phase, setPhase]);
+    if (currentScreen !== "replay-briefing") {
+      localStorage.setItem(storageKey, currentScreen);
+    }
+  }, [currentScreen, storageKey]);
 
-  if (state.phase === "investigation") return <InvestigationHub />;
+  const handleNavigate = useCallback((screen: string) => {
+    setTransitioning(true);
+    setTimeout(() => {
+      // Reset game state when navigating back to the start (replay)
+      if (screen === "company-briefing") {
+        resetGame();
+        localStorage.removeItem(storageKey);
+      }
+      setCurrentScreen(screen as Screen);
+      setTimeout(() => setTransitioning(false), 100);
+    }, 400);
+  }, [resetGame, storageKey]);
 
-  // Placeholder for synthesis / framing / debrief — coming in Sessions 2 & 3
+  const handleReplayBriefing = useCallback(() => {
+    setCurrentScreen("replay-briefing");
+  }, []);
+
+  const handleResetProgress = useCallback(() => {
+    localStorage.removeItem(storageKey);
+    resetGame();
+    setTransitioning(true);
+    setTimeout(() => {
+      setCurrentScreen("company-briefing");
+      setTimeout(() => setTransitioning(false), 100);
+    }, 400);
+  }, [storageKey, resetGame]);
+
+  const showSettings = currentScreen !== "replay-briefing";
+  const showTimeline = !["company-briefing", "replay-briefing", "result"].includes(currentScreen);
+
   return (
-    <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-6" dir="rtl">
-      <Card className="max-w-md">
-        <CardContent className="p-6 text-center space-y-2">
-          <div className="text-xs uppercase tracking-wider text-primary">قريباً</div>
-          <h2 className="text-xl font-bold">شاشة "{state.phase}" قيد البناء</h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            انتهيت من مرحلة الاستقصاء. شاشات التحليل والتأطير والنتيجة هتتبني في الجلسات الجاية.
-          </p>
-        </CardContent>
-      </Card>
+    <div className="min-h-screen bg-background">
+      <ScreenTransition isActive={transitioning} />
+
+      {showTimeline && <ProgressTimeline currentScreen={currentScreen} />}
+
+      {showSettings && (
+        <PlayerSettingsPanel
+          onReplayBriefing={handleReplayBriefing}
+          onResetProgress={handleResetProgress}
+        />
+      )}
+
+      {currentScreen === "company-briefing" && (
+        <CompanyBriefingScreen onComplete={() => handleNavigate("travel")} />
+      )}
+      {currentScreen === "replay-briefing" && (
+        <CompanyBriefingScreen
+          onComplete={() => {
+            const saved = localStorage.getItem(storageKey) as Screen;
+            setCurrentScreen(saved || "company-briefing");
+          }}
+          isReviewMode
+        />
+      )}
+      {currentScreen === "travel" && (
+        <TravelScreen onComplete={() => handleNavigate("arrival")} />
+      )}
+      {currentScreen === "arrival" && (
+        <ArrivalScreen onComplete={() => handleNavigate("inquiry")} />
+      )}
+      {currentScreen === "inquiry" && (
+        <InquiryScreen onComplete={() => handleNavigate("reflection")} />
+      )}
+      {currentScreen === "reflection" && (
+        <ReflectionTransition onComplete={() => handleNavigate("framing")} />
+      )}
+      {currentScreen === "framing" && (
+        <FramingScreen onComplete={() => handleNavigate("presentation")} />
+      )}
+      {currentScreen === "presentation" && (
+        <PresentationScreen onComplete={() => handleNavigate("return-travel")} />
+      )}
+      {currentScreen === "return-travel" && (
+        <ReturnTravelScreen onComplete={() => handleNavigate("debrief")} />
+      )}
+      {currentScreen === "debrief" && (
+        <DebriefScreen onComplete={() => handleNavigate("result")} />
+      )}
+      {currentScreen === "result" && (
+        <ResultScreen onNavigate={handleNavigate} />
+      )}
     </div>
   );
 };
 
-const Index = () => (
-  <PFGameProvider>
-    <PhaseRouter />
-  </PFGameProvider>
-);
+const Index = () => {
+  return (
+    <PFGameProvider>
+      <MusicProvider>
+        <SoundProvider>
+          <GameContent />
+        </SoundProvider>
+      </MusicProvider>
+    </PFGameProvider>
+  );
+};
 
 export default Index;
