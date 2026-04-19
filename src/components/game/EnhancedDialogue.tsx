@@ -348,11 +348,7 @@ export const EnhancedDialogue = ({
               </motion.div>
             )}
           </AnimatePresence>
-        </motion.div>
-        {/* Close the dialogue motion.div above this */}
-        {/* eslint-disable-next-line */}
-        <></>
-        {/* Re-open it via re-render trick — actually we need to keep structure. The original closed </motion.div> is below — we are inside it still. Removing this stub. */}
+
 
           <AnimatePresence>
             {showSaveButton && onSaveNote && currentDialogue.isSaveable && (
