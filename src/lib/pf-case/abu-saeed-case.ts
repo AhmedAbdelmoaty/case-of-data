@@ -544,7 +544,7 @@ export const RESPONSES: Record<string, ResponseNode> = {
     id: "r2c",
     text: "ممكن يكون فيه جزء من كده، بس أنا ماقدرش أقول ده بثقة.",
     tone: "guarded",
-    noteCandidateIds: ["note_weak_opinion_missing_purchase"],
+    noteCandidateIds: ["note_weak_price_guess"],
   },
 
   r3a: {
