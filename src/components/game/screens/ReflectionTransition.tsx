@@ -22,6 +22,7 @@ export const ReflectionTransition = ({ onComplete }: ReflectionTransitionProps) 
       >
         <img src={storeCounterImg} alt="" className="w-full h-full object-cover blur-sm" />
       </motion.div>
+
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/85 to-background/60" />
 
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-4">
@@ -40,20 +41,19 @@ export const ReflectionTransition = ({ onComplete }: ReflectionTransitionProps) 
           </motion.div>
 
           <h2 className="text-foreground text-lg font-bold" dir="rtl">
-            بتراجع كل اللي سمعته...
+            بتراجع اللي جمعته من الحوار...
           </h2>
 
           <motion.p
-            className="text-muted-foreground text-sm"
+            className="text-muted-foreground text-sm max-w-sm leading-relaxed"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1.5 }}
+            transition={{ delay: 1.2 }}
             dir="rtl"
           >
-            وبتحاول تصيغ المشكلة الحقيقية
+            وبتحاول تحدد: أبو سعيد كان شايف المشكلة إزاي، والخلل الحقيقي كان فين قبل ما تبني الـframing النهائي.
           </motion.p>
 
-          {/* Thinking dots */}
           <div className="flex justify-center gap-2 mt-4">
             {[0, 1, 2].map((i) => (
               <motion.div
