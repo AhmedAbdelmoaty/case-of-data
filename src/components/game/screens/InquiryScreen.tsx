@@ -154,8 +154,18 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
   );
 
   const handleDialogueComplete = useCallback(() => {
-    const budgetExhausted = state.totalQuestionsAsked >= TOTAL_BUDGET;
+    const followUpPending =
+      state.currentBundleId === "bundle_7a_followup" && !state.exceptionalCauseKnown;
+
+    if (followUpPending) {
+      setPhase("choosing");
+      return;
+    }
+
     const readyForFraming = canProceedToFraming();
+
+    const budgetExhausted =
+      state.totalQuestionsAsked >= TOTAL_BUDGET && !followUpPending;
 
     if (readyForFraming || budgetExhausted) {
       onComplete();
@@ -176,7 +186,14 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
     }
 
     setPhase("choosing");
-  }, [state.totalQuestionsAsked, state.currentBundleId, canProceedToFraming, onComplete, displayBg]);
+  }, [
+    state.currentBundleId,
+    state.exceptionalCauseKnown,
+    state.totalQuestionsAsked,
+    canProceedToFraming,
+    onComplete,
+    displayBg,
+  ]);
 
   const currentBg = displayBg;
   const overlayOpacity = getOverlayClass(state.currentBundleId);
@@ -214,7 +231,6 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
         </motion.div>
       </AnimatePresence>
 
-      {/* Progress indicator */}
       <div className="fixed top-4 right-4 z-20 flex gap-1.5">
         {progressDots.map((i) => (
           <motion.div
@@ -234,7 +250,6 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
 
       <PFNotebook />
 
-      {/* Question choices */}
       <AnimatePresence>
         {phase === "choosing" && currentBundleOptions.length > 0 && (
           <motion.div
@@ -284,7 +299,6 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
         )}
       </AnimatePresence>
 
-      {/* Dialogue */}
       {phase === "dialogue" && currentLines.length > 0 && (
         <EnhancedDialogue
           key={dialogueKey}
