@@ -14,7 +14,7 @@ export const ABU_SAEED_DEBRIEF_STRONG: DialogueLine[] = [
   {
     characterId: "abuSaeed",
     text: "كده الصورة وضحت جدًا... أنا فعلًا كنت داخل على قرار بسرعة من غير ما أراجع المقارنة نفسها.",
-    mood: "reflective",
+    mood: "neutral",
   },
 ];
 
@@ -32,7 +32,7 @@ export const ABU_SAEED_DEBRIEF_MEDIUM: DialogueLine[] = [
   {
     characterId: "abuSaeed",
     text: "فاهم... يعني أنا كنت محتاج أحدد المشكلة بدقة أكتر قبل ما أتحرك.",
-    mood: "reflective",
+    mood: "neutral",
   },
 ];
 
@@ -40,7 +40,7 @@ export const ABU_SAEED_DEBRIEF_WEAK: DialogueLine[] = [
   {
     characterId: "abuSaeed",
     text: "يعني حضرتك شايف نعمل عروض ونشوف؟",
-    mood: "neutral",
+    mood: "concerned",
   },
   {
     characterId: "detective",
