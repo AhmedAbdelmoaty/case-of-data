@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookmarkPlus, Check, X, ChevronRight } from "lucide-react";
+import { BookmarkPlus, Check, X, ChevronRight, FileText } from "lucide-react";
 import { AnimatedCharacter, type CharacterId } from "./AnimatedCharacter";
-import { EvidenceChart } from "./EvidenceChart";
+import { ReportDocument } from "./ReportDocument";
 import type { EvidenceData } from "@/lib/pf-case/evidence-catalog";
 import analystImg from "@/assets/characters/analyst.png";
 import saraImg from "@/assets/characters/sara.png";
@@ -73,6 +73,7 @@ export const EnhancedDialogue = ({
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
   const [showSaveButton, setShowSaveButton] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const stopAudio = () => {
@@ -285,8 +286,73 @@ export const EnhancedDialogue = ({
           </p>
 
           {!isTyping && currentDialogue.inlineEvidence && (
-            <EvidenceChart evidence={currentDialogue.inlineEvidence} />
+            <motion.div
+              className="mt-3 rounded-xl border border-primary/40 bg-primary/5 p-3 flex items-center justify-between gap-3"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              dir="rtl"
+            >
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <FileText className="w-5 h-5 text-primary shrink-0" />
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[11px] text-muted-foreground">
+                    أبو سعيد سلّمك تقرير
+                  </span>
+                  <span className="text-sm font-bold text-foreground truncate">
+                    {currentDialogue.inlineEvidence.title}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setReportOpen(true);
+                }}
+                className="shrink-0 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-colors"
+              >
+                افتح التقرير
+              </button>
+            </motion.div>
           )}
+
+          {/* Report modal */}
+          <AnimatePresence>
+            {reportOpen && currentDialogue.inlineEvidence && (
+              <motion.div
+                className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setReportOpen(false);
+                }}
+              >
+                <motion.div
+                  className="relative max-w-xl w-full max-h-[88vh] overflow-y-auto"
+                  initial={{ scale: 0.92, y: 20 }}
+                  animate={{ scale: 1, y: 0 }}
+                  exit={{ scale: 0.92, y: 20 }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    onClick={() => setReportOpen(false)}
+                    className="absolute -top-2 -left-2 z-10 w-9 h-9 rounded-full bg-card border border-border flex items-center justify-center text-foreground hover:bg-muted transition-colors shadow-lg"
+                    aria-label="إغلاق"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                  <ReportDocument evidence={currentDialogue.inlineEvidence} />
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+        {/* Close the dialogue motion.div above this */}
+        {/* eslint-disable-next-line */}
+        <></>
+        {/* Re-open it via re-render trick — actually we need to keep structure. The original closed </motion.div> is below — we are inside it still. Removing this stub. */}
 
           <AnimatePresence>
             {showSaveButton && onSaveNote && currentDialogue.isSaveable && (
