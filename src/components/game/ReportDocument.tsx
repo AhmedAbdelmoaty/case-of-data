@@ -1,0 +1,222 @@
+import { motion } from "framer-motion";
+import { FileText, Stamp } from "lucide-react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import type { EvidenceData } from "@/lib/pf-case/evidence-catalog";
+
+interface ReportDocumentProps {
+  evidence: EvidenceData;
+  /** Compact rendering when shown inline in dialogue (smaller height) */
+  compact?: boolean;
+}
+
+const COLORS = {
+  primary: "hsl(var(--primary))",
+  accent: "hsl(var(--accent))",
+  muted: "hsl(var(--muted-foreground))",
+};
+
+/**
+ * ReportDocument — renders a chart/table as a printed paper report,
+ * with a header (title + issuer + date), the chart body, and a
+ * stamp + footnote on the bottom. This makes evidence feel like an
+ * artifact Abu Saeed hands over, not a chat-bubble data dump.
+ */
+export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProps) => {
+  const chartHeight = compact ? "h-40" : "h-56";
+
+  return (
+    <motion.div
+      className="relative rounded-lg overflow-hidden border-2 border-border/70 shadow-lg"
+      initial={{ opacity: 0, scale: 0.95, y: 12, rotate: -0.6 }}
+      animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
+      transition={{ duration: 0.45, ease: "easeOut" }}
+      dir="rtl"
+      style={{
+        background:
+          "linear-gradient(180deg, hsl(45 38% 96%) 0%, hsl(42 32% 92%) 100%)",
+        color: "hsl(20 14% 18%)",
+        fontFamily: "inherit",
+      }}
+    >
+      {/* Paper "lines" texture overlay */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-[0.06]"
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(0deg, transparent 0, transparent 23px, hsl(20 14% 18%) 23px, hsl(20 14% 18%) 24px)",
+        }}
+      />
+
+      {/* Header */}
+      <div className="relative px-4 pt-4 pb-3 border-b-2 border-dashed border-border/60">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <FileText className="w-4 h-4 opacity-70" />
+              <span className="text-[10px] uppercase tracking-widest opacity-60">
+                تقرير رسمي
+              </span>
+            </div>
+            <h4 className="text-sm font-bold leading-tight">{evidence.title}</h4>
+          </div>
+          {evidence.reportDate && (
+            <div className="text-[10px] opacity-70 text-left shrink-0 leading-tight">
+              <div>تاريخ الإصدار</div>
+              <div className="font-bold mt-0.5">{evidence.reportDate}</div>
+            </div>
+          )}
+        </div>
+        {evidence.issuer && (
+          <div className="text-[11px] opacity-70 mt-1">
+            صادر عن: <span className="font-semibold">{evidence.issuer}</span>
+          </div>
+        )}
+        {evidence.caption && (
+          <p className="text-xs opacity-80 mt-2 leading-relaxed">
+            {evidence.caption}
+          </p>
+        )}
+      </div>
+
+      {/* Body */}
+      <div className="relative px-3 py-3">
+        {evidence.type === "bar" && (
+          <div className={`${chartHeight} w-full`}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={evidence.rows} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(20 14% 18% / 0.15)" />
+                <XAxis dataKey="label" tick={{ fontSize: 10, fill: "hsl(20 14% 18%)" }} />
+                <YAxis tick={{ fontSize: 10, fill: "hsl(20 14% 18%)" }} />
+                <Tooltip
+                  contentStyle={{
+                    background: "hsl(45 38% 96%)",
+                    border: "1px solid hsl(20 14% 18% / 0.3)",
+                    fontSize: 12,
+                    color: "hsl(20 14% 18%)",
+                  }}
+                />
+                <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                  {evidence.rows.map((_, i) => (
+                    <Cell key={i} fill={i === evidence.rows.length - 1 ? COLORS.accent : COLORS.primary} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {evidence.type === "stacked_bar" && (
+          <div className={`${chartHeight} w-full`}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={evidence.rows} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(20 14% 18% / 0.15)" />
+                <XAxis dataKey="label" tick={{ fontSize: 10, fill: "hsl(20 14% 18%)" }} />
+                <YAxis tick={{ fontSize: 10, fill: "hsl(20 14% 18%)" }} />
+                <Tooltip
+                  contentStyle={{
+                    background: "hsl(45 38% 96%)",
+                    border: "1px solid hsl(20 14% 18% / 0.3)",
+                    fontSize: 12,
+                    color: "hsl(20 14% 18%)",
+                  }}
+                />
+                <Legend wrapperStyle={{ fontSize: 11, color: "hsl(20 14% 18%)" }} />
+                <Bar dataKey="individuals" name="أفراد" stackId="a" fill={COLORS.primary} />
+                <Bar dataKey="corporate" name="شركات" stackId="a" fill={COLORS.accent} radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {evidence.type === "line" && (
+          <div className={`${chartHeight} w-full`}>
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={evidence.rows} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(20 14% 18% / 0.15)" />
+                <XAxis dataKey="label" tick={{ fontSize: 10, fill: "hsl(20 14% 18%)" }} />
+                <YAxis tick={{ fontSize: 10, fill: "hsl(20 14% 18%)" }} />
+                <Tooltip
+                  contentStyle={{
+                    background: "hsl(45 38% 96%)",
+                    border: "1px solid hsl(20 14% 18% / 0.3)",
+                    fontSize: 12,
+                    color: "hsl(20 14% 18%)",
+                  }}
+                />
+                <Line type="monotone" dataKey="value" stroke={COLORS.primary} strokeWidth={2} dot={{ r: 3 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {evidence.type === "table" && (
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b-2 border-border/60">
+                  {evidence.headers?.map((h) => (
+                    <th key={h} className="text-right py-2 px-2 font-bold opacity-80">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {evidence.rows.map((row, i) => (
+                  <tr key={i} className="border-b border-border/30">
+                    {row.cells?.map((c, j) => (
+                      <td key={j} className={`py-2 px-2 ${j === 0 ? "font-bold" : ""}`}>
+                        {c}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {evidence.type === "list" && (
+          <ul className="space-y-1.5 py-1">
+            {evidence.rows.map((row, i) => (
+              <li key={i} className="text-xs flex items-start gap-2">
+                <span className="opacity-60 mt-0.5">•</span>
+                <span>{row.label}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* Footer with stamp + footnote */}
+      <div className="relative px-4 pt-2 pb-3 border-t-2 border-dashed border-border/60 flex items-end justify-between gap-3">
+        <p className="text-[10px] opacity-70 leading-snug flex-1">
+          {evidence.footnote || "ملاحظة: التقرير للاستخدام الداخلي فقط."}
+        </p>
+        {/* Faux ink stamp */}
+        <div
+          className="shrink-0 flex flex-col items-center justify-center rounded-md border-2 px-2 py-1 -rotate-6 select-none"
+          style={{
+            borderColor: "hsl(0 60% 40% / 0.7)",
+            color: "hsl(0 60% 40% / 0.85)",
+          }}
+        >
+          <Stamp className="w-3 h-3 mb-0.5" />
+          <span className="text-[9px] font-bold tracking-widest">معتمد</span>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
