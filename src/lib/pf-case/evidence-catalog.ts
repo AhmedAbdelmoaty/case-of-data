@@ -1,6 +1,9 @@
 // ============================================================
-// Evidence Catalog — chart definitions rendered inline in dialogue
+// Evidence Catalog — REPORT documents (delivered as printed papers)
 // ============================================================
+// Each "evidence" represents a real report Abu Saeed hands over.
+// Carries: title, issuer (stamp), date, footnote — to feel like a real document.
+// All numeric facts live HERE, never in dialogue text.
 
 export type EvidenceChartType =
   | "bar"
@@ -24,10 +27,12 @@ export interface EvidenceData {
   title: string;
   type: EvidenceChartType;
   caption?: string;
+  /** Document metadata — gives the report-document feel */
+  issuer?: string;          // "محاسبة محل أبو سعيد"
+  reportDate?: string;      // "مارس 2026"
+  footnote?: string;        // small note printed on the paper
   rows: EvidenceDataRow[];
-  /** For stacked bars / multi-series bars: legend labels */
   series?: { key: "value" | "individuals" | "corporate"; label: string; color?: string }[];
-  /** For table type */
   headers?: string[];
 }
 
@@ -35,37 +40,46 @@ export const EVIDENCE: Record<string, EvidenceData> = {
   // === SPINE ===
   ev_year_vs_year: {
     id: "ev_year_vs_year",
-    title: "مبيعات الشهر — السنة دي vs السنة اللي فاتت",
+    title: "تقرير مبيعات شهرية — مقارنة فبراير 2025 / فبراير 2026",
     type: "bar",
-    caption: "فرق حوالي 30% بين الشهرين.",
+    issuer: "محاسبة محل أبو سعيد",
+    reportDate: "مارس 2026",
+    caption: "مقارنة إجمالي المبيعات بين نفس الشهر في السنتين.",
+    footnote: "الأرقام بالألف جنيه مصري، صافي مبيعات بعد المرتجعات.",
     rows: [
-      { label: "نفس الشهر — السنة اللي فاتت", value: 430 },
-      { label: "الشهر الحالي", value: 300 },
+      { label: "فبراير 2025", value: 430 },
+      { label: "فبراير 2026", value: 300 },
     ],
     series: [{ key: "value", label: "ألف جنيه" }],
   },
   ev_three_year: {
     id: "ev_three_year",
-    title: "مبيعات نفس الشهر — 3 سنين",
+    title: "تقرير مبيعات فبراير — على مدى 3 سنين",
     type: "bar",
-    caption: "السنة اللي فاتت طالعة عن الباقي بشكل واضح.",
+    issuer: "محاسبة محل أبو سعيد",
+    reportDate: "مارس 2026",
+    caption: "مبيعات شهر فبراير في السنوات الثلاث الأخيرة.",
+    footnote: "الأرقام بالألف جنيه. التقرير بيوضح إن سنة 2025 طالعة بشكل ملحوظ عن السنتين التانيين.",
     rows: [
-      { label: "السنة الأسبق", value: 290 },
-      { label: "السنة اللي فاتت", value: 430 },
-      { label: "السنة دي", value: 300 },
+      { label: "فبراير 2024", value: 290 },
+      { label: "فبراير 2025", value: 430 },
+      { label: "فبراير 2026", value: 300 },
     ],
     series: [{ key: "value", label: "ألف جنيه" }],
   },
   ev_breakdown: {
     id: "ev_breakdown",
-    title: "تفكيك المبيعات — أفراد vs شركات",
+    title: "تقرير تفصيلي — تقسيم مبيعات فبراير حسب نوع البيع",
     type: "stacked_bar",
-    caption:
-      "السنة اللي فاتت فيها أوردر شركات استثنائي 150 ألف. لو شيلناه — الأفراد ماشيين في نمو طبيعي 270 → 280 → 290.",
+    issuer: "محاسبة محل أبو سعيد",
+    reportDate: "مارس 2026",
+    caption: "كل سنة مقسومة لبيع أفراد (تجزئة) وبيع شركات (جملة).",
+    footnote:
+      "الأرقام بالألف جنيه. ملاحظة المحاسبة: في فبراير 2025 جالنا أوردر شركات استثنائي (حوالي 150 ألف) من عميل واحد، مش بيتكرر كل سنة.",
     rows: [
-      { label: "السنة الأسبق", individuals: 270, corporate: 20 },
-      { label: "السنة اللي فاتت", individuals: 280, corporate: 150 },
-      { label: "السنة دي", individuals: 290, corporate: 10 },
+      { label: "فبراير 2024", individuals: 270, corporate: 20 },
+      { label: "فبراير 2025", individuals: 280, corporate: 150 },
+      { label: "فبراير 2026", individuals: 290, corporate: 10 },
     ],
     series: [
       { key: "individuals", label: "أفراد" },
@@ -76,9 +90,12 @@ export const EVIDENCE: Record<string, EvidenceData> = {
   // === TRACK A ===
   ev_team_performance: {
     id: "ev_team_performance",
-    title: "أداء فريق البيع — الشهر الحالي",
+    title: "تقرير أداء فريق البيع — فبراير 2026",
     type: "bar",
-    caption: "فروقات واضحة بين الأفراد.",
+    issuer: "محاسبة محل أبو سعيد",
+    reportDate: "مارس 2026",
+    caption: "إجمالي مبيعات كل بائع للشهر الحالي.",
+    footnote: "الأرقام بالألف جنيه. الفريق مكوّن من 4 بائعين بدوام كامل.",
     rows: [
       { label: "كريم", value: 110 },
       { label: "سامح", value: 75 },
@@ -89,9 +106,12 @@ export const EVIDENCE: Record<string, EvidenceData> = {
   },
   ev_team_conversion: {
     id: "ev_team_conversion",
-    title: "نسبة التحويل (Conversion) لكل بائع",
+    title: "تقرير نسبة الإقفال (التحويل) لكل بائع",
     type: "table",
-    headers: ["البائع", "نسبة التحويل"],
+    issuer: "محاسبة محل أبو سعيد",
+    reportDate: "مارس 2026",
+    footnote: "نسبة التحويل = عدد البيعات ÷ عدد الزباين اللي تعامل معاهم البائع.",
+    headers: ["البائع", "نسبة الإقفال"],
     rows: [
       { label: "كريم", cells: ["كريم", "28%"] },
       { label: "سامح", cells: ["سامح", "21%"] },
@@ -103,9 +123,12 @@ export const EVIDENCE: Record<string, EvidenceData> = {
   // === TRACK B ===
   ev_daily_sales: {
     id: "ev_daily_sales",
-    title: "تقرير المبيعات اليومية — الشهر الحالي",
+    title: "تقرير المبيعات اليومية — فبراير 2026",
     type: "line",
-    caption: "تذبذب طبيعي. الإجمالي الشهري حوالي 300 ألف.",
+    issuer: "محاسبة محل أبو سعيد",
+    reportDate: "مارس 2026",
+    caption: "حركة البيع اليومية على مدار الشهر.",
+    footnote: "الأرقام بالألف جنيه/يوم. الإجمالي الشهري حوالي 300 ألف جنيه.",
     rows: [
       { label: "ي1", value: 9 },
       { label: "ي5", value: 11 },
@@ -119,9 +142,12 @@ export const EVIDENCE: Record<string, EvidenceData> = {
   },
   ev_weekly_sales: {
     id: "ev_weekly_sales",
-    title: "مبيعات الشهر — أسبوعياً",
+    title: "تقرير المبيعات الأسبوعية — فبراير 2026",
     type: "bar",
-    caption: "الأسبوع الأخير الأضعف.",
+    issuer: "محاسبة محل أبو سعيد",
+    reportDate: "مارس 2026",
+    caption: "إجمالي البيع لكل أسبوع في الشهر.",
+    footnote: "الأرقام بالألف جنيه. الأسبوع الرابع هو الأقل بشكل واضح.",
     rows: [
       { label: "أسبوع 1", value: 78 },
       { label: "أسبوع 2", value: 92 },
@@ -134,19 +160,25 @@ export const EVIDENCE: Record<string, EvidenceData> = {
   // === TRACK C ===
   ev_competitor_offers: {
     id: "ev_competitor_offers",
-    title: "عروض المنافسين الحاليين",
+    title: "ملخص عروض المنافسين الحاليين",
     type: "list",
+    issuer: "متابعة أبو سعيد الشخصية",
+    reportDate: "فبراير 2026",
+    footnote: "ملاحظات مجمّعة من زيارات شخصية للمحلات المجاورة.",
     rows: [
       { label: "محل 1: خصم 10% على المجموعات الكاملة" },
       { label: "محل 2: عرض 2+1 على موديلات مختارة" },
       { label: "محل 3: حملة سوشيال ميديا + توصيل مجاني" },
-      { label: "محل 4: كوبونات لعملاء Loyalty" },
+      { label: "محل 4: كوبونات لعملاء الـ Loyalty" },
     ],
   },
   ev_customer_feedback: {
     id: "ev_customer_feedback",
     title: "ملاحظات العملاء الأخيرة",
     type: "list",
+    issuer: "دفتر ملاحظات أبو سعيد",
+    reportDate: "فبراير 2026",
+    footnote: "تعليقات شفوية مسجّلة من زباين الفترة الأخيرة.",
     rows: [
       { label: "«السعر غالي شوية مقارنة بالشارع»" },
       { label: "«مفيش عروض الفترة دي»" },
@@ -157,13 +189,16 @@ export const EVIDENCE: Record<string, EvidenceData> = {
   // === TRACK D ===
   ev_marketing: {
     id: "ev_marketing",
-    title: "Dashboard التسويق — السنة دي vs السنة اللي فاتت",
+    title: "ملخص أداء التسويق — فبراير 2025 vs فبراير 2026",
     type: "table",
-    headers: ["المؤشر", "السنة اللي فاتت", "السنة دي"],
+    issuer: "متابعة أبو سعيد للحملات",
+    reportDate: "مارس 2026",
+    footnote: "بيانات مجمّعة من حسابات السوشيال ميديا والإعلانات الممولة.",
+    headers: ["المؤشر", "فبراير 2025", "فبراير 2026"],
     rows: [
       { label: "ميزانية", cells: ["ميزانية شهرية", "18 ألف", "12 ألف"] },
-      { label: "reach", cells: ["Reach", "420 ألف", "380 ألف"] },
-      { label: "engagement", cells: ["Engagement", "3.1%", "2.9%"] },
+      { label: "reach", cells: ["وصول الإعلانات", "420 ألف", "380 ألف"] },
+      { label: "engagement", cells: ["نسبة التفاعل", "3.1%", "2.9%"] },
       { label: "campaigns", cells: ["حملات نشطة", "2", "0"] },
     ],
   },
