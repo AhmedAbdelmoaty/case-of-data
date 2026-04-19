@@ -1,13 +1,12 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { INQUIRY_ROUNDS } from "@/data/pf-scenario";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSound } from "@/hooks/useSoundEffects";
 import { useAmbientSound } from "@/hooks/useAmbientSound";
 import { EnhancedDialogue } from "../EnhancedDialogue";
 import { PFNotebook } from "../PFNotebook";
-import type { InquiryOption } from "@/data/pf-scenario";
+import { CASE_META, QUESTION_BUNDLES, type NoteCandidate, type QuestionOption } from "@/data/pf-case";
 import storeInsideImg from "@/assets/scenes/store-inside.png";
 import storeCounterImg from "@/assets/scenes/store-counter.png";
 import storeWomensSectionImg from "@/assets/scenes/store-womens-section.jpg";
@@ -16,134 +15,183 @@ interface InquiryScreenProps {
   onComplete: () => void;
 }
 
+interface DialogueLineUI {
+  characterId: string;
+  text: string;
+  mood?: "neutral" | "happy" | "suspicious";
+  isSaveable?: boolean;
+  saveId?: string;
+  saveText?: string;
+}
+
+const TOTAL_BUDGET = CASE_META.coreQuestionBudget + CASE_META.recoveryBudget;
+
+const getBackgroundForBundle = (bundleId: string | null) => {
+  if (!bundleId) return storeInsideImg;
+
+  if (
+    bundleId === "bundle_6_baseline_validity" ||
+    bundleId === "bundle_6_recovery" ||
+    bundleId === "bundle_7_exceptional_factor" ||
+    bundleId === "bundle_7_recovery" ||
+    bundleId === "bundle_7a_followup"
+  ) {
+    return storeCounterImg;
+  }
+
+  if (
+    bundleId === "bundle_4_baseline" ||
+    bundleId === "bundle_4_recovery" ||
+    bundleId === "bundle_5_reality_check" ||
+    bundleId === "bundle_5_recovery"
+  ) {
+    return storeWomensSectionImg;
+  }
+
+  return storeInsideImg;
+};
+
+const getQuestionMood = (quality: QuestionOption["quality"]): "neutral" | "happy" | "suspicious" => {
+  if (quality === "strong") return "happy";
+  if (quality === "weak") return "suspicious";
+  return "neutral";
+};
+
+const getOverlayClass = (bundleId: string | null) => {
+  if (
+    bundleId === "bundle_6_baseline_validity" ||
+    bundleId === "bundle_6_recovery" ||
+    bundleId === "bundle_7_exceptional_factor" ||
+    bundleId === "bundle_7_recovery" ||
+    bundleId === "bundle_7a_followup"
+  ) {
+    return "bg-black/70";
+  }
+
+  return "bg-black/60";
+};
+
 export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
-  const { state, chooseQuestion, addNote } = usePFGame();
+  const {
+    state,
+    startCase,
+    getCurrentBundle,
+    selectQuestion,
+    saveCaseNote,
+    canProceedToFraming,
+  } = usePFGame();
+
   const { profile } = useAuth();
   const { playSound } = useSound();
   useAmbientSound("store");
 
   const [phase, setPhase] = useState<"choosing" | "dialogue" | "scene-transition">("choosing");
-  const [roundIndex, setRoundIndex] = useState(0);
-  const [currentLines, setCurrentLines] = useState<any[]>([]);
+  const [currentLines, setCurrentLines] = useState<DialogueLineUI[]>([]);
   const [dialogueIndex, setDialogueIndex] = useState(0);
-  const [savedNoteIds, setSavedNoteIds] = useState<string[]>([]);
   const [dialogueKey, setDialogueKey] = useState(0);
+  const [displayBg, setDisplayBg] = useState<string>(storeInsideImg);
+  const [pendingBg, setPendingBg] = useState<string | null>(null);
 
   const playerName = profile?.display_name || "محلل";
   const g = (profile?.gender || "male") as "male" | "female";
 
-  const round = INQUIRY_ROUNDS[roundIndex];
+  useEffect(() => {
+    startCase();
+  }, [startCase]);
 
-  // Round-based backgrounds: 0-1 store-inside, 2 women's section, 3-4 counter
-  const getBackgroundForRound = (idx: number) => {
-    if (idx >= 3) return storeCounterImg;
-    if (idx === 2) return storeWomensSectionImg;
-    return storeInsideImg;
-  };
+  useEffect(() => {
+    const targetBg = getBackgroundForBundle(state.currentBundleId);
+    setDisplayBg(targetBg);
+  }, [state.currentBundleId]);
 
-  const currentBg = getBackgroundForRound(roundIndex);
-  const overlayOpacity = roundIndex >= 4 ? "bg-black/70" : "bg-black/60";
+  const currentBundleOptions = useMemo(() => getCurrentBundle(), [getCurrentBundle]);
+  const currentBundle = state.currentBundleId ? QUESTION_BUNDLES[state.currentBundleId] : null;
 
-  const shuffledOptions = useMemo(() => {
-    if (!round) return [];
-    const arr = [...round.options];
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
-  }, [roundIndex, round]);
+  const progressDots = useMemo(() => {
+    return Array.from({ length: TOTAL_BUDGET }, (_, i) => i);
+  }, []);
 
-  const getMoodForTier = (tier: string): "neutral" | "happy" | "suspicious" => {
-    if (tier === "strong") return "happy";
-    if (tier === "weak") return "suspicious";
-    return "neutral";
-  };
+  const handlePickQuestion = useCallback(
+    (option: QuestionOption) => {
+      try {
+        playSound("pageFlip");
+      } catch {}
 
-  const handlePickQuestion = (option: InquiryOption) => {
-    try { playSound("pageFlip"); } catch {}
-    chooseQuestion(option);
+      const result = selectQuestion(option.id);
+      if (!result) return;
 
-    const abuMood = getMoodForTier(option.tier);
+      const firstNote: NoteCandidate | undefined = result.noteCandidates[0];
 
-    let responsePrefix = "";
-    if (roundIndex >= 3) {
-      const currentTrust = state.trustLevel + (option.tier === "strong" ? 1 : option.tier === "weak" ? -1 : 0);
-      if (currentTrust >= 7) {
-        responsePrefix = "فعلاً أنت خلّيتني أفكر في حاجات ما كنتش واخد بالي منها… ";
-      } else if (currentTrust <= 3) {
-        responsePrefix = "مش عارف يا أستاذ… ";
-      }
-    }
+      const lines: DialogueLineUI[] = [
+        {
+          characterId: "detective",
+          text: result.question.text,
+          mood: "neutral",
+        },
+        {
+          characterId: "abuSaeed",
+          text: result.responseText,
+          mood: getQuestionMood(result.question.quality),
+          isSaveable: !!firstNote,
+          saveId: firstNote?.id,
+          saveText: firstNote?.text,
+        },
+      ];
 
-    const lines = [
-      {
-        characterId: "detective",
-        text: option.text,
-        mood: "neutral" as const,
-      },
-      {
-        characterId: "abuSaeed",
-        text: responsePrefix + option.response,
-        mood: abuMood,
-        isSaveable: true,
-        saveId: `round-${roundIndex}`,
-        saveText: option.response,
-      },
-    ];
+      setCurrentLines(lines);
+      setDialogueIndex(0);
+      setDialogueKey((prev) => prev + 1);
+      setPhase("dialogue");
+    },
+    [playSound, selectQuestion]
+  );
 
-    setCurrentLines(lines);
-    setDialogueIndex(0);
-    setDialogueKey(prev => prev + 1);
-    setPhase("dialogue");
-  };
+  const handleSaveNote = useCallback(
+    (saveId: string) => {
+      saveCaseNote(saveId);
+    },
+    [saveCaseNote]
+  );
 
-  const handleDialogueComplete = () => {
-    if (roundIndex < INQUIRY_ROUNDS.length - 1) {
-      const nextRound = roundIndex + 1;
-      const nextBg = getBackgroundForRound(nextRound);
-      const currentBgNow = getBackgroundForRound(roundIndex);
+  const handleDialogueComplete = useCallback(() => {
+    const budgetExhausted = state.totalQuestionsAsked >= TOTAL_BUDGET;
+    const readyForFraming = canProceedToFraming();
 
-      // Scene transition when background changes — just visual fade, no text
-      if (nextBg !== currentBgNow) {
-        setPhase("scene-transition");
-        setTimeout(() => {
-          setRoundIndex(nextRound);
-          setPhase("choosing");
-        }, 2500);
-      } else {
-        setRoundIndex(nextRound);
-        setPhase("choosing");
-      }
-    } else {
+    if (readyForFraming || budgetExhausted) {
       onComplete();
+      return;
     }
-  };
 
-  const handleSaveNote = (saveId: string, saveText: string) => {
-    if (!savedNoteIds.includes(saveId)) {
-      setSavedNoteIds(prev => [...prev, saveId]);
-      const rIdx = parseInt(saveId.replace("round-", ""), 10);
-      const roundId = INQUIRY_ROUNDS[rIdx]?.id ?? rIdx;
-      addNote(roundId, saveText);
+    const nextBg = getBackgroundForBundle(state.currentBundleId);
+
+    if (nextBg !== displayBg) {
+      setPendingBg(nextBg);
+      setPhase("scene-transition");
+      setTimeout(() => {
+        setDisplayBg(nextBg);
+        setPendingBg(null);
+        setPhase("choosing");
+      }, 1200);
+      return;
     }
-  };
 
-  if (!round) return null;
+    setPhase("choosing");
+  }, [state.totalQuestionsAsked, state.currentBundleId, canProceedToFraming, onComplete, displayBg]);
 
-  // Scene transition — image only, no text or labels
+  const currentBg = displayBg;
+  const overlayOpacity = getOverlayClass(state.currentBundleId);
+
   if (phase === "scene-transition") {
-    const nextRound = roundIndex + 1;
-    const transitionBgImg = getBackgroundForRound(nextRound);
     return (
       <div className="min-h-screen bg-background relative overflow-hidden">
         <motion.div
           className="absolute inset-0"
+          key={pendingBg || currentBg}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 1.5 }}
+          transition={{ duration: 0.8 }}
         >
-          <img src={transitionBgImg} alt="" className="w-full h-full object-cover" />
+          <img src={pendingBg || currentBg} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/50" />
         </motion.div>
       </div>
@@ -166,20 +214,20 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
         </motion.div>
       </AnimatePresence>
 
-      {/* Round indicator */}
+      {/* Progress indicator */}
       <div className="fixed top-4 right-4 z-20 flex gap-1.5">
-        {INQUIRY_ROUNDS.map((_, i) => (
+        {progressDots.map((i) => (
           <motion.div
             key={i}
             className={`w-2.5 h-2.5 rounded-full transition-colors ${
-              i < roundIndex
+              i < state.totalQuestionsAsked
                 ? "bg-primary"
-                : i === roundIndex
+                : i === state.totalQuestionsAsked
                 ? "bg-primary/60 ring-2 ring-primary/30"
                 : "bg-muted"
             }`}
-            initial={i === roundIndex ? { scale: 0 } : {}}
-            animate={i === roundIndex ? { scale: 1 } : {}}
+            initial={i === state.totalQuestionsAsked ? { scale: 0 } : {}}
+            animate={i === state.totalQuestionsAsked ? { scale: 1 } : {}}
           />
         ))}
       </div>
@@ -188,9 +236,9 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
 
       {/* Question choices */}
       <AnimatePresence>
-        {phase === "choosing" && (
+        {phase === "choosing" && currentBundleOptions.length > 0 && (
           <motion.div
-            key={`choices-${roundIndex}`}
+            key={`choices-${state.currentBundleId}-${state.totalQuestionsAsked}`}
             className="fixed inset-0 z-40 flex items-end justify-center pb-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -203,25 +251,32 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
                 animate={{ opacity: 1, y: 0 }}
               >
                 <span className="text-xs text-muted-foreground bg-card/60 backdrop-blur-sm px-3 py-1 rounded-full">
-                  جولة {roundIndex + 1} من {INQUIRY_ROUNDS.length} — {round.title}
+                  سؤال {Math.min(state.totalQuestionsAsked + 1, TOTAL_BUDGET)} من {TOTAL_BUDGET}
+                  {currentBundle?.purpose ? ` — ${currentBundle.purpose}` : ""}
                 </span>
               </motion.div>
 
-              {shuffledOptions.map((option, i) => (
+              {currentBundleOptions.map((option, i) => (
                 <motion.button
                   key={option.id}
                   onClick={() => handlePickQuestion(option)}
-                  onMouseEnter={() => { try { playSound("tick"); } catch {} }}
+                  onMouseEnter={() => {
+                    try {
+                      playSound("tick");
+                    } catch {}
+                  }}
                   className="w-full p-4 rounded-xl bg-card/80 backdrop-blur-sm border border-border hover:border-primary/60 hover:bg-card hover:shadow-[0_0_24px_hsl(var(--primary)/0.18)] transition-all text-right group"
                   dir="rtl"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
+                  transition={{ delay: i * 0.08 }}
                   whileHover={{ scale: 1.02, y: -2 }}
                   whileTap={{ scale: 0.98 }}
                   exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
                 >
-                  <p className="text-foreground text-sm leading-relaxed group-hover:text-primary transition-colors">{option.text}</p>
+                  <p className="text-foreground text-sm leading-relaxed group-hover:text-primary transition-colors">
+                    {option.text}
+                  </p>
                 </motion.button>
               ))}
             </div>
@@ -229,7 +284,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
         )}
       </AnimatePresence>
 
-      {/* EnhancedDialogue */}
+      {/* Dialogue */}
       {phase === "dialogue" && currentLines.length > 0 && (
         <EnhancedDialogue
           key={dialogueKey}
@@ -238,8 +293,8 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
           onComplete={handleDialogueComplete}
           currentIndex={dialogueIndex}
           onIndexChange={setDialogueIndex}
-          onSaveNote={handleSaveNote}
-          savedNoteIds={savedNoteIds}
+          onSaveNote={(saveId) => handleSaveNote(saveId)}
+          savedNoteIds={state.savedNoteIds}
           playerName={playerName}
           playerGender={g}
         />
