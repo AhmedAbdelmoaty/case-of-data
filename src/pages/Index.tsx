@@ -33,6 +33,7 @@ type Screen =
 const GameContent = () => {
   const { user } = useAuth();
   const { resetGame } = usePFGame();
+
   const userId = user?.id || "guest";
   const storageKey = `pf-game-screen-${userId}`;
 
@@ -50,32 +51,54 @@ const GameContent = () => {
     }
   }, [currentScreen, storageKey]);
 
-  const handleNavigate = useCallback((screen: string) => {
-    setTransitioning(true);
-    setTimeout(() => {
-      // Reset game state when navigating back to the start (replay)
+  const navigateWithTransition = useCallback(
+    (screen: Screen, options?: { reset?: boolean; clearStorage?: boolean }) => {
+      setTransitioning(true);
+
+      setTimeout(() => {
+        if (options?.reset) {
+          resetGame();
+        }
+
+        if (options?.clearStorage) {
+          localStorage.removeItem(storageKey);
+        }
+
+        setCurrentScreen(screen);
+
+        setTimeout(() => {
+          setTransitioning(false);
+        }, 100);
+      }, 400);
+    },
+    [resetGame, storageKey]
+  );
+
+  const handleNavigate = useCallback(
+    (screen: string) => {
       if (screen === "company-briefing") {
-        resetGame();
-        localStorage.removeItem(storageKey);
+        navigateWithTransition("company-briefing", {
+          reset: true,
+          clearStorage: true,
+        });
+        return;
       }
-      setCurrentScreen(screen as Screen);
-      setTimeout(() => setTransitioning(false), 100);
-    }, 400);
-  }, [resetGame, storageKey]);
+
+      navigateWithTransition(screen as Screen);
+    },
+    [navigateWithTransition]
+  );
 
   const handleReplayBriefing = useCallback(() => {
     setCurrentScreen("replay-briefing");
   }, []);
 
   const handleResetProgress = useCallback(() => {
-    localStorage.removeItem(storageKey);
-    resetGame();
-    setTransitioning(true);
-    setTimeout(() => {
-      setCurrentScreen("company-briefing");
-      setTimeout(() => setTransitioning(false), 100);
-    }, 400);
-  }, [storageKey, resetGame]);
+    navigateWithTransition("company-briefing", {
+      reset: true,
+      clearStorage: true,
+    });
+  }, [navigateWithTransition]);
 
   const showSettings = currentScreen !== "replay-briefing";
   const showTimeline = !["company-briefing", "replay-briefing", "result"].includes(currentScreen);
@@ -96,39 +119,49 @@ const GameContent = () => {
       {currentScreen === "company-briefing" && (
         <CompanyBriefingScreen onComplete={() => handleNavigate("travel")} />
       )}
+
       {currentScreen === "replay-briefing" && (
         <CompanyBriefingScreen
           onComplete={() => {
-            const saved = localStorage.getItem(storageKey) as Screen;
-            setCurrentScreen(saved || "company-briefing");
+            const saved = localStorage.getItem(storageKey) as Screen | null;
+            setCurrentScreen(saved && saved !== "replay-briefing" ? saved : "company-briefing");
           }}
           isReviewMode
         />
       )}
+
       {currentScreen === "travel" && (
         <TravelScreen onComplete={() => handleNavigate("arrival")} />
       )}
+
       {currentScreen === "arrival" && (
         <ArrivalScreen onComplete={() => handleNavigate("inquiry")} />
       )}
+
       {currentScreen === "inquiry" && (
         <InquiryScreen onComplete={() => handleNavigate("reflection")} />
       )}
+
       {currentScreen === "reflection" && (
         <ReflectionTransition onComplete={() => handleNavigate("framing")} />
       )}
+
       {currentScreen === "framing" && (
         <FramingScreen onComplete={() => handleNavigate("presentation")} />
       )}
+
       {currentScreen === "presentation" && (
         <PresentationScreen onComplete={() => handleNavigate("return-travel")} />
       )}
+
       {currentScreen === "return-travel" && (
         <ReturnTravelScreen onComplete={() => handleNavigate("debrief")} />
       )}
+
       {currentScreen === "debrief" && (
         <DebriefScreen onComplete={() => handleNavigate("result")} />
       )}
+
       {currentScreen === "result" && (
         <ResultScreen onNavigate={handleNavigate} />
       )}
