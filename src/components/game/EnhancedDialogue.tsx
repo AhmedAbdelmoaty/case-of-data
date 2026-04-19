@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookmarkPlus, Check, X, ChevronRight } from "lucide-react";
 import { AnimatedCharacter, type CharacterId } from "./AnimatedCharacter";
+import { EvidenceChart } from "./EvidenceChart";
+import type { EvidenceData } from "@/lib/pf-case/evidence-catalog";
 import analystImg from "@/assets/characters/analyst.png";
 import saraImg from "@/assets/characters/sara.png";
 
@@ -13,6 +15,7 @@ interface DialogueLine {
   saveId?: string;
   saveText?: string;
   audioSrc?: string;
+  inlineEvidence?: EvidenceData;
 }
 
 interface EnhancedDialogueProps {
@@ -280,6 +283,10 @@ export const EnhancedDialogue = ({
               />
             )}
           </p>
+
+          {!isTyping && currentDialogue.inlineEvidence && (
+            <EvidenceChart evidence={currentDialogue.inlineEvidence} />
+          )}
 
           <AnimatePresence>
             {showSaveButton && onSaveNote && currentDialogue.isSaveable && (
