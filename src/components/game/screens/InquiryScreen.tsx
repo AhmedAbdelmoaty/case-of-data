@@ -4,6 +4,7 @@ import { INQUIRY_ROUNDS } from "@/data/pf-scenario";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSound } from "@/hooks/useSoundEffects";
+import { useAmbientSound } from "@/hooks/useAmbientSound";
 import { EnhancedDialogue } from "../EnhancedDialogue";
 import { PFNotebook } from "../PFNotebook";
 import type { InquiryOption } from "@/data/pf-scenario";
@@ -19,6 +20,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
   const { state, chooseQuestion, addNote } = usePFGame();
   const { profile } = useAuth();
   const { playSound } = useSound();
+  useAmbientSound("store");
 
   const [phase, setPhase] = useState<"choosing" | "dialogue" | "scene-transition">("choosing");
   const [roundIndex, setRoundIndex] = useState(0);

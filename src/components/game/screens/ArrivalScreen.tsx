@@ -4,6 +4,7 @@ import { MapPin, DoorOpen } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { gText } from "@/lib/gText";
 import { useSound } from "@/hooks/useSoundEffects";
+import { useAmbientSound, type AmbientScene } from "@/hooks/useAmbientSound";
 import { EnhancedDialogue } from "../EnhancedDialogue";
 import storeFrontImg from "@/assets/scenes/store-front.png";
 import storeEntranceImg from "@/assets/scenes/store-entrance.jpg";
@@ -18,6 +19,8 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
   const { playSound } = useSound();
   const g = profile?.gender || "male";
   const [phase, setPhase] = useState<"storefront" | "entrance" | "greeting" | "dialogue">("storefront");
+  const ambientScene: AmbientScene = phase === "storefront" ? "street" : "store";
+  useAmbientSound(ambientScene);
 
   const dialogues = [
     {
