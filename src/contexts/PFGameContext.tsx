@@ -27,6 +27,8 @@ export interface PFGameState extends GameState {
   framingSubmitted: boolean;
   outcome: CaseOutcome | null;
   framingCorrectCount: number;
+  /** Reports (evidence ids) Abu Saeed handed over, in receipt order */
+  collectedReports: string[];
 }
 
 interface ChoiceResult {
@@ -60,6 +62,7 @@ const initialState: PFGameState = {
   framingSubmitted: false,
   outcome: null,
   framingCorrectCount: 0,
+  collectedReports: [],
 };
 
 const PFGameContext = createContext<PFGameContextValue | null>(null);
@@ -79,10 +82,17 @@ export const PFGameProvider = ({ children }: { children: ReactNode }) => {
     (isCorrect: boolean): ChoiceResult | null => {
       const choice = isCorrect ? "correct" : "wrong";
       const result = engineApply(state, choice);
-      setState((prev) => ({
-        ...prev,
-        ...result.nextState,
-      }));
+      setState((prev) => {
+        const newReports =
+          result.evidenceId && !prev.collectedReports.includes(result.evidenceId)
+            ? [...prev.collectedReports, result.evidenceId]
+            : prev.collectedReports;
+        return {
+          ...prev,
+          ...result.nextState,
+          collectedReports: newReports,
+        };
+      });
 
       return {
         questionText: result.questionText,
