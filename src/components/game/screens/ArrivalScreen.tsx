@@ -2,80 +2,67 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { MapPin, DoorOpen } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { gText } from "@/lib/gText";
 import { useSound } from "@/hooks/useSoundEffects";
 import { useAmbientSound, type AmbientScene } from "@/hooks/useAmbientSound";
 import { EnhancedDialogue } from "../EnhancedDialogue";
 import storeFrontImg from "@/assets/scenes/store-front.png";
 import storeEntranceImg from "@/assets/scenes/store-entrance.jpg";
 import abuSaeedGreetingImg from "@/assets/scenes/abu-saeed-greeting.jpg";
+import { ABU_SAEED_GREETING } from "@/data/pf-case";
 
 interface ArrivalScreenProps {
   onComplete: () => void;
 }
+
+type EnhancedDialogueMood = "neutral" | "happy" | "nervous" | "angry" | "suspicious";
+
+const mapMood = (mood?: string): EnhancedDialogueMood => {
+  switch (mood) {
+    case "happy":
+      return "happy";
+    case "concerned":
+      return "nervous";
+    case "serious":
+      return "neutral";
+    case "confident":
+      return "neutral";
+    case "impressed":
+      return "happy";
+    case "disappointed":
+      return "angry";
+    case "uncertain":
+      return "suspicious";
+    default:
+      return "neutral";
+  }
+};
 
 export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
   const { profile } = useAuth();
   const { playSound } = useSound();
   const g = profile?.gender || "male";
   const [phase, setPhase] = useState<"storefront" | "entrance" | "greeting" | "dialogue">("storefront");
+
   const ambientScene: AmbientScene = phase === "storefront" ? "street" : "store";
   useAmbientSound(ambientScene);
 
-  const dialogues = [
-    {
-      characterId: "abuSaeed",
-      text: "أهلاً وسهلاً… نوّرت يا أستاذ. اتفضل.",
-      mood: "happy" as const,
-      audioSrc: "/voiceover/abu-saeed/arrival-01-welcome.mp3",
-    },
-    {
-      characterId: "abuSaeed",
-      text: "أنا أبو سعيد. المحل ده بقالي فيه أكتر من اتناشر سنة، والحمد لله… عملته بإيدي من الصفر.",
-      mood: "neutral" as const,
-      audioSrc: "/voiceover/abu-saeed/arrival-02-pride.mp3",
-    },
-    {
-      characterId: "abuSaeed",
-      text: "بس من كام أسبوع كده… حاسس إن فيه حاجة مش مظبوطة.",
-      mood: "nervous" as const,
-      audioSrc: "/voiceover/abu-saeed/arrival-03-concern.mp3",
-    },
-    {
-      characterId: "abuSaeed",
-      text: "الحركة في المحل كويسة… الناس بتيجي وبتتفرج وبتدخل وبتطلع… يعني المحل مش فاضي.",
-      mood: "neutral" as const,
-      audioSrc: "/voiceover/abu-saeed/arrival-04-traffic.mp3",
-    },
-    {
-      characterId: "abuSaeed",
-      text: "بس لما باجي أحسِب آخِر الأسبوع… بلاقي الرقم مش زي ما متوقع. البيع مش باين… رغم إن الحركة شكلها كويس.",
-      mood: "nervous" as const,
-      audioSrc: "/voiceover/abu-saeed/arrival-05-sales-problem.mp3",
-    },
-    {
-      characterId: "detective",
-      text: "طيب… خليني أسألك كام سؤال عشان أفهم الصورة كويس.",
-      mood: "neutral" as const,
-    },
-    {
-      characterId: "abuSaeed",
-      text: "اتفضل… اسأل اللي عايزه. أنا محتاج حد يفهمني إيه اللي بيحصل.",
-      mood: "neutral" as const,
-      audioSrc: "/voiceover/abu-saeed/arrival-06-invite.mp3",
-    },
-  ];
+  const dialogues = ABU_SAEED_GREETING.map((line) => ({
+    characterId: line.characterId,
+    text: line.text,
+    mood: mapMood(line.mood),
+    audioSrc: line.audioSrc,
+  }));
 
-  // Auto-advance entrance phase after 2.5s
   useEffect(() => {
     if (phase === "entrance") {
-      try { playSound("storeBell"); } catch {}
+      try {
+        playSound("storeBell");
+      } catch {}
       const timer = setTimeout(() => setPhase("greeting"), 2500);
       return () => clearTimeout(timer);
     }
   }, [phase, playSound]);
 
-  // Auto-advance greeting phase after 2.5s
   useEffect(() => {
     if (phase === "greeting") {
       const timer = setTimeout(() => setPhase("dialogue"), 2500);
@@ -83,7 +70,6 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
     }
   }, [phase]);
 
-  // Phase 1: Storefront from distance
   if (phase === "storefront") {
     return (
       <div className="relative h-screen overflow-hidden">
@@ -116,7 +102,9 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
             <h1 className="text-2xl md:text-3xl font-bold text-white mb-0.5 drop-shadow-lg">
               Fashion House
             </h1>
-            <p className="text-white/70 text-xs" dir="rtl">أبو سعيد مستنيك جوه</p>
+            <p className="text-white/70 text-xs" dir="rtl">
+              أبو سعيد مستنيك جوه
+            </p>
           </motion.div>
 
           <motion.button
@@ -144,7 +132,6 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
     );
   }
 
-  // Phase 2: Store entrance — auto-advance, no text/buttons
   if (phase === "entrance") {
     return (
       <div className="relative h-screen overflow-hidden">
@@ -161,7 +148,6 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
     );
   }
 
-  // Phase 3: Abu Saeed greeting — auto-advance, no text/buttons
   if (phase === "greeting") {
     return (
       <div className="relative h-screen overflow-hidden">
@@ -178,7 +164,6 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
     );
   }
 
-  // Phase 4: Dialogue — starts automatically
   return (
     <div className="min-h-screen bg-background relative">
       <motion.div
