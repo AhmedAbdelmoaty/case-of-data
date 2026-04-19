@@ -1,57 +1,42 @@
 // ============================================================================
-// Index — TEMPORARY scaffold during rebuild (Phase 2 complete)
-// Old screens are intentionally NOT mounted — they depend on a removed API
-// and will be replaced in Phase 3 (InvestigationHub, SynthesisScreen,
-// FramingBuilder, DebriefScreen).
+// Index — Session 1: InvestigationHub mounted directly so the user can play.
+// Briefing/Travel/Arrival linking comes in Session 3.
 // ============================================================================
 
+import { useEffect } from "react";
 import { PFGameProvider, usePFGame } from "@/contexts/PFGameContext";
+import { InvestigationHub } from "@/components/game/screens/InvestigationHub";
+import { Card, CardContent } from "@/components/ui/card";
 
-const RebuildNotice = () => {
-  const { caseData, state, remainingBudget, availableQuestions } = usePFGame();
+const PhaseRouter = () => {
+  const { state, setPhase } = usePFGame();
 
+  // Temporary: skip briefing/travel/arrival until Session 3 wires the old screens
+  useEffect(() => {
+    if (state.phase === "briefing") setPhase("investigation");
+  }, [state.phase, setPhase]);
+
+  if (state.phase === "investigation") return <InvestigationHub />;
+
+  // Placeholder for synthesis / framing / debrief — coming in Sessions 2 & 3
   return (
-    <div className="min-h-screen bg-background text-foreground p-8 flex items-center justify-center">
-      <div className="max-w-2xl w-full space-y-6 text-center">
-        <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
-          Phase 2 / 5 — Context layer rebuilt
-        </div>
-
-        <h1 className="text-3xl font-bold">{caseData.title}</h1>
-        <p className="text-muted-foreground leading-relaxed">
-          الـ Schema الجديد و PFGameContext تم بناؤهم. الشاشات الجديدة
-          (Investigation Hub، Synthesis، Framing Builder، Debrief) هتتبني في
-          المرحلة 3.
-        </p>
-
-        <div className="grid grid-cols-3 gap-4 text-sm">
-          <div className="rounded-lg border border-border p-4">
-            <div className="text-2xl font-bold text-primary">{caseData.questionBank.length}</div>
-            <div className="text-muted-foreground">سؤال في البنك</div>
-          </div>
-          <div className="rounded-lg border border-border p-4">
-            <div className="text-2xl font-bold text-primary">{remainingBudget}</div>
-            <div className="text-muted-foreground">ميزانية الأسئلة</div>
-          </div>
-          <div className="rounded-lg border border-border p-4">
-            <div className="text-2xl font-bold text-primary">{state.trust}</div>
-            <div className="text-muted-foreground">الثقة</div>
-          </div>
-        </div>
-
-        <div className="text-xs text-muted-foreground">
-          المرحلة الحالية: <span className="font-mono text-foreground">{state.phase}</span>
-          {" · "}
-          أسئلة متاحة: <span className="font-mono text-foreground">{availableQuestions.length}</span>
-        </div>
-      </div>
+    <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-6" dir="rtl">
+      <Card className="max-w-md">
+        <CardContent className="p-6 text-center space-y-2">
+          <div className="text-xs uppercase tracking-wider text-primary">قريباً</div>
+          <h2 className="text-xl font-bold">شاشة "{state.phase}" قيد البناء</h2>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            انتهيت من مرحلة الاستقصاء. شاشات التحليل والتأطير والنتيجة هتتبني في الجلسات الجاية.
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 };
 
 const Index = () => (
   <PFGameProvider>
-    <RebuildNotice />
+    <PhaseRouter />
   </PFGameProvider>
 );
 
