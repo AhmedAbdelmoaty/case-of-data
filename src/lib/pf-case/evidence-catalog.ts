@@ -92,6 +92,8 @@ export const EVIDENCE: Record<string, EvidenceData> = {
       { key: "individuals", label: "أفراد" },
       { key: "corporate", label: "شركات" },
     ],
+    yMax: 800,
+    yTicks: [0, 200, 400, 600, 800],
   },
 
   // === TRACK A ===
