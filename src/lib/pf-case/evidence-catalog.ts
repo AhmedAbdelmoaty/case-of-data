@@ -8,6 +8,7 @@
 export type EvidenceChartType =
   | "bar"
   | "stacked_bar"
+  | "grouped_bar"
   | "line"
   | "table"
   | "list";
@@ -55,7 +56,7 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     ],
     series: [{ key: "value", label: "ألف جنيه" }],
     yMax: 800,
-    yTicks: [0, 200, 400, 600, 800],
+    yTicks: [0, 100, 200, 300, 400, 500, 600, 700, 800],
   },
   ev_three_year: {
     id: "ev_three_year",
@@ -72,28 +73,28 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     ],
     series: [{ key: "value", label: "ألف جنيه" }],
     yMax: 800,
-    yTicks: [0, 200, 400, 600, 800],
+    yTicks: [0, 100, 200, 300, 400, 500, 600, 700, 800],
   },
   ev_breakdown: {
     id: "ev_breakdown",
     title: "تقرير تفصيلي — تقسيم مبيعات فبراير حسب نوع البيع",
-    type: "stacked_bar",
+    type: "grouped_bar",
     issuer: "محاسبة محل أبو سعيد",
     reportDate: "مارس 2026",
-    caption: "كل سنة مقسومة لبيع أفراد (تجزئة) وبيع شركات (جملة).",
+    caption: "كل سنة فيها عمودين: بيع أفراد (تجزئة) جنب بيع شركات (جملة) — عشان يبان التدرج في كل نوع لوحده.",
     footnote:
-      "الأرقام بالألف جنيه. ملاحظة المحاسبة: في فبراير 2025 جالنا أوردر شركات استثنائي (حوالي 260 ألف) من عميل واحد، مش بيتكرر كل سنة.",
+      "الأرقام بالألف جنيه. ملاحظة المحاسبة: في فبراير 2025 جالنا أوردر شركات استثنائي (حوالي 290 ألف) من عميل واحد، مش بيتكرر كل سنة.",
     rows: [
-      { label: "فبراير 2024", individuals: 440, corporate: 40 },
-      { label: "فبراير 2025", individuals: 460, corporate: 260 },
+      { label: "فبراير 2024", individuals: 390, corporate: 90 },
+      { label: "فبراير 2025", individuals: 430, corporate: 290 },
       { label: "فبراير 2026", individuals: 480, corporate: 20 },
     ],
     series: [
       { key: "individuals", label: "أفراد" },
       { key: "corporate", label: "شركات" },
     ],
-    yMax: 800,
-    yTicks: [0, 200, 400, 600, 800],
+    yMax: 500,
+    yTicks: [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500],
   },
 
   // === TRACK A ===
