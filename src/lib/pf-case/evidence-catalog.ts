@@ -8,6 +8,7 @@
 export type EvidenceChartType =
   | "bar"
   | "stacked_bar"
+  | "grouped_bar"
   | "line"
   | "table"
   | "list";
