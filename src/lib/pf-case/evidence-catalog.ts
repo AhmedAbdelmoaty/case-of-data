@@ -48,7 +48,7 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     type: "bar",
     issuer: "محاسبة محل أبو سعيد",
     reportDate: "مارس 2026",
-    caption: "مقارنة إجمالي المبيعات بين نفس الشهر في السنتين.",
+    caption: "مقارنة إجمالي المبيعات بين شهر فبراير 2026 وشهر فبراير 2025",
     footnote: "الأرقام بالألف جنيه مصري، صافي مبيعات بعد المرتجعات.",
     rows: [
       { label: "فبراير 2025", value: 720 },
