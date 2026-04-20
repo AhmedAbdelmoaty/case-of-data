@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,9 +10,15 @@ import { TimeBudgetHUD } from "../TimeBudgetHUD";
 import { TOTAL_QUESTION_BUDGET } from "@/lib/pf-case/case-tree";
 import { ABU_SAEED_TIMEOUT_LINE } from "@/lib/pf-case/mansour-scripts";
 import type { EvidenceData } from "@/lib/pf-case/evidence-catalog";
-import storeInsideImg from "@/assets/scenes/store-inside.png";
-import storeCounterImg from "@/assets/scenes/store-counter.png";
-import storeWomensSectionImg from "@/assets/scenes/store-womens-section.jpg";
+import velaroInteriorWideImg from "@/assets/scenes/velaro-interior-wide.png";
+import velaroCheckoutBusyImg from "@/assets/scenes/velaro-checkout-busy.png";
+import velaroWomensSectionImg from "@/assets/scenes/velaro-womens-section.png";
+import velaroMensSectionImg from "@/assets/scenes/velaro-mens-section.png";
+import hishamOfficeSeatedMaleImg from "@/assets/scenes/hisham-office-seated-male.png";
+import hishamGreetingMaleImg from "@/assets/scenes/hisham-greeting-male.png";
+import hishamGreetingFemaleImg from "@/assets/scenes/hisham-greeting-female.png";
+import hishamHandingReportMaleImg from "@/assets/scenes/hisham-handing-report-male.png";
+import hishamHandingReportFemaleImg from "@/assets/scenes/hisham-handing-report-female.png";
 
 interface InquiryScreenProps {
   onComplete: () => void;
@@ -27,12 +33,6 @@ interface DialogueLineUI {
   saveText?: string;
   inlineEvidence?: EvidenceData;
 }
-
-const getBackground = (questionsUsed: number) => {
-  if (questionsUsed <= 1) return storeInsideImg;
-  if (questionsUsed <= 3) return storeWomensSectionImg;
-  return storeCounterImg;
-};
 
 export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
   const { state, getChoices, pickChoice, saveNote } = usePFGame();
@@ -50,7 +50,21 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
   const g = (profile?.gender || "male") as "male" | "female";
 
   const choices = getChoices();
-  const bg = getBackground(state.questionsUsed);
+
+  const dialogueScene = useMemo(() => {
+    const ownerBase = g === "female" ? hishamGreetingFemaleImg : hishamGreetingMaleImg;
+    const ownerOffice = hishamOfficeSeatedMaleImg;
+    const reportScene = g === "female" ? hishamHandingReportFemaleImg : hishamHandingReportMaleImg;
+
+    if (phase === "timeout") return ownerOffice;
+    if (currentLines.some((line) => line.inlineEvidence)) return reportScene;
+    if (state.currentNodeId?.includes("TRACK_A")) return velaroMensSectionImg;
+    if (state.currentNodeId?.includes("TRACK_C")) return velaroWomensSectionImg;
+    if (state.currentNodeId?.includes("TRACK_B") || state.currentNodeId?.includes("TRACK_D")) return velaroCheckoutBusyImg;
+    if (phase === "dialogue") return ownerOffice;
+    if (state.questionsUsed === 0) return ownerBase;
+    return velaroInteriorWideImg;
+  }, [currentLines, g, phase, state.currentNodeId, state.questionsUsed]);
 
   const handlePick = useCallback(
     (isCorrect: boolean) => {
@@ -59,7 +73,6 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
       const result = pickChoice(isCorrect);
       if (!result) return;
 
-      // Trigger HUD cost-flash animation
       setCostFlashKey((k) => k + 1);
 
       const lines: DialogueLineUI[] = [
@@ -85,8 +98,6 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
 
   const handleDialogueComplete = useCallback(() => {
     if (state.isComplete) {
-      // If meeting ended because the clock ran out before 5 questions,
-      // show Abu Saeed's narrative wrap-up before going to framing.
       if (state.endedByTimeout) {
         setCurrentLines(
           ABU_SAEED_TIMEOUT_LINE.map((l) => ({
@@ -110,7 +121,6 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
     onComplete();
   }, [onComplete]);
 
-  // Safety: when state becomes complete after dialogue closes
   useEffect(() => {
     if (state.isComplete && phase === "choosing") {
       if (state.endedByTimeout) {
@@ -135,37 +145,17 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
   return (
     <div className="min-h-screen bg-background relative">
       <AnimatePresence mode="wait">
-        <motion.div
-          key={bg}
-          className="absolute inset-0 overflow-hidden"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <img src={bg} alt="" className="w-full h-full object-cover animate-ken-burns" />
-          <div className="absolute inset-0 bg-black/65 backdrop-blur-[2px]" />
+        <motion.div key={dialogueScene} className="absolute inset-0 overflow-hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.8 }}>
+          <img src={dialogueScene} alt="VELARO conversation scene" className="w-full h-full object-cover animate-ken-burns" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/25 to-transparent" />
         </motion.div>
       </AnimatePresence>
 
-      <TimeBudgetHUD
-        timeRemaining={state.timeRemaining}
-        lastTimeCost={state.lastTimeCost}
-        flashKey={costFlashKey}
-      />
+      <TimeBudgetHUD timeRemaining={state.timeRemaining} lastTimeCost={state.lastTimeCost} flashKey={costFlashKey} />
 
       <div className="fixed top-4 right-4 z-20 flex gap-1.5">
         {progressDots.map((i) => (
-          <motion.div
-            key={i}
-            className={`w-2.5 h-2.5 rounded-full transition-colors ${
-              i < state.questionsUsed
-                ? "bg-primary"
-                : i === state.questionsUsed
-                ? "bg-primary/60 ring-2 ring-primary/30"
-                : "bg-muted"
-            }`}
-          />
+          <motion.div key={i} className={`w-2.5 h-2.5 rounded-full transition-colors ${i < state.questionsUsed ? "bg-primary" : i === state.questionsUsed ? "bg-primary/60 ring-2 ring-primary/30" : "bg-muted"}`} />
         ))}
       </div>
 
@@ -173,16 +163,10 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
 
       <AnimatePresence>
         {phase === "choosing" && choices.length > 0 && !state.isComplete && (
-          <motion.div
-            key={`choices-${state.currentNodeId}-${state.questionsUsed}`}
-            className="fixed inset-0 z-40 flex items-end justify-center pb-6"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
+          <motion.div key={`choices-${state.currentNodeId}-${state.questionsUsed}`} className="fixed inset-0 z-40 flex items-end justify-center pb-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <div className="max-w-lg w-full px-4 space-y-3">
               <motion.div className="text-center mb-2" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-                <span className="text-xs text-muted-foreground bg-card/60 backdrop-blur-sm px-3 py-1 rounded-full">
+                <span className="text-xs text-muted-foreground bg-card/65 px-3 py-1 rounded-full">
                   سؤال {Math.min(state.questionsUsed + 1, TOTAL_QUESTION_BUDGET)} من {TOTAL_QUESTION_BUDGET}
                 </span>
               </motion.div>
@@ -192,7 +176,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
                   key={option.id}
                   onClick={() => handlePick(option.isCorrect)}
                   onMouseEnter={() => { try { playSound("tick"); } catch {} }}
-                  className="w-full p-4 rounded-xl bg-card/85 backdrop-blur-sm border border-border hover:border-primary/60 hover:bg-card hover:shadow-[0_0_24px_hsl(var(--primary)/0.18)] transition-all text-right group"
+                  className="w-full p-4 rounded-xl bg-card/85 border border-border hover:border-primary/60 hover:bg-card hover:shadow-[0_0_24px_hsl(var(--primary)/0.18)] transition-all text-right group"
                   dir="rtl"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -201,9 +185,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
                   whileTap={{ scale: 0.98 }}
                   exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
                 >
-                  <p className="text-foreground text-sm leading-relaxed group-hover:text-primary transition-colors">
-                    {option.text}
-                  </p>
+                  <p className="text-foreground text-sm leading-relaxed group-hover:text-primary transition-colors">{option.text}</p>
                 </motion.button>
               ))}
             </div>

@@ -10,8 +10,9 @@ import {
   MANSOUR_DEBRIEF_MEDIUM,
   MANSOUR_DEBRIEF_WEAK,
 } from "@/lib/pf-case/mansour-scripts";
-import officeHallwayImg from "@/assets/scenes/office-hallway.jpg";
-import mansourDeskImg from "@/assets/scenes/mansour-desk.jpg";
+import prismHallwayImg from "@/assets/scenes/prism-hallway.png";
+import mansourOfficeSeatedMaleImg from "@/assets/scenes/mansour-office-seated-male.png";
+import mansourOfficeSeatedFemaleImg from "@/assets/scenes/mansour-office-seated-female.png";
 
 interface DebriefScreenProps {
   onComplete: () => void;
@@ -41,49 +42,29 @@ export const DebriefScreen = ({ onComplete }: DebriefScreenProps) => {
 
   const playerName = profile?.display_name || "محلل";
   const g = (profile?.gender || "male") as "male" | "female";
-
+  const bg = g === "female" ? mansourOfficeSeatedFemaleImg : mansourOfficeSeatedMaleImg;
   const tier = state.outcome || "medium";
 
   const dialogues = useMemo(() => {
-    const source =
-      tier === "strong" ? MANSOUR_DEBRIEF_STRONG :
-      tier === "weak" ? MANSOUR_DEBRIEF_WEAK :
-      MANSOUR_DEBRIEF_MEDIUM;
-    return source.map((line) => ({
-      characterId: line.characterId,
-      text: line.text,
-      mood: mapMood(line.mood),
-    }));
+    const source = tier === "strong" ? MANSOUR_DEBRIEF_STRONG : tier === "weak" ? MANSOUR_DEBRIEF_WEAK : MANSOUR_DEBRIEF_MEDIUM;
+    return source.map((line) => ({ characterId: line.characterId, text: line.text, mood: mapMood(line.mood) }));
   }, [tier]);
 
-  const hallwayTitle =
-    tier === "strong" ? "راجع المكتب — منصور مستني يسمع منك" :
-    tier === "weak" ? "راجع المكتب — تقييم منصور مهم المرة دي" :
-    "راجع المكتب — وقت التقييم النهائي";
+  const hallwayTitle = tier === "strong" ? "راجع المكتب — منصور مستني يسمع منك" : tier === "weak" ? "راجع المكتب — تقييم منصور مهم المرة دي" : "راجع المكتب — وقت التقييم النهائي";
 
   if (phase === "hallway") {
     return (
       <div className="min-h-screen bg-background relative overflow-hidden">
         <motion.div className="absolute inset-0" initial={{ scale: 1.1, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 1.5 }}>
-          <img src={officeHallwayImg} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/40" />
+          <img src={prismHallwayImg} alt="Prism hallway" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/65 to-transparent" />
         </motion.div>
-
         <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="space-y-3 max-w-md">
-            <p className="text-muted-foreground text-sm tracking-widest">🏢 الطابق 12</p>
+            <p className="text-muted-foreground text-sm tracking-widest">🏢 PRISM</p>
             <h2 className="text-foreground text-lg font-bold" dir="rtl">{hallwayTitle}</h2>
           </motion.div>
-
-          <motion.button
-            onClick={() => { try { playSound("door"); } catch {}; setPhase("dialogue"); }}
-            className="mt-8 px-8 py-3 rounded-xl bg-card/60 backdrop-blur-md border border-border text-foreground font-bold hover:bg-card/80 transition-all"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.5 }}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-          >
+          <motion.button onClick={() => { try { playSound("door"); } catch {}; setPhase("dialogue"); }} className="mt-8 px-8 py-3 rounded-xl bg-card/60 border border-border text-foreground font-bold hover:bg-card/80 transition-all" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5 }} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
             ادخل المكتب
           </motion.button>
         </div>
@@ -93,20 +74,11 @@ export const DebriefScreen = ({ onComplete }: DebriefScreenProps) => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      <motion.div className="absolute inset-0" initial={{ scale: 1.1, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 1.5 }}>
-        <img src={mansourDeskImg} alt="" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
+      <motion.div className="absolute inset-0" initial={{ scale: 1.04, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 1.2 }}>
+        <img src={bg} alt="Debrief with Mansour" className="w-full h-full object-cover animate-ken-burns" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/20 to-transparent" />
       </motion.div>
-
-      <EnhancedDialogue
-        dialogues={dialogues}
-        isActive={true}
-        onComplete={onComplete}
-        currentIndex={dialogueIndex}
-        onIndexChange={setDialogueIndex}
-        playerName={playerName}
-        playerGender={g}
-      />
+      <EnhancedDialogue dialogues={dialogues} isActive={true} onComplete={onComplete} currentIndex={dialogueIndex} onIndexChange={setDialogueIndex} playerName={playerName} playerGender={g} />
     </div>
   );
 };
