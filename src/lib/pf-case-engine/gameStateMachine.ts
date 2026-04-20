@@ -2,7 +2,16 @@
 // Game State Machine — drives the new case logic
 // ============================================================
 
-import { NODES, TOTAL_QUESTION_BUDGET, type CaseNode, type NodeId, type TrackId, type CaseOutcome } from "@/lib/pf-case/case-tree";
+import {
+  NODES,
+  TOTAL_QUESTION_BUDGET,
+  TOTAL_TIME_BUDGET,
+  getTimeCost,
+  type CaseNode,
+  type NodeId,
+  type TrackId,
+  type CaseOutcome,
+} from "@/lib/pf-case/case-tree";
 import { countCorrectFraming, type FramingSelection } from "@/lib/pf-case/framing-board";
 
 export interface GameState {
@@ -15,6 +24,12 @@ export interface GameState {
   collectedEvidence: string[];
   savedNoteIds: string[];
   isComplete: boolean;
+  /** Abstract time budget in minutes (does not tick in real time) */
+  timeRemaining: number;
+  /** Cost of the last question taken (for HUD animation) */
+  lastTimeCost: number;
+  /** True if the meeting ended because time ran out before 5 questions */
+  endedByTimeout: boolean;
 }
 
 export const initialGameState: GameState = {
@@ -26,6 +41,9 @@ export const initialGameState: GameState = {
   collectedEvidence: [],
   savedNoteIds: [],
   isComplete: false,
+  timeRemaining: TOTAL_TIME_BUDGET,
+  lastTimeCost: 0,
+  endedByTimeout: false,
 };
 
 export function getNode(state: GameState): CaseNode {
@@ -73,10 +91,16 @@ export function applyChoice(
 
   const questionsUsed = state.questionsUsed + 1;
 
-  // Determine completion: budget exhausted OR reached END
+  // Time budget: each question costs 3 (correct) or 5 (wrong) abstract minutes
+  const timeCost = getTimeCost(choice);
+  const timeRemaining = Math.max(0, state.timeRemaining - timeCost);
+
+  // Determine completion: reached END, hit question cap, or ran out of time
   const reachedEnd = nextNodeId === "END";
   const budgetExhausted = questionsUsed >= TOTAL_QUESTION_BUDGET;
-  const isComplete = reachedEnd || budgetExhausted;
+  const timeExhausted = timeRemaining <= 0;
+  const isComplete = reachedEnd || budgetExhausted || timeExhausted;
+  const endedByTimeout = timeExhausted && !reachedEnd && questionsUsed < TOTAL_QUESTION_BUDGET;
 
   const collectedEvidence = option.evidenceId
     ? [...state.collectedEvidence, option.evidenceId]
@@ -91,6 +115,9 @@ export function applyChoice(
     history: [...state.history, { nodeId: state.currentNodeId, choice }],
     collectedEvidence,
     isComplete,
+    timeRemaining,
+    lastTimeCost: timeCost,
+    endedByTimeout,
   };
 
   return {
