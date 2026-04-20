@@ -54,6 +54,8 @@ export const EVIDENCE: Record<string, EvidenceData> = {
       { label: "فبراير 2026", value: 500 },
     ],
     series: [{ key: "value", label: "ألف جنيه" }],
+    yMax: 800,
+    yTicks: [0, 200, 400, 600, 800],
   },
   ev_three_year: {
     id: "ev_three_year",
