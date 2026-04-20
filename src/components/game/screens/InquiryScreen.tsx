@@ -225,6 +225,20 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
           playerGender={g}
         />
       )}
+
+      {phase === "timeout" && currentLines.length > 0 && (
+        <EnhancedDialogue
+          key={`timeout-${dialogueKey}`}
+          dialogues={currentLines}
+          isActive={true}
+          onComplete={handleTimeoutComplete}
+          currentIndex={dialogueIndex}
+          onIndexChange={setDialogueIndex}
+          savedNoteIds={state.savedNoteIds}
+          playerName={playerName}
+          playerGender={g}
+        />
+      )}
     </div>
   );
 };
