@@ -34,7 +34,10 @@ const COLORS = {
  * artifact Abu Saeed hands over, not a chat-bubble data dump.
  */
 export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProps) => {
-  const chartHeight = compact ? "h-40" : "h-56";
+  const chartHeight = compact ? "h-52" : "h-72";
+  const yAxisProps = evidence.yMax
+    ? { domain: [0, evidence.yMax] as [number, number], ticks: evidence.yTicks }
+    : {};
 
   return (
     <motion.div
