@@ -75,11 +75,11 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     reportDate: "مارس 2026",
     caption: "كل سنة مقسومة لبيع أفراد (تجزئة) وبيع شركات (جملة).",
     footnote:
-      "الأرقام بالألف جنيه. ملاحظة المحاسبة: في فبراير 2025 جالنا أوردر شركات استثنائي (حوالي 150 ألف) من عميل واحد، مش بيتكرر كل سنة.",
+      "الأرقام بالألف جنيه. ملاحظة المحاسبة: في فبراير 2025 جالنا أوردر شركات استثنائي (حوالي 260 ألف) من عميل واحد، مش بيتكرر كل سنة.",
     rows: [
-      { label: "فبراير 2024", individuals: 270, corporate: 20 },
-      { label: "فبراير 2025", individuals: 280, corporate: 150 },
-      { label: "فبراير 2026", individuals: 290, corporate: 10 },
+      { label: "فبراير 2024", individuals: 440, corporate: 40 },
+      { label: "فبراير 2025", individuals: 460, corporate: 260 },
+      { label: "فبراير 2026", individuals: 480, corporate: 20 },
     ],
     series: [
       { key: "individuals", label: "أفراد" },
