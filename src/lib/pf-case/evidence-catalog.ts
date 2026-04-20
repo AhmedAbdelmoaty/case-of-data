@@ -160,12 +160,14 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     caption: "إجمالي البيع لكل أسبوع في الشهر.",
     footnote: "الأرقام بالألف جنيه. الأسبوع الرابع هو الأقل بشكل واضح.",
     rows: [
-      { label: "أسبوع 1", value: 78 },
-      { label: "أسبوع 2", value: 92 },
-      { label: "أسبوع 3", value: 71 },
-      { label: "أسبوع 4", value: 59 },
+      { label: "أسبوع 1", value: 130 },
+      { label: "أسبوع 2", value: 155 },
+      { label: "أسبوع 3", value: 120 },
+      { label: "أسبوع 4", value: 95 },
     ],
     series: [{ key: "value", label: "ألف جنيه" }],
+    yMax: 180,
+    yTicks: [0, 45, 90, 135, 180],
   },
 
   // === TRACK C ===
