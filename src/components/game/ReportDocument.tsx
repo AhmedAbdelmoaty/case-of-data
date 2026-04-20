@@ -99,7 +99,7 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
         {evidence.type === "bar" && (
           <div className={`${chartHeight} w-full`}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={evidence.rows} margin={{ top: 8, right: 8, left: 8, bottom: 0 }} barCategoryGap="35%">
+              <BarChart data={evidence.rows} margin={{ top: 22, right: 8, left: 8, bottom: 0 }} barCategoryGap="40%">
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(20 14% 18% / 0.15)" />
                 <XAxis dataKey="label" tick={{ fontSize: 10, fill: "hsl(20 14% 18%)" }} />
                 <YAxis tick={{ fontSize: 10, fill: "hsl(20 14% 18%)" }} {...yAxisProps} />
@@ -115,6 +115,7 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
                   {evidence.rows.map((_, i) => (
                     <Cell key={i} fill={i === evidence.rows.length - 1 ? COLORS.accent : COLORS.primary} />
                   ))}
+                  <LabelList dataKey="value" position="top" style={{ fontSize: 11, fontWeight: 700, fill: "hsl(20 14% 18%)" }} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -139,6 +140,33 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
                 <Legend wrapperStyle={{ fontSize: 11, color: "hsl(20 14% 18%)" }} />
                 <Bar dataKey="individuals" name="أفراد" stackId="a" fill={COLORS.primary} />
                 <Bar dataKey="corporate" name="شركات" stackId="a" fill={COLORS.accent} radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {evidence.type === "grouped_bar" && (
+          <div className={`${chartHeight} w-full`}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={evidence.rows} margin={{ top: 22, right: 8, left: 8, bottom: 0 }} barCategoryGap="25%" barGap={4}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(20 14% 18% / 0.15)" />
+                <XAxis dataKey="label" tick={{ fontSize: 10, fill: "hsl(20 14% 18%)" }} />
+                <YAxis tick={{ fontSize: 10, fill: "hsl(20 14% 18%)" }} {...yAxisProps} />
+                <Tooltip
+                  contentStyle={{
+                    background: "hsl(45 38% 96%)",
+                    border: "1px solid hsl(20 14% 18% / 0.3)",
+                    fontSize: 12,
+                    color: "hsl(20 14% 18%)",
+                  }}
+                />
+                <Legend wrapperStyle={{ fontSize: 11, color: "hsl(20 14% 18%)" }} />
+                <Bar dataKey="individuals" name="أفراد" fill={COLORS.primary} radius={[6, 6, 0, 0]}>
+                  <LabelList dataKey="individuals" position="top" style={{ fontSize: 10, fontWeight: 700, fill: "hsl(20 14% 18%)" }} />
+                </Bar>
+                <Bar dataKey="corporate" name="شركات" fill={COLORS.accent} radius={[6, 6, 0, 0]}>
+                  <LabelList dataKey="corporate" position="top" style={{ fontSize: 10, fontWeight: 700, fill: "hsl(20 14% 18%)" }} />
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
