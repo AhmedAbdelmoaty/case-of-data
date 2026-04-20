@@ -34,6 +34,9 @@ export interface EvidenceData {
   rows: EvidenceDataRow[];
   series?: { key: "value" | "individuals" | "corporate"; label: string; color?: string }[];
   headers?: string[];
+  /** Optional fixed Y axis bounds + ticks — used to exaggerate visual differences on key reports */
+  yMax?: number;
+  yTicks?: number[];
 }
 
 export const EVIDENCE: Record<string, EvidenceData> = {
