@@ -148,6 +148,12 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
         </motion.div>
       </AnimatePresence>
 
+      <TimeBudgetHUD
+        timeRemaining={state.timeRemaining}
+        lastTimeCost={state.lastTimeCost}
+        flashKey={costFlashKey}
+      />
+
       <div className="fixed top-4 right-4 z-20 flex gap-1.5">
         {progressDots.map((i) => (
           <motion.div
