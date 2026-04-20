@@ -8,8 +8,10 @@ type Screen =
   | "reflection"
   | "framing"
   | "presentation"
-  | "return-travel"
-  | "debrief"
+  | "email-send"
+  | "mansour-receives"
+  | "incoming-call"
+  | "phone-call"
   | "result";
 
 const STAGES: { key: Screen; icon: string; label: string }[] = [
@@ -20,8 +22,10 @@ const STAGES: { key: Screen; icon: string; label: string }[] = [
   { key: "reflection", icon: "🧠", label: "التأمل" },
   { key: "framing", icon: "📋", label: "التأطير" },
   { key: "presentation", icon: "📊", label: "التقديم" },
-  { key: "return-travel", icon: "🚗", label: "العودة" },
-  { key: "debrief", icon: "🏢", label: "التقييم" },
+  { key: "email-send", icon: "📧", label: "الإيميل" },
+  { key: "mansour-receives", icon: "📩", label: "الاستلام" },
+  { key: "incoming-call", icon: "📞", label: "المكالمة" },
+  { key: "phone-call", icon: "🗣️", label: "التقييم" },
   { key: "result", icon: "⭐", label: "النتيجة" },
 ];
 
