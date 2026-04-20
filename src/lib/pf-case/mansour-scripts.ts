@@ -199,3 +199,14 @@ export const MANSOUR_DEBRIEF_WEAK: DialogueLine[] = [
     mood: "serious",
   },
 ];
+
+// Single line shown when Abu Saeed wraps up the meeting because time ran out
+// before the player asked their 5 questions. No leak about correctness — just
+// a natural shopkeeper's excuse to end on time.
+export const ABU_SAEED_TIMEOUT_LINE: DialogueLine[] = [
+  {
+    characterId: "abuSaeed",
+    text: "معلش يا فندم، أنا نسيت أقولك… عندي مورّد جايلي بعد شوية ولازم أستقبله. خلينا نقفل النهارده على اللي معانا، وحضرتك شوف الموضوع بنفسك بالمعلومات اللي جمعناها سوا.",
+    mood: "concerned",
+  },
+];
