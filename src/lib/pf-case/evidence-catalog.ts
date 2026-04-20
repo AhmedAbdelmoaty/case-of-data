@@ -61,9 +61,9 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     caption: "مبيعات شهر فبراير في السنوات الثلاث الأخيرة.",
     footnote: "الأرقام بالألف جنيه. التقرير بيوضح إن سنة 2025 طالعة بشكل ملحوظ عن السنتين التانيين.",
     rows: [
-      { label: "فبراير 2024", value: 290 },
-      { label: "فبراير 2025", value: 430 },
-      { label: "فبراير 2026", value: 300 },
+      { label: "فبراير 2024", value: 480 },
+      { label: "فبراير 2025", value: 720 },
+      { label: "فبراير 2026", value: 500 },
     ],
     series: [{ key: "value", label: "ألف جنيه" }],
   },
