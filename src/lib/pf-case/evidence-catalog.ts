@@ -34,6 +34,9 @@ export interface EvidenceData {
   rows: EvidenceDataRow[];
   series?: { key: "value" | "individuals" | "corporate"; label: string; color?: string }[];
   headers?: string[];
+  /** Optional fixed Y axis bounds + ticks — used to exaggerate visual differences on key reports */
+  yMax?: number;
+  yTicks?: number[];
 }
 
 export const EVIDENCE: Record<string, EvidenceData> = {
@@ -47,10 +50,12 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     caption: "مقارنة إجمالي المبيعات بين نفس الشهر في السنتين.",
     footnote: "الأرقام بالألف جنيه مصري، صافي مبيعات بعد المرتجعات.",
     rows: [
-      { label: "فبراير 2025", value: 430 },
-      { label: "فبراير 2026", value: 300 },
+      { label: "فبراير 2025", value: 720 },
+      { label: "فبراير 2026", value: 500 },
     ],
     series: [{ key: "value", label: "ألف جنيه" }],
+    yMax: 800,
+    yTicks: [0, 200, 400, 600, 800],
   },
   ev_three_year: {
     id: "ev_three_year",
@@ -61,11 +66,13 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     caption: "مبيعات شهر فبراير في السنوات الثلاث الأخيرة.",
     footnote: "الأرقام بالألف جنيه. التقرير بيوضح إن سنة 2025 طالعة بشكل ملحوظ عن السنتين التانيين.",
     rows: [
-      { label: "فبراير 2024", value: 290 },
-      { label: "فبراير 2025", value: 430 },
-      { label: "فبراير 2026", value: 300 },
+      { label: "فبراير 2024", value: 480 },
+      { label: "فبراير 2025", value: 720 },
+      { label: "فبراير 2026", value: 500 },
     ],
     series: [{ key: "value", label: "ألف جنيه" }],
+    yMax: 800,
+    yTicks: [0, 200, 400, 600, 800],
   },
   ev_breakdown: {
     id: "ev_breakdown",
@@ -75,16 +82,18 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     reportDate: "مارس 2026",
     caption: "كل سنة مقسومة لبيع أفراد (تجزئة) وبيع شركات (جملة).",
     footnote:
-      "الأرقام بالألف جنيه. ملاحظة المحاسبة: في فبراير 2025 جالنا أوردر شركات استثنائي (حوالي 150 ألف) من عميل واحد، مش بيتكرر كل سنة.",
+      "الأرقام بالألف جنيه. ملاحظة المحاسبة: في فبراير 2025 جالنا أوردر شركات استثنائي (حوالي 260 ألف) من عميل واحد، مش بيتكرر كل سنة.",
     rows: [
-      { label: "فبراير 2024", individuals: 270, corporate: 20 },
-      { label: "فبراير 2025", individuals: 280, corporate: 150 },
-      { label: "فبراير 2026", individuals: 290, corporate: 10 },
+      { label: "فبراير 2024", individuals: 440, corporate: 40 },
+      { label: "فبراير 2025", individuals: 460, corporate: 260 },
+      { label: "فبراير 2026", individuals: 480, corporate: 20 },
     ],
     series: [
       { key: "individuals", label: "أفراد" },
       { key: "corporate", label: "شركات" },
     ],
+    yMax: 800,
+    yTicks: [0, 200, 400, 600, 800],
   },
 
   // === TRACK A ===
@@ -128,17 +137,19 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     issuer: "محاسبة محل أبو سعيد",
     reportDate: "مارس 2026",
     caption: "حركة البيع اليومية على مدار الشهر.",
-    footnote: "الأرقام بالألف جنيه/يوم. الإجمالي الشهري حوالي 300 ألف جنيه.",
+    footnote: "الأرقام بالألف جنيه/يوم. الإجمالي الشهري حوالي 500 ألف جنيه.",
     rows: [
-      { label: "ي1", value: 9 },
-      { label: "ي5", value: 11 },
-      { label: "ي10", value: 8 },
-      { label: "ي15", value: 12 },
-      { label: "ي20", value: 9 },
-      { label: "ي25", value: 10 },
-      { label: "ي30", value: 7 },
+      { label: "ي1", value: 15 },
+      { label: "ي5", value: 18 },
+      { label: "ي10", value: 14 },
+      { label: "ي15", value: 20 },
+      { label: "ي20", value: 16 },
+      { label: "ي25", value: 17 },
+      { label: "ي30", value: 12 },
     ],
     series: [{ key: "value", label: "ألف جنيه/يوم" }],
+    yMax: 25,
+    yTicks: [0, 5, 10, 15, 20, 25],
   },
   ev_weekly_sales: {
     id: "ev_weekly_sales",
@@ -149,12 +160,14 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     caption: "إجمالي البيع لكل أسبوع في الشهر.",
     footnote: "الأرقام بالألف جنيه. الأسبوع الرابع هو الأقل بشكل واضح.",
     rows: [
-      { label: "أسبوع 1", value: 78 },
-      { label: "أسبوع 2", value: 92 },
-      { label: "أسبوع 3", value: 71 },
-      { label: "أسبوع 4", value: 59 },
+      { label: "أسبوع 1", value: 130 },
+      { label: "أسبوع 2", value: 155 },
+      { label: "أسبوع 3", value: 120 },
+      { label: "أسبوع 4", value: 95 },
     ],
     series: [{ key: "value", label: "ألف جنيه" }],
+    yMax: 180,
+    yTicks: [0, 45, 90, 135, 180],
   },
 
   // === TRACK C ===

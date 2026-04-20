@@ -34,7 +34,10 @@ const COLORS = {
  * artifact Abu Saeed hands over, not a chat-bubble data dump.
  */
 export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProps) => {
-  const chartHeight = compact ? "h-40" : "h-56";
+  const chartHeight = compact ? "h-52" : "h-72";
+  const yAxisProps = evidence.yMax
+    ? { domain: [0, evidence.yMax] as [number, number], ticks: evidence.yTicks }
+    : {};
 
   return (
     <motion.div
@@ -95,10 +98,10 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
         {evidence.type === "bar" && (
           <div className={`${chartHeight} w-full`}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={evidence.rows} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+              <BarChart data={evidence.rows} margin={{ top: 8, right: 8, left: 8, bottom: 0 }} barCategoryGap="35%">
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(20 14% 18% / 0.15)" />
                 <XAxis dataKey="label" tick={{ fontSize: 10, fill: "hsl(20 14% 18%)" }} />
-                <YAxis tick={{ fontSize: 10, fill: "hsl(20 14% 18%)" }} />
+                <YAxis tick={{ fontSize: 10, fill: "hsl(20 14% 18%)" }} {...yAxisProps} />
                 <Tooltip
                   contentStyle={{
                     background: "hsl(45 38% 96%)",
@@ -120,10 +123,10 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
         {evidence.type === "stacked_bar" && (
           <div className={`${chartHeight} w-full`}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={evidence.rows} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+              <BarChart data={evidence.rows} margin={{ top: 8, right: 8, left: 8, bottom: 0 }} barCategoryGap="35%">
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(20 14% 18% / 0.15)" />
                 <XAxis dataKey="label" tick={{ fontSize: 10, fill: "hsl(20 14% 18%)" }} />
-                <YAxis tick={{ fontSize: 10, fill: "hsl(20 14% 18%)" }} />
+                <YAxis tick={{ fontSize: 10, fill: "hsl(20 14% 18%)" }} {...yAxisProps} />
                 <Tooltip
                   contentStyle={{
                     background: "hsl(45 38% 96%)",
@@ -143,10 +146,10 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
         {evidence.type === "line" && (
           <div className={`${chartHeight} w-full`}>
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={evidence.rows} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+              <LineChart data={evidence.rows} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(20 14% 18% / 0.15)" />
                 <XAxis dataKey="label" tick={{ fontSize: 10, fill: "hsl(20 14% 18%)" }} />
-                <YAxis tick={{ fontSize: 10, fill: "hsl(20 14% 18%)" }} />
+                <YAxis tick={{ fontSize: 10, fill: "hsl(20 14% 18%)" }} {...yAxisProps} />
                 <Tooltip
                   contentStyle={{
                     background: "hsl(45 38% 96%)",
