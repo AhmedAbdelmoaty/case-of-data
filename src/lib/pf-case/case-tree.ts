@@ -507,3 +507,19 @@ export const NODES: Record<NodeId, CaseNode> = {
 };
 
 export const TOTAL_QUESTION_BUDGET = 5;
+
+// ============================================================
+// Time Budget (abstract minutes — does NOT tick in real time)
+// ============================================================
+// 15 minutes total. Correct question = 3 min, Wrong question = 5 min.
+// Math:
+//   - 5 correct: 15 min → reaches S5 exactly
+//   - 1 wrong + recovery + 3 correct: 5+5+3+3 = 16 → cannot finish 5 questions
+//   - Track (all wrong): 5+5+5 = 15 → ends after 3 questions
+// ============================================================
+export const TOTAL_TIME_BUDGET = 15;
+export const TIME_COST_CORRECT = 3;
+export const TIME_COST_WRONG = 5;
+
+export const getTimeCost = (choice: "correct" | "wrong"): number =>
+  choice === "correct" ? TIME_COST_CORRECT : TIME_COST_WRONG;
