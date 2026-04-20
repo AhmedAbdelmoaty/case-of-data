@@ -7,8 +7,10 @@ import { InquiryScreen } from "@/components/game/screens/InquiryScreen";
 import { FramingScreen } from "@/components/game/screens/FramingScreen";
 import { ReflectionTransition } from "@/components/game/screens/ReflectionTransition";
 import { PresentationScreen } from "@/components/game/screens/PresentationScreen";
-import { ReturnTravelScreen } from "@/components/game/screens/ReturnTravelScreen";
-import { DebriefScreen } from "@/components/game/screens/DebriefScreen";
+import { EmailSendScreen } from "@/components/game/screens/EmailSendScreen";
+import { MansourReceivesEmailScreen } from "@/components/game/screens/MansourReceivesEmailScreen";
+import { IncomingCallScreen } from "@/components/game/screens/IncomingCallScreen";
+import { PhoneCallDebriefScreen } from "@/components/game/screens/PhoneCallDebriefScreen";
 import { ResultScreen } from "@/components/game/screens/ResultScreen";
 import { SoundProvider } from "@/hooks/useSoundEffects";
 import { MusicProvider } from "@/hooks/useBackgroundMusic";
@@ -25,8 +27,10 @@ type Screen =
   | "reflection"
   | "framing"
   | "presentation"
-  | "return-travel"
-  | "debrief"
+  | "email-send"
+  | "mansour-receives"
+  | "incoming-call"
+  | "phone-call"
   | "result"
   | "replay-briefing";
 
@@ -151,15 +155,23 @@ const GameContent = () => {
       )}
 
       {currentScreen === "presentation" && (
-        <PresentationScreen onComplete={() => handleNavigate("return-travel")} />
+        <PresentationScreen onComplete={() => handleNavigate("email-send")} />
       )}
 
-      {currentScreen === "return-travel" && (
-        <ReturnTravelScreen onComplete={() => handleNavigate("debrief")} />
+      {currentScreen === "email-send" && (
+        <EmailSendScreen onComplete={() => handleNavigate("mansour-receives")} />
       )}
 
-      {currentScreen === "debrief" && (
-        <DebriefScreen onComplete={() => handleNavigate("result")} />
+      {currentScreen === "mansour-receives" && (
+        <MansourReceivesEmailScreen onComplete={() => handleNavigate("incoming-call")} />
+      )}
+
+      {currentScreen === "incoming-call" && (
+        <IncomingCallScreen onAnswer={() => handleNavigate("phone-call")} />
+      )}
+
+      {currentScreen === "phone-call" && (
+        <PhoneCallDebriefScreen onComplete={() => handleNavigate("result")} />
       )}
 
       {currentScreen === "result" && (
