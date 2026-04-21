@@ -3,11 +3,9 @@ import { motion } from "framer-motion";
 import { Phone, PhoneOff } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSound } from "@/hooks/useSoundEffects";
-// Placeholder — swap with analyst-relaxing-{gender}.png
-import analystMaleImg from "@/assets/scenes/city-drive-luxury-male.png";
-import analystFemaleImg from "@/assets/scenes/city-drive-luxury-female.png";
-// Placeholder — swap with mansour-avatar-circle.png
-import mansourAvatar from "@/assets/characters/analyst.png";
+import analystMaleImg from "@/assets/photos/analyst-relaxing-male.png";
+import analystFemaleImg from "@/assets/photos/analyst-relaxing-female.png";
+import mansourAvatar from "@/assets/photos/mansour-avatar-circle.png";
 
 interface IncomingCallScreenProps {
   onAnswer: () => void;
