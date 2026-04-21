@@ -34,7 +34,7 @@ interface DialogueLineUI {
 }
 
 export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
-  const { state, getChoices, pickChoice, saveNote } = usePFGame();
+  const { state, getChoices, pickChoice, saveNote, restartInquiry, canRestart } = usePFGame();
   const { profile } = useAuth();
   const { playSound } = useSound();
   useAmbientSound("store");
@@ -43,11 +43,29 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
   const [currentLines, setCurrentLines] = useState<DialogueLineUI[]>([]);
   const [dialogueIndex, setDialogueIndex] = useState(0);
   const [dialogueKey, setDialogueKey] = useState(0);
+  const [showRestartConfirm, setShowRestartConfirm] = useState(false);
 
   const playerName = profile?.display_name || "محلل";
   const g = (profile?.gender || "male") as "male" | "female";
 
   const choices = getChoices();
+
+  // Restart button visible: between Q1 and Q4, only if attempt still available
+  const showRestartButton =
+    canRestart &&
+    state.questionsUsed >= 1 &&
+    state.questionsUsed < 4 &&
+    !state.isComplete &&
+    phase === "choosing";
+
+  const handleConfirmRestart = () => {
+    try { playSound("pageFlip"); } catch {}
+    restartInquiry();
+    setShowRestartConfirm(false);
+    setPhase("choosing");
+    setCurrentLines([]);
+    setDialogueIndex(0);
+  };
 
   const dialogueScene = useMemo(() => {
     const ownerBase = g === "female" ? hishamGreetingFemaleImg : hishamGreetingMaleImg;
