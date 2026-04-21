@@ -5,8 +5,6 @@
 import {
   NODES,
   TOTAL_QUESTION_BUDGET,
-  TOTAL_TIME_BUDGET,
-  getTimeCost,
   type CaseNode,
   type NodeId,
   type TrackId,
@@ -24,12 +22,6 @@ export interface GameState {
   collectedEvidence: string[];
   savedNoteIds: string[];
   isComplete: boolean;
-  /** Abstract time budget in minutes (does not tick in real time) */
-  timeRemaining: number;
-  /** Cost of the last question taken (for HUD animation) */
-  lastTimeCost: number;
-  /** True if the meeting ended because time ran out before 5 questions */
-  endedByTimeout: boolean;
 }
 
 export const initialGameState: GameState = {
@@ -41,9 +33,6 @@ export const initialGameState: GameState = {
   collectedEvidence: [],
   savedNoteIds: [],
   isComplete: false,
-  timeRemaining: TOTAL_TIME_BUDGET,
-  lastTimeCost: 0,
-  endedByTimeout: false,
 };
 
 export function getNode(state: GameState): CaseNode {
@@ -64,7 +53,6 @@ export function applyChoice(
   choice: "correct" | "wrong"
 ): ApplyChoiceResult {
   if (state.isComplete) {
-    const node = getNode(state);
     return {
       nextState: state,
       responseText: "",
@@ -91,16 +79,10 @@ export function applyChoice(
 
   const questionsUsed = state.questionsUsed + 1;
 
-  // Time budget: each question costs 3 (correct) or 5 (wrong) abstract minutes
-  const timeCost = getTimeCost(choice);
-  const timeRemaining = Math.max(0, state.timeRemaining - timeCost);
-
-  // Determine completion: reached END, hit question cap, or ran out of time
+  // Determine completion: reached END or hit question cap
   const reachedEnd = nextNodeId === "END";
   const budgetExhausted = questionsUsed >= TOTAL_QUESTION_BUDGET;
-  const timeExhausted = timeRemaining <= 0;
-  const isComplete = reachedEnd || budgetExhausted || timeExhausted;
-  const endedByTimeout = timeExhausted && !reachedEnd && questionsUsed < TOTAL_QUESTION_BUDGET;
+  const isComplete = reachedEnd || budgetExhausted;
 
   const collectedEvidence = option.evidenceId
     ? [...state.collectedEvidence, option.evidenceId]
@@ -115,9 +97,6 @@ export function applyChoice(
     history: [...state.history, { nodeId: state.currentNodeId, choice }],
     collectedEvidence,
     isComplete,
-    timeRemaining,
-    lastTimeCost: timeCost,
-    endedByTimeout,
   };
 
   return {

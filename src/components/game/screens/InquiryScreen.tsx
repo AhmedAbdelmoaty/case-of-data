@@ -6,9 +6,7 @@ import { useSound } from "@/hooks/useSoundEffects";
 import { useAmbientSound } from "@/hooks/useAmbientSound";
 import { EnhancedDialogue } from "../EnhancedDialogue";
 import { PFNotebook } from "../PFNotebook";
-import { TimeBudgetHUD } from "../TimeBudgetHUD";
 import { TOTAL_QUESTION_BUDGET } from "@/lib/pf-case/case-tree";
-import { ABU_SAEED_TIMEOUT_LINE } from "@/lib/pf-case/mansour-scripts";
 import type { EvidenceData } from "@/lib/pf-case/evidence-catalog";
 import velaroInteriorWideImg from "@/assets/scenes/velaro-interior-wide.png";
 import velaroCheckoutBusyImg from "@/assets/scenes/velaro-checkout-busy.png";
@@ -41,11 +39,10 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
   const { playSound } = useSound();
   useAmbientSound("store");
 
-  const [phase, setPhase] = useState<"choosing" | "dialogue" | "timeout">("choosing");
+  const [phase, setPhase] = useState<"choosing" | "dialogue">("choosing");
   const [currentLines, setCurrentLines] = useState<DialogueLineUI[]>([]);
   const [dialogueIndex, setDialogueIndex] = useState(0);
   const [dialogueKey, setDialogueKey] = useState(0);
-  const [costFlashKey, setCostFlashKey] = useState(0);
 
   const playerName = profile?.display_name || "محلل";
   const g = (profile?.gender || "male") as "male" | "female";
@@ -57,7 +54,6 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
     const ownerOffice = g === "female" ? hishamOfficeSeatedFemaleImg : hishamOfficeSeatedMaleImg;
     const reportScene = g === "female" ? hishamHandingReportFemaleImg : hishamHandingReportMaleImg;
 
-    if (phase === "timeout") return ownerOffice;
     if (currentLines.some((line) => line.inlineEvidence)) return reportScene;
     if (state.currentNodeId?.includes("TRACK_A")) return velaroMensSectionImg;
     if (state.currentNodeId?.includes("TRACK_C")) return velaroWomensSectionImg;
@@ -73,8 +69,6 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
       try { playSound("tick"); } catch {}
       const result = pickChoice(isCorrect);
       if (!result) return;
-
-      setCostFlashKey((k) => k + 1);
 
       const lines: DialogueLineUI[] = [
         { characterId: "detective", text: result.questionText, mood: "neutral" },
@@ -99,47 +93,17 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
 
   const handleDialogueComplete = useCallback(() => {
     if (state.isComplete) {
-      if (state.endedByTimeout) {
-        setCurrentLines(
-          ABU_SAEED_TIMEOUT_LINE.map((l) => ({
-            characterId: l.characterId,
-            text: l.text,
-            mood: "suspicious",
-          }))
-        );
-        setDialogueIndex(0);
-        setDialogueKey((k) => k + 1);
-        setPhase("timeout");
-        return;
-      }
       onComplete();
       return;
     }
     setPhase("choosing");
-  }, [state.isComplete, state.endedByTimeout, onComplete]);
-
-  const handleTimeoutComplete = useCallback(() => {
-    onComplete();
-  }, [onComplete]);
+  }, [state.isComplete, onComplete]);
 
   useEffect(() => {
     if (state.isComplete && phase === "choosing") {
-      if (state.endedByTimeout) {
-        setCurrentLines(
-          ABU_SAEED_TIMEOUT_LINE.map((l) => ({
-            characterId: l.characterId,
-            text: l.text,
-            mood: "suspicious",
-          }))
-        );
-        setDialogueIndex(0);
-        setDialogueKey((k) => k + 1);
-        setPhase("timeout");
-      } else {
-        onComplete();
-      }
+      onComplete();
     }
-  }, [state.isComplete, state.endedByTimeout, phase, onComplete]);
+  }, [state.isComplete, phase, onComplete]);
 
   const progressDots = Array.from({ length: TOTAL_QUESTION_BUDGET }, (_, i) => i);
 
@@ -151,8 +115,6 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
           <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/25 to-transparent" />
         </motion.div>
       </AnimatePresence>
-
-      <TimeBudgetHUD timeRemaining={state.timeRemaining} lastTimeCost={state.lastTimeCost} flashKey={costFlashKey} />
 
       <div className="fixed top-4 right-4 z-20 flex gap-1.5">
         {progressDots.map((i) => (
@@ -209,19 +171,6 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
         />
       )}
 
-      {phase === "timeout" && currentLines.length > 0 && (
-        <EnhancedDialogue
-          key={`timeout-${dialogueKey}`}
-          dialogues={currentLines}
-          isActive={true}
-          onComplete={handleTimeoutComplete}
-          currentIndex={dialogueIndex}
-          onIndexChange={setDialogueIndex}
-          savedNoteIds={state.savedNoteIds}
-          playerName={playerName}
-          playerGender={g}
-        />
-      )}
     </div>
   );
 };
