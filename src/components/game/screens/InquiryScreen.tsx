@@ -15,6 +15,7 @@ import velaroCheckoutBusyImg from "@/assets/scenes/velaro-checkout-busy.png";
 import velaroWomensSectionImg from "@/assets/scenes/velaro-womens-section.png";
 import velaroMensSectionImg from "@/assets/scenes/velaro-mens-section.png";
 import hishamOfficeSeatedMaleImg from "@/assets/scenes/hisham-office-seated-male.png";
+import hishamOfficeSeatedFemaleImg from "@/assets/scenes/hisham-office-seated-female.png";
 import hishamGreetingMaleImg from "@/assets/scenes/hisham-greeting-male.png";
 import hishamGreetingFemaleImg from "@/assets/scenes/hisham-greeting-female.png";
 import hishamHandingReportMaleImg from "@/assets/scenes/hisham-handing-report-male.png";
@@ -53,7 +54,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
 
   const dialogueScene = useMemo(() => {
     const ownerBase = g === "female" ? hishamGreetingFemaleImg : hishamGreetingMaleImg;
-    const ownerOffice = hishamOfficeSeatedMaleImg;
+    const ownerOffice = g === "female" ? hishamOfficeSeatedFemaleImg : hishamOfficeSeatedMaleImg;
     const reportScene = g === "female" ? hishamHandingReportFemaleImg : hishamHandingReportMaleImg;
 
     if (phase === "timeout") return ownerOffice;

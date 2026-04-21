@@ -5,7 +5,7 @@ import { usePFGame, FRAMING_SECTIONS } from "@/contexts/PFGameContext";
 import { useSound } from "@/hooks/useSoundEffects";
 import { PFNotebook } from "../PFNotebook";
 import { StampEffect } from "../StampEffect";
-import storeCounterImg from "@/assets/scenes/store-counter.png";
+import framingBoardDeskImg from "@/assets/scenes/framing-board-desk.png";
 
 interface FramingScreenProps {
   onComplete: () => void;
@@ -51,8 +51,8 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
   return (
     <div className="min-h-screen bg-background relative">
       <div className="absolute inset-0 overflow-hidden">
-        <img src={storeCounterImg} alt="" className="w-full h-full object-cover animate-ken-burns" />
-        <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+        <img src={framingBoardDeskImg} alt="" className="w-full h-full object-cover animate-ken-burns" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/80 to-background/70" />
       </div>
 
       <AnimatePresence>

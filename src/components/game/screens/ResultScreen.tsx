@@ -6,8 +6,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import analystImg from "@/assets/characters/analyst.png";
 import saraImg from "@/assets/characters/sara.png";
-import storeCounterImg from "@/assets/scenes/store-counter.png";
-import officeHallwayImg from "@/assets/scenes/office-hallway.jpg";
+import strongOutcomeImg from "@/assets/scenes/hisham-receiving-report-male.png";
+import otherOutcomeImg from "@/assets/scenes/prism-building-exterior.png";
 
 interface ResultScreenProps {
   onNavigate: (screen: string) => void;
@@ -70,7 +70,7 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       <motion.div className="absolute inset-0" initial={{ scale: 1.1, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 1.5 }}>
-        <img src={outcome === "strong" ? storeCounterImg : officeHallwayImg} alt="" className="w-full h-full object-cover" />
+        <img src={outcome === "strong" ? strongOutcomeImg : otherOutcomeImg} alt="" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-black/75 backdrop-blur-md" />
       </motion.div>
 
