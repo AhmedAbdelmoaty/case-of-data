@@ -3,11 +3,11 @@ import { motion, AnimatePresence } from "framer-motion";
 
 // Import character images
 import analystImg from "@/assets/characters/analyst.png";
-import ahmedImg from "@/assets/characters/ahmed.png";
+import ahmedImg from "@/assets/characters/mansour.png";
 import abuSaeedImg from "@/assets/characters/hesham.png";
-import khaledImg from "@/assets/characters/khaled.png";
+import khaledImg from "@/assets/characters/karim.png";
 import nouraImg from "@/assets/characters/noura.png";
-import amiraImg from "@/assets/characters/amira.png";
+import amiraImg from "@/assets/characters/sara.png";
 import karimImg from "@/assets/characters/karim.png";
 import detectiveImg from "@/assets/characters/detective.png";
 
