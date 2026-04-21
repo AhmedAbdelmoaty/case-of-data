@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Phone } from "lucide-react";
-// Placeholder — swap later with mansour-reading-email.png
-import mansourImg from "@/assets/scenes/mansour-office-seated-male.png";
+import mansourReadingImg from "@/assets/photos/mansour-reading-email.png";
+import mansourPhoneImg from "@/assets/photos/mansour-picking-phone.png";
 
 interface MansourReceivesEmailScreenProps {
   onComplete: () => void;
