@@ -51,8 +51,8 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     caption: "مقارنة إجمالي المبيعات بين شهر فبراير 2026 وشهر فبراير 2025",
     footnote: "الأرقام بالألف جنيه مصري، صافي مبيعات بعد المرتجعات.",
     rows: [
-      { label: "فبراير 2025", value: 720k },
-      { label: "فبراير 2026", value: 500 k },
+      { label: "فبراير 2025", value: 720 },
+      { label: "فبراير 2026", value: 500 },
     ],
     series: [{ key: "value", label: "ألف جنيه" }],
     yMax: 800,
