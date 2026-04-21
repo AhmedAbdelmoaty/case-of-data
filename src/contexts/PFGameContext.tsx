@@ -183,6 +183,8 @@ export const PFGameProvider = ({ children }: { children: ReactNode }) => {
         pickChoice,
         saveNote,
         removeNote,
+        restartInquiry,
+        canRestart: state.restartCount < 1,
         setFramingSelection,
         submitFraming,
         resetGame,
