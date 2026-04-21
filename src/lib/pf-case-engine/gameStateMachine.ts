@@ -35,6 +35,11 @@ export const initialGameState: GameState = {
   isComplete: false,
 };
 
+/** Reset only the inquiry portion of state, leaving outcome/framing untouched. */
+export function resetInquiryState(): GameState {
+  return { ...initialGameState };
+}
+
 export function getNode(state: GameState): CaseNode {
   return NODES[state.currentNodeId];
 }
