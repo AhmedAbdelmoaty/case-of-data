@@ -49,6 +49,9 @@ interface PFGameContextValue {
   pickChoice: (isCorrect: boolean) => ChoiceResult | null;
   saveNote: (id: string, text: string) => void;
   removeNote: (roundId: number) => void;
+  // Restart inquiry (limited to 1 use)
+  restartInquiry: () => void;
+  canRestart: boolean;
   // Framing
   setFramingSelection: (sectionId: keyof FramingSelection, optionId: string) => void;
   submitFraming: () => CaseOutcome;
@@ -66,6 +69,7 @@ const initialState: PFGameState = {
   outcome: null,
   framingCorrectCount: 0,
   collectedReports: [],
+  restartCount: 0,
 };
 
 const PFGameContext = createContext<PFGameContextValue | null>(null);
