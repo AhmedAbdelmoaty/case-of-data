@@ -1,148 +1,272 @@
 
 
-# 🎨 Prompts كاملة لصور سلسلة الإيميل + المكالمة (نسخة مصححة)
+# 🎬 خطة إعادة صياغة المشاهد بشكل سينمائي كامل
 
-أعتذر عن الخطأ السابق — كنت غيّرت أوصاف الشخصيات بدل ما ألتزم بالـ character references الثابتة بتاعتك. دلوقتي البلان مبني على **نفس الـ 4 شخصيات بالظبط** اللي في الصور المرجعية، بنفس اللبس ونفس الملامح، ومع الـ **base prompt الثابت** اللي بتحطه قبل كل صورة.
+## ✅ فهمت إيه بالظبط
 
----
+راجعت كل شيء وعندي صورة كاملة دلوقتي:
 
-## 🔒 BASE PROMPT (ثابت — يتحط قبل كل prompt)
+### 📸 الصور الموجودة فعلاً في `src/assets/scenes/` (29 صورة)
 
-```
-Cinematic, photorealistic 3D render with a stylized semi-cartoon aesthetic matching the reference character images. Warm cinematic lighting with soft rim light. Shallow depth of field. 16:9 aspect ratio, 4K detail. Rich color grading with teal-orange balance. High-end luxury brand atmosphere. No text artifacts, no distorted faces, no extra limbs.
----
-CHARACTER REFERENCES (use EXACT likeness from attached images):
+كل الصور بأسمائها الصح ومتاحة للاستخدام. عدّيتها واحدة واحدة:
 
-- HISHAM AL-SHARIF (store owner): Egyptian man, ~45yo, trimmed dark hair with greying sides, sunglasses pushed up on head, thin mustache, beige blazer over light blue shirt with pocket square. Warm concerned expression.
+**مكتب Prism (5)**: `prism-building-exterior` · `prism-hallway` · `prism-knock-{m/f}` · `mansour-office-welcome-{m/f}` · `mansour-office-seated-{m/f}`
 
-- A. MANSOUR (consulting manager): Egyptian man, ~35yo, neatly styled black hair, full black beard, navy blue suit with crisp white shirt and red tie, holding a black leather folder and pen. Confident professional demeanor.
+**السفر (3)**: `city-drive-luxury-{m/f}` · `velaro-street` · `velaro-storefront`
 
-- PLAYER (MALE ANALYST): Egyptian man, ~28yo, short dark brown hair styled up, light stubble, dark navy button-up shirt, holding a black spiral notebook. Intelligent focused expression.
+**داخل VELARO (6)**: `velaro-entering-{m/f}` · `velaro-interior-wide` · `hisham-greeting-{m/f}` · `hisham-office-seated-{m/f}`
 
-- PLAYER (FEMALE ANALYST): Egyptian woman, ~28yo, wearing burgundy/plum hijab, black-framed glasses, dark grey blazer over white shirt, holding a black spiral notebook. Intelligent focused expression.
+**كادرات الحوار (5)**: `velaro-mens-section` · `velaro-womens-section` · `velaro-checkout-busy` · `hisham-handing-report-{m/f}`
 
-IMPORTANT: Maintain EXACT facial features, hair, and clothing as in reference images.
-```
+**التأطير والتقديم (3)**: `analyst-reflecting-{m/f}` · `framing-board-desk` · `hisham-receiving-report-{m/f}`
 
-> 📎 **مع كل توليد صورة**: ارفق الصور المرجعية بتاعت الشخصية (أو الشخصيتين) اللي في المشهد + اكتب الـ Base Prompt فوق + الـ Scene Prompt تحت.
+> ✅ **مفيش `return-to-prism`** (اتشال — استبدلناه بمشاهد الإيميل والمكالمة).
 
----
+### 🐛 الأخطاء اللي حصلت قبل كده وهنصلحها
 
-## 📋 جدول الصور المطلوبة
-
-| # | الملف | Aspect | الشخصيات في المشهد | المرجع المطلوب رفعه |
-|---|---|---|---|---|
-| 1 | `analyst-laptop-evening-male.png` | 16:9 | PLAYER (MALE) | analyst-2.png |
-| 2 | `analyst-laptop-evening-female.png` | 16:9 | PLAYER (FEMALE) | analyst_women-2.png |
-| 3 | `mansour-reading-email.png` | 16:9 | A. MANSOUR | mansour-2.png |
-| 4 | `mansour-picking-phone.png` | 16:9 | A. MANSOUR | mansour-2.png |
-| 5 | `analyst-relaxing-male.png` | 16:9 | PLAYER (MALE) | analyst-2.png |
-| 6 | `analyst-relaxing-female.png` | 16:9 | PLAYER (FEMALE) | analyst_women-2.png |
-| 7 | `analyst-on-phone-male.png` | 16:9 | PLAYER (MALE) | analyst-2.png |
-| 8 | `analyst-on-phone-female.png` | 16:9 | PLAYER (FEMALE) | analyst_women-2.png |
-| 9 | `mansour-avatar-circle.png` | 1:1 | A. MANSOUR | mansour-2.png |
-
-**إجمالي: 9 صور**
+| # | المشكلة | السبب | الحل |
+|---|---|---|---|
+| 1 | `ArrivalScreen` لسه شغال بصور قديمة محذوفة (`store-front.png`, `abu-saeed-greeting.jpg`) | الملف ما اتحدّثش لما الصور الجديدة وصلت | إعادة بناء كاملة |
+| 2 | لما أضغط "اطرق باب المكتب" الصورة بتظهر متأخرة | `playDoorKnock()` بيستنى يخلص قبل الـ setPhase | نقدم الـ setPhase + نعمل preload للصورة |
+| 3 | `FramingScreen` مستخدم `store-counter.png` (محذوفة) — هيكسر الـ build | الملف ما اتحدّثش | استخدام `framing-board-desk.png` |
+| 4 | `Auth.tsx` مستخدم `store-front.png` (محذوفة) — هيكسر الـ build | reference قديم | استبدال بـ `prism-building-exterior.png` |
+| 5 | كادرات `InquiryScreen` بتستخدم `hisham-office-seated-male` فقط (مش gender-aware) | hard-coded male | gender-aware |
+| 6 | `velaro-entering` و `velaro-interior-wide` و `velaro-storefront` صور موجودة بس مش مستخدمة | ما اتربطتش | نضيفها في ArrivalScreen |
+| 7 | timing الـ phases جامد (مثلاً 2500ms للـ entrance) → بيحس بـ delay أو سرعة | بدون preload + بدون tuning | preload كل صور المشهد + tuning الأوقات |
 
 ---
 
-## 🎬 SCENE PROMPTS (تتحط بعد الـ Base Prompt مباشرة)
+## 🎯 الفلسفة السينمائية الجديدة (مستوحاة من نجاح مشاهد الإيميل/المكالمة)
 
-### 1️⃣ `analyst-laptop-evening-male.png`
-**مرجع: analyst-2.png**
-```
-SCENE: Wide cinematic shot of the MALE ANALYST (exact likeness from reference) seated at a modern wooden desk in a cozy upscale apartment in the evening. He is wearing his signature dark navy button-up shirt, focused on an open silver MacBook laptop, fingers on the keyboard composing an important email. The laptop screen glows softly, casting warm light on his face. His black spiral notebook sits closed beside the laptop. On the desk: a glass of mint tea, a smartphone face-down. Background: blurred warm bokeh of hanging Edison bulbs, large window showing out-of-focus Cairo nightscape with city lights and distant minarets. Color palette: deep navy and charcoal with warm amber and gold accents. Mood: focused, professional, end-of-workday.
-```
+اللي خلى مشاهد الإيميل ممتعة:
+- **انتقالات `AnimatePresence` نظيفة** بين كل phase
+- **الصور preloaded** فمفيش flash أبيض
+- **كل phase ليه auto-advance بعد timing محسوب** (مش طويل، مش قصير)
+- **النص متزامن مع الصورة** (مش بيظهر قبلها أو بعدها)
+- **Ken Burns hover effect دايماً شغال** = إحساس إن الصورة بتتنفس
+- **Bottom gradient فقط** (مفيش backdrop-blur على الصورة)
 
-### 2️⃣ `analyst-laptop-evening-female.png`
-**مرجع: analyst_women-2.png**
-```
-SCENE: Wide cinematic shot of the FEMALE ANALYST (exact likeness from reference — burgundy/plum hijab, black-framed glasses, dark grey blazer over white shirt) seated at a modern wooden desk in a cozy upscale apartment in the evening. She is focused on an open silver MacBook laptop, fingers on the keyboard composing an important email. The laptop screen glows softly, casting warm light on her face. Her black spiral notebook sits closed beside the laptop. On the desk: a glass of mint tea, a smartphone face-down. Background: blurred warm bokeh of hanging Edison bulbs, large window showing out-of-focus Cairo nightscape with city lights and distant minarets. Color palette: deep navy and charcoal with warm amber and gold accents. Mood: focused, professional, end-of-workday.
-```
+هطبق نفس النهج ده على كل مشهد.
 
-### 3️⃣ `mansour-reading-email.png`
-**مرجع: mansour-2.png**
-```
-SCENE: Cinematic medium shot of A. MANSOUR (exact likeness from reference — full black beard, navy blue suit with crisp white shirt and red tie) seated at a large executive desk in his modern high-end consulting firm office at night. He is leaning slightly forward holding a black tablet in his hands, reading an email with a serious, focused, slightly narrowed-eye expression of concentration. His black leather folder sits closed on the desk beside him. Behind him: floor-to-ceiling windows showing a panoramic Cairo skyline at night, glowing city lights softly out of focus, with the same potted plants visible in the reference. Warm desk lamp casts a golden glow on one side of his face, while cool blue light from the window touches the other side. Color palette: deep navy, charcoal, with warm gold accents. Mood: contemplative, executive, decisive.
-```
+---
 
-### 4️⃣ `mansour-picking-phone.png`
-**مرجع: mansour-2.png**
-```
-SCENE: Cinematic close-up shot of A. MANSOUR (exact likeness from reference — full black beard, navy blue suit, crisp white shirt, red tie) standing beside his executive desk, holding a sleek black smartphone up to his ear, mid-action of dialing — his other hand still hovering near the screen. Expression: serious and intentional, jaw set, eyes focused forward. Background: same modern office with the Cairo nightscape glowing softly out of focus through the window behind him, plants visible. Warm desk lamp light from below catches his hand and the phone. Color palette: deep navy, charcoal, gold and amber accents. Mood: decisive, urgent, professional.
-```
+## 📋 خطة المشاهد الجديدة (شاشة بشاشة)
 
-### 5️⃣ `analyst-relaxing-male.png`
-**مرجع: analyst-2.png**
-```
-SCENE: Wide cinematic shot of the MALE ANALYST (exact likeness from reference — dark navy button-up shirt) now relaxed after sending the email. He is sitting back in a plush armchair on a small balcony overlooking a glowing Cairo cityscape at night. Posture relaxed, leaning back, one arm on the armrest, holding a small glass of mint tea. On a small side table next to him: his smartphone face-up with a dark screen, and his black spiral notebook closed. Soft warm string lights overhead, blurred city lights and distant minarets. Expression: calm, satisfied, slightly tired but content — a small smile. Color palette: deep navy sky with warm amber, gold, and orange city glow. Mood: peaceful, end-of-day relief, the calm before the call.
-```
+### 🎬 1. CompanyBriefingScreen (5 phases — 4 صور)
 
-### 6️⃣ `analyst-relaxing-female.png`
-**مرجع: analyst_women-2.png**
-```
-SCENE: Wide cinematic shot of the FEMALE ANALYST (exact likeness from reference — burgundy/plum hijab, black-framed glasses, dark grey blazer over white shirt) now relaxed after sending the email. She is sitting back in a plush armchair on a small balcony overlooking a glowing Cairo cityscape at night. Posture relaxed, leaning back, one arm on the armrest, holding a small glass of mint tea. On a small side table next to her: her smartphone face-up with a dark screen, and her black spiral notebook closed. Soft warm string lights overhead, blurred city lights and distant minarets. Expression: calm, satisfied, slightly tired but content — a small smile. Color palette: deep navy sky with warm amber, gold, and orange city glow. Mood: peaceful, end-of-day relief, the calm before the call.
-```
+**التوزيع الزمني الجديد**:
 
-### 7️⃣ `analyst-on-phone-male.png`
-**مرجع: analyst-2.png**
-```
-SCENE: Cinematic medium shot of the MALE ANALYST (exact likeness from reference — dark navy button-up shirt, short dark brown hair, light stubble) standing on the balcony, holding a black smartphone pressed to his right ear, listening intently to an important call. His other hand rests on the balcony railing. Facial expression: alert, attentive, slightly tense — eyebrows slightly furrowed, lips parted as if about to respond. Background: glowing Cairo nightscape with warm city lights and distant minarets, blurred bokeh. Warm string lights above cast soft golden light on his face, contrasting with the cool blue night behind. Color palette: deep navy and charcoal with warm amber and gold accents. Mood: tense, anticipatory, the moment of truth.
-```
+| Phase | المدة | الصورة | إيش بيحصل |
+|---|---|---|---|
+| `exterior` | **2.5s** auto-advance | `prism-building-exterior` | Ken Burns slow zoom + لوجو "PRISM CONSULTING" يفيد + نص "رحلتك بتبدأ من هنا" |
+| `hallway` | **انتظار click** | `prism-hallway` | "Floor 12 · مكتب أ. منصور" + زرار "اطرق باب المكتب" |
+| `door-knock` | **2.5s ثابت** + سهل للضغط | `prism-knock-{gender}` | **الصورة تظهر فوراً** (preloaded) + sound یشتغل بـ delay 150ms + "طق طق طق" بعد 600ms + "اتفضل!" بعد 1.6s + زرار "ادخل المكتب" بعد 2.2s |
+| `welcome` | **انتظار click** | `mansour-office-welcome-{gender}` | منصور بيشاور للاعب يقعد + GraduationCap + نص الترحيب + زرار "يلا نروح VELARO!" |
+| `dialogue` | للحوار | `mansour-office-seated-{gender}` | EnhancedDialogue كامل |
 
-### 8️⃣ `analyst-on-phone-female.png`
-**مرجع: analyst_women-2.png**
-```
-SCENE: Cinematic medium shot of the FEMALE ANALYST (exact likeness from reference — burgundy/plum hijab, black-framed glasses, dark grey blazer over white shirt) standing on the balcony, holding a black smartphone pressed to her right ear, listening intently to an important call. Her other hand rests on the balcony railing. Facial expression: alert, attentive, slightly tense — eyebrows slightly furrowed, lips parted as if about to respond. Background: glowing Cairo nightscape with warm city lights and distant minarets, blurred bokeh. Warm string lights above cast soft golden light on her face, contrasting with the cool blue night behind. Color palette: deep navy and charcoal with warm amber and gold accents. Mood: tense, anticipatory, the moment of truth.
-```
+**الإصلاح الأهم**: الـ `door-knock` phase دلوقتي بيظهر بعد click فوراً (مفيش أي delay لأن بنعمل preload). الـ `welcome` بقى phase منفصل عن `dialogue` عشان مفيش لخبطة.
 
-### 9️⃣ `mansour-avatar-circle.png` (1:1 — للـ caller ID في شاشة المكالمة)
-**مرجع: mansour-2.png**
+---
+
+### 🚗 2. TravelScreen (الموجود حالياً تمام — تحسين بسيط)
+
+| Phase | المدة | الصورة |
+|---|---|---|
+| `drive` | **3.5s** | `city-drive-luxury-{gender}` |
+| `street` | **2.8s** | `velaro-street` |
+
+Total: 6.3s → onComplete. الـ waypoints والـ monologues متزامنين مع الـ phase changes.
+
+---
+
+### 🏪 3. ArrivalScreen — إعادة بناء كاملة (4 phases)
+
+**حالياً مكسور** (بصور قديمة). هنبنيه من جديد:
+
+| Phase | المدة | الصورة | إيش بيحصل |
+|---|---|---|---|
+| `storefront` | **انتظار click** | `velaro-storefront` | "وصلت متجر VELARO" + "أ. هشام مستنيك جوه" + زرار "ادخل المتجر" |
+| `entering` | **2.2s** auto + storeBell sound | `velaro-entering-{gender}` | لقطة POV الباب بيتفتح |
+| `interior` | **2.5s** auto | `velaro-interior-wide` | لقطة wide للصالة الفخمة + نص "صالة VELARO" يفيد ثم يختفي |
+| `greeting` | للحوار | `hisham-greeting-{gender}` ← `hisham-office-seated-{gender}` بعد 2 سطور | EnhancedDialogue + الصورة تتبدل من greeting لـ office-seated مع تقدم الحوار |
+
+> ✨ **جديد**: مرحلة `interior` بتعرض صالة VELARO كاملة قبل ما هشام يقابله — ده بيدّي إحساس "وصلت لمكان فاخر".
+
+---
+
+### ❓ 4. InquiryScreen (تحسين الـ scene logic)
+
+كل الكادرات شغالة، بس فيه bug:
+- `hisham-office-seated-male` hardcoded → نخليه gender-aware
+
+**Scene mapping محسّن**:
 ```
-SCENE: Professional close-up portrait headshot of A. MANSOUR (exact likeness from reference — full black beard, neatly styled black hair, navy blue suit jacket, crisp white shirt, red tie). He is looking directly at the camera with a confident, composed, slightly serious executive expression — a hint of warmth in his eyes. Soft studio lighting from a 45-degree angle, neutral dark gradient background (deep charcoal to navy). Centered composition, head and shoulders only, perfectly framed for a circular crop (avatar style). 1:1 SQUARE ASPECT RATIO (override the 16:9 in base prompt for this image only). Sharp focus on face, soft background.
+TRACK_A → velaro-mens-section
+TRACK_C → velaro-womens-section  
+TRACK_B/D → velaro-checkout-busy
+inlineEvidence → hisham-handing-report-{gender}
+greeting (q=0) → hisham-greeting-{gender}
+default dialogue → hisham-office-seated-{gender}  ← gender fix
+timeout → hisham-office-seated-{gender}
 ```
 
 ---
 
-## 🎯 خطوات التوليد (مهم جداً)
+### 🧠 5. ReflectionTransition (تمام — تعديل بسيط)
 
-لكل صورة من الـ 9:
-
-1. **افتح أداة توليد الصور** (Gemini / Nano Banana Pro)
-2. **ارفع الصور المرجعية** المذكورة في عمود "المرجع المطلوب رفعه"
-   - مثلاً صورة 1: ارفع `analyst-2.png`
-   - صورة 9: ارفع `mansour-2.png`
-3. **انسخ الـ Base Prompt** كامل (الموجود فوق)
-4. **الصق Scene Prompt** بتاع الصورة بعده مباشرة
-5. **ولّد الصورة** → تأكد إن الشخصية مطابقة للمرجع 100%
-6. **لو فيه اختلاف** في اللبس أو الملامح: أعد التوليد مع التأكيد على الـ "EXACT likeness from reference"
-
----
-
-## 📤 بعد ما تجهّز الصور
-
-ابعتهم ليّا بأي أسماء، وأنا هحطهم في أماكنهم الصح:
-
-| الصورة | المكان في الكود |
+| المدة الحالية | المقترحة |
 |---|---|
-| analyst-laptop-evening-{male/female} | `EmailSendScreen.tsx` |
-| mansour-reading-email | `MansourReceivesEmailScreen.tsx` (phase: reading) |
-| mansour-picking-phone | `MansourReceivesEmailScreen.tsx` (phase: phoning) |
-| analyst-relaxing-{male/female} | `IncomingCallScreen.tsx` |
-| mansour-avatar-circle | `IncomingCallScreen.tsx` (caller ID) |
-| analyst-on-phone-{male/female} | `PhoneCallDebriefScreen.tsx` |
+| 4.0s | **4.5s** (يدي وقت أكتر للقراءة) |
 
-كل الـ imports والـ wiring هتبقى جاهزة فور ما تبعت الصور — مفيش أي تغيير في اللوجيك أو الـ flow.
+الصورة `analyst-reflecting-{gender}` شغالة صح. هنضيف بس fade-out في آخر 600ms.
 
 ---
 
-## ✅ ضمانات
+### 🎯 6. FramingScreen (إصلاح الصورة المكسورة)
 
-- ✅ نفس الـ 4 شخصيات بالظبط (نفس الملامح، نفس اللبس، نفس الـ accessories)
-- ✅ المحللة بالحجاب البرغندي + النضارة السوداء (زي المرجع)
-- ✅ المحلل بقميص النيفي الكحلي (زي المرجع)
-- ✅ منصور بالبدلة الكحلي + الكرافت الأحمر (زي المرجع)
-- ✅ هشام مش هيظهر في المشاهد دي (هو بس في PresentationScreen السابقة)
-- ✅ نفس الـ Base Prompt الثابت بتاعك بدون تعديل
-- ✅ الـ 9 صور هتبقى متناسقة بصرياً مع باقي صور اللعبة الموجودة
+**Bug**: مستخدم `store-counter.png` (محذوفة) → الـ build هيكسر.
+
+**الحل**: نستبدل بـ `framing-board-desk.png` كخلفية top-down للوحة التأطير. ده مناسب جداً لأنه flat-lay لمكتب فيه دفتر وتقارير.
+
+---
+
+### 📊 7. PresentationScreen (تمام — تحسين الـ flow)
+
+شغال صح بـ `hisham-receiving-report-{gender}`. التحسين:
+- نضيف زرار **"📧 أرسل التقرير لأستاذ منصور بالإيميل"** في آخر سطر من الحوار (موجود بالفعل في الكود؟ خليني أتأكد، لو مش موجود هضيفه)
+
+---
+
+### 🔐 8. Auth.tsx (إصلاح bug)
+
+`storeFrontImg` reference broken → استبدال بـ `prism-building-exterior.png` كخلفية صفحة الدخول.
+
+---
+
+## 🛠️ التقنيات اللي هستخدمها (نفس اللي خلت مشاهد الإيميل ممتازة)
+
+### 1. **Image preloading** قبل كل phase change
+```ts
+useEffect(() => {
+  const img = new Image();
+  img.src = nextPhaseImg;
+}, [phase]);
+```
+ده بيلغي الـ flash الأبيض اللي بين الـ phases.
+
+### 2. **AnimatePresence mode="wait"** لكل تبديل صورة
+عشان الـ exit animation تخلص قبل ما الـ enter تبدأ.
+
+### 3. **Ken Burns على كل الصور الثابتة**
+class `animate-ken-burns` (موجود في `index.css`) → zoom-in بطيء 8s.
+
+### 4. **Bottom-only gradient overlay** (لا blur نهائي على الصورة)
+```css
+bg-gradient-to-t from-background/95 via-background/20 to-transparent
+```
+
+### 5. **Timing محسوب لكل phase** بدل القيم العشوائية
+- **Establishing shots** (exterior, interior wide): 2.2-2.5s
+- **Action shots** (knocking, entering): 2.0-2.5s
+- **Conversation shots**: انتظار click أو حوار
+
+### 6. **زرار "Skip"** خفيف لو اللاعب مش عايز يستنى التحول
+في الكورنر السفلي (موجود في بعض المشاهد، هنوحده).
+
+---
+
+## 📦 الملفات اللي هتتعدل بالظبط
+
+| الملف | التعديل | السبب |
+|---|---|---|
+| `ArrivalScreen.tsx` | **إعادة بناء كاملة** | الصور القديمة محذوفة |
+| `CompanyBriefingScreen.tsx` | إضافة phase `welcome` منفصل + preload + timing tuning | door-knock delay fix |
+| `InquiryScreen.tsx` | gender-aware لـ `hisham-office-seated` | bug fix |
+| `FramingScreen.tsx` | `store-counter.png` → `framing-board-desk.png` | broken import |
+| `Auth.tsx` | `store-front.png` → `prism-building-exterior.png` | broken import |
+| `PresentationScreen.tsx` | تأكيد أن زرار "أرسل بالإيميل" بيظهر في آخر سطر | flow continuity |
+
+**ملفات هتفضل زي ما هي** (شغالة صح):
+- `TravelScreen.tsx` (تعديل بسيط في timing لو محتاج)
+- `ReflectionTransition.tsx` (تعديل بسيط في duration)
+- `EmailSendScreen.tsx`, `MansourReceivesEmailScreen.tsx`, `IncomingCallScreen.tsx`, `PhoneCallDebriefScreen.tsx` (شغالين ممتاز)
+
+---
+
+## 🎨 الـ Color Grading والاتساق البصري
+
+كل الصور تم توليدها بنفس الـ style prefix (teal-orange cinematic). هنضمن الاتساق بـ:
+
+1. **نفس الـ overlay gradient** على كل المشاهد: `from-background/95 via-background/20 to-transparent`
+2. **نفس مدة Ken Burns**: 8s slow zoom 1.05x
+3. **نفس مدة الـ crossfade**: 0.8-1.0s بين phases
+4. **نفس font weights ونفس الـ glassmorphism**: `bg-card/65 border border-border` على كل الـ text overlays
+
+---
+
+## ✅ الترتيب الزمني للمشهد الكامل (من الدخول للنهاية)
+
+```text
+1. CompanyBriefing
+   ├─ [2.5s] prism-building-exterior         (auto)
+   ├─ [click] prism-hallway                  
+   ├─ [2.5s] prism-knock-{g}                 (auto + sound)
+   ├─ [click] mansour-office-welcome-{g}     
+   └─ [dialogue] mansour-office-seated-{g}   (EnhancedDialogue)
+
+2. TravelScreen
+   ├─ [3.5s] city-drive-luxury-{g}
+   └─ [2.8s] velaro-street                   → auto onComplete
+
+3. ArrivalScreen
+   ├─ [click] velaro-storefront
+   ├─ [2.2s] velaro-entering-{g}             (auto)
+   ├─ [2.5s] velaro-interior-wide            (auto)
+   └─ [dialogue] hisham-greeting-{g} → hisham-office-seated-{g}
+
+4. InquiryScreen (existing — gender fix)
+   └─ Dynamic scenes per question track
+
+5. ReflectionTransition
+   └─ [4.5s] analyst-reflecting-{g}
+
+6. FramingScreen
+   └─ Static framing-board-desk + UI
+
+7. PresentationScreen
+   ├─ [dialogue] hisham-receiving-report-{g}
+   └─ [click] "📧 أرسل لأستاذ منصور" → EmailSendScreen
+
+8. EmailSendScreen → MansourReceivesEmail → IncomingCall → PhoneCallDebrief → Result
+   (شغالين ممتاز — مفيش تعديل)
+```
+
+---
+
+## 🛡️ ضمانات
+
+- ✅ **مفيش imports مكسورة** — هحذف كل reference لصورة محذوفة
+- ✅ **كل صورة gender-aware** زي ما المفروض (أو static لو الصورة عامة)
+- ✅ **مفيش delay** بعد click — كل phase change instant + preloaded
+- ✅ **انتقالات نظيفة** بـ `AnimatePresence mode="wait"`
+- ✅ **التوقيتات محسوبة** لإحساس سينمائي (مش طويلة، مش قصيرة)
+- ✅ **اللوجيك صفر تغيير** — scoring, framing, choices زي ما هي
+- ✅ **مفيش backdrop-blur** على الصور — الصور واضحة طول الوقت
+- ✅ **Auth + Framing build errors اتصلحوا**
+
+---
+
+## 🎯 النتيجة المتوقعة
+
+اللاعب هيحس إنه **بيشاهد فيلم تفاعلي**:
+- يدخل مبنى Prism فاخر بالليل ✨
+- يمشي في الممر، يطرق الباب، الباب يفتح
+- يقابل منصور في مكتبه، يسمع البريفينغ
+- يركب عربية فخمة، يوصل حي راقي، يدخل VELARO
+- يشوف الصالة الفخمة، يقابل هشام، يدخل مكتبه
+- يسأل أسئلته، الكادرات بتتبدل حسب السؤال
+- يفكّر في كافيه، يبني الـ framing
+- يقدم لهشام، يبعت إيميل لمنصور، منصور يرن عليه
+
+**كل الانتقالات سلسة، كل صورة في وقتها، كل صوت متزامن.**
 
