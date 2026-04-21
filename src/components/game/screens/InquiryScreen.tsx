@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { RotateCcw } from "lucide-react";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSound } from "@/hooks/useSoundEffects";
@@ -34,7 +35,7 @@ interface DialogueLineUI {
 }
 
 export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
-  const { state, getChoices, pickChoice, saveNote } = usePFGame();
+  const { state, getChoices, pickChoice, saveNote, restartInquiry, canRestart } = usePFGame();
   const { profile } = useAuth();
   const { playSound } = useSound();
   useAmbientSound("store");
@@ -43,11 +44,29 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
   const [currentLines, setCurrentLines] = useState<DialogueLineUI[]>([]);
   const [dialogueIndex, setDialogueIndex] = useState(0);
   const [dialogueKey, setDialogueKey] = useState(0);
+  const [showRestartConfirm, setShowRestartConfirm] = useState(false);
 
   const playerName = profile?.display_name || "محلل";
   const g = (profile?.gender || "male") as "male" | "female";
 
   const choices = getChoices();
+
+  // Restart button visible: between Q1 and Q4, only if attempt still available
+  const showRestartButton =
+    canRestart &&
+    state.questionsUsed >= 1 &&
+    state.questionsUsed < 4 &&
+    !state.isComplete &&
+    phase === "choosing";
+
+  const handleConfirmRestart = () => {
+    try { playSound("pageFlip"); } catch {}
+    restartInquiry();
+    setShowRestartConfirm(false);
+    setPhase("choosing");
+    setCurrentLines([]);
+    setDialogueIndex(0);
+  };
 
   const dialogueScene = useMemo(() => {
     const ownerBase = g === "female" ? hishamGreetingFemaleImg : hishamGreetingMaleImg;
@@ -123,6 +142,70 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
       </div>
 
       <PFNotebook />
+
+      {/* Restart inquiry button — limited to 1 use, only mid-game */}
+      <AnimatePresence>
+        {showRestartButton && (
+          <motion.button
+            key="restart-btn"
+            onClick={() => setShowRestartConfirm(true)}
+            className="fixed top-4 left-4 z-30 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-card/75 backdrop-blur-sm border border-border hover:border-primary/60 hover:bg-card transition-all text-xs text-muted-foreground hover:text-primary group"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            title="ابدأ المحادثة من الأول (مرة واحدة بس)"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span dir="rtl">إعادة المحادثة</span>
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* Confirm restart modal */}
+      <AnimatePresence>
+        {showRestartConfirm && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowRestartConfirm(false)}
+          >
+            <motion.div
+              className="max-w-sm w-full bg-card border border-border rounded-2xl p-5 shadow-2xl"
+              dir="rtl"
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <RotateCcw className="w-5 h-5 text-primary" />
+                <h3 className="text-base font-bold text-foreground">إعادة المحادثة من الأول؟</h3>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                هترجع لأول سؤال مع هشام، وكل اللي جمعته من ملاحظات وتقارير هيتمسح. عندك <span className="text-primary font-bold">محاولة واحدة بس</span> — استخدمها بحكمة.
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowRestartConfirm(false)}
+                  className="flex-1 px-4 py-2 rounded-lg bg-muted text-muted-foreground hover:bg-muted/70 transition-colors text-sm font-medium"
+                >
+                  لا، كمل
+                </button>
+                <button
+                  onClick={handleConfirmRestart}
+                  className="flex-1 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm font-bold"
+                >
+                  أيوه، ابدأ من تاني
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {phase === "choosing" && choices.length > 0 && !state.isComplete && (

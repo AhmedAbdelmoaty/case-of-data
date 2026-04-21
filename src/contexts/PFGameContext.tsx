@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
 import {
   initialGameState,
+  resetInquiryState,
   applyChoice as engineApply,
   getChoices as engineGetChoices,
   getNode as engineGetNode,
@@ -29,6 +30,8 @@ export interface PFGameState extends GameState {
   framingCorrectCount: number;
   /** Reports (evidence ids) Abu Saeed handed over, in receipt order */
   collectedReports: string[];
+  /** Number of times the player restarted the inquiry (max 1) */
+  restartCount: number;
 }
 
 interface ChoiceResult {
@@ -46,6 +49,9 @@ interface PFGameContextValue {
   pickChoice: (isCorrect: boolean) => ChoiceResult | null;
   saveNote: (id: string, text: string) => void;
   removeNote: (roundId: number) => void;
+  // Restart inquiry (limited to 1 use)
+  restartInquiry: () => void;
+  canRestart: boolean;
   // Framing
   setFramingSelection: (sectionId: keyof FramingSelection, optionId: string) => void;
   submitFraming: () => CaseOutcome;
@@ -63,6 +69,7 @@ const initialState: PFGameState = {
   outcome: null,
   framingCorrectCount: 0,
   collectedReports: [],
+  restartCount: 0,
 };
 
 const PFGameContext = createContext<PFGameContextValue | null>(null);
@@ -76,7 +83,23 @@ export const usePFGame = () => {
 export const PFGameProvider = ({ children }: { children: ReactNode }) => {
   const [state, setState] = useState<PFGameState>(initialState);
 
-  const getChoices = useCallback(() => engineGetChoices(state), [state]);
+  const getChoices = useCallback(
+    () => engineGetChoices(state, state.restartCount * 13),
+    [state]
+  );
+
+  const restartInquiry = useCallback(() => {
+    setState((prev) => {
+      if (prev.restartCount >= 1) return prev;
+      return {
+        ...prev,
+        ...resetInquiryState(),
+        notes: [],
+        collectedReports: [],
+        restartCount: prev.restartCount + 1,
+      };
+    });
+  }, []);
 
   const pickChoice = useCallback(
     (isCorrect: boolean): ChoiceResult | null => {
@@ -160,6 +183,8 @@ export const PFGameProvider = ({ children }: { children: ReactNode }) => {
         pickChoice,
         saveNote,
         removeNote,
+        restartInquiry,
+        canRestart: state.restartCount < 1,
         setFramingSelection,
         submitFraming,
         resetGame,

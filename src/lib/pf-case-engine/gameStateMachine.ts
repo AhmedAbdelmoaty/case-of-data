@@ -35,6 +35,11 @@ export const initialGameState: GameState = {
   isComplete: false,
 };
 
+/** Reset only the inquiry portion of state, leaving outcome/framing untouched. */
+export function resetInquiryState(): GameState {
+  return { ...initialGameState };
+}
+
 export function getNode(state: GameState): CaseNode {
   return NODES[state.currentNodeId];
 }
@@ -121,7 +126,7 @@ export interface ChoicePresentation {
  * Returns the two options shuffled for display, with stable seeding per node so
  * shuffling does not flip on re-render.
  */
-export function getChoices(state: GameState): ChoicePresentation[] {
+export function getChoices(state: GameState, shuffleSalt: number = 0): ChoicePresentation[] {
   const node = getNode(state);
   if (state.isComplete || node.id === "END") return [];
 
@@ -130,8 +135,8 @@ export function getChoices(state: GameState): ChoicePresentation[] {
     { id: `${node.id}_wrong`, text: node.wrong.text, isCorrect: false },
   ];
 
-  // Stable pseudo-shuffle: seed by node id char-sum
-  const seed = node.id.split("").reduce((s, c) => s + c.charCodeAt(0), 0);
+  // Stable pseudo-shuffle: seed by node id char-sum + salt (changes after restart)
+  const seed = node.id.split("").reduce((s, c) => s + c.charCodeAt(0), 0) + shuffleSalt;
   if (seed % 2 === 0) options.reverse();
 
   return options;
