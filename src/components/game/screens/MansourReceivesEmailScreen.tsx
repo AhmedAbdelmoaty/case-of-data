@@ -19,15 +19,23 @@ export const MansourReceivesEmailScreen = ({ onComplete }: MansourReceivesEmailS
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      <motion.div
-        className="absolute inset-0"
-        initial={{ scale: 1.06, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 1.6 }}
-      >
-        <img src={mansourImg} alt="Mansour reading email in his office" className="w-full h-full object-cover animate-ken-burns" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/40 to-background/60" />
-      </motion.div>
+      <AnimatePresence mode="sync">
+        <motion.div
+          key={phase}
+          className="absolute inset-0"
+          initial={{ scale: 1.06, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1.0 }}
+        >
+          <img
+            src={phase === "reading" ? mansourReadingImg : mansourPhoneImg}
+            alt={phase === "reading" ? "Mansour reading email in his office" : "Mansour picking up the phone"}
+            className="w-full h-full object-cover animate-ken-burns"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/40 to-background/60" />
+        </motion.div>
+      </AnimatePresence>
 
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 text-center">
         <motion.p
