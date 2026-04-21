@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
 import {
   initialGameState,
+  resetInquiryState,
   applyChoice as engineApply,
   getChoices as engineGetChoices,
   getNode as engineGetNode,
