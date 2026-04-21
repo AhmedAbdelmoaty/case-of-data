@@ -30,6 +30,8 @@ export interface PFGameState extends GameState {
   framingCorrectCount: number;
   /** Reports (evidence ids) Abu Saeed handed over, in receipt order */
   collectedReports: string[];
+  /** Number of times the player restarted the inquiry (max 1) */
+  restartCount: number;
 }
 
 interface ChoiceResult {
