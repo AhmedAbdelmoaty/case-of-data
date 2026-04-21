@@ -60,10 +60,24 @@ export const CompanyBriefingScreen = ({
 
   const [phase, setPhase] = useState<BriefingPhase>(isReviewMode ? "dialogue" : "exterior");
 
+  const avatarImgEarly = g === "female" ? saraImg : analystImg;
+  const knockImgEarly = g === "female" ? prismKnockFemaleImg : prismKnockMaleImg;
+  const welcomeImgEarly = g === "female" ? mansourWelcomeFemaleImg : mansourWelcomeMaleImg;
+  const seatedImgEarly = g === "female" ? mansourSeatedFemaleImg : mansourSeatedMaleImg;
+
+  // Preload next phase images for instant transitions
+  useEffect(() => {
+    const preload = (src: string) => { const i = new Image(); i.src = src; };
+    if (phase === "exterior") preload(prismHallwayImg);
+    if (phase === "hallway") preload(knockImgEarly);
+    if (phase === "door-knock") preload(welcomeImgEarly);
+    if (phase === "transition") preload(seatedImgEarly);
+  }, [phase, knockImgEarly, welcomeImgEarly, seatedImgEarly]);
+
   useEffect(() => {
     if (isReviewMode) return;
     if (phase === "exterior") {
-      const timer = setTimeout(() => setPhase("hallway"), 2200);
+      const timer = setTimeout(() => setPhase("hallway"), 2500);
       return () => clearTimeout(timer);
     }
   }, [phase, isReviewMode]);
@@ -123,8 +137,8 @@ export const CompanyBriefingScreen = ({
 
           <motion.button
             onClick={() => {
-              playDoorKnock();
               setPhase("door-knock");
+              setTimeout(() => { try { playDoorKnock(); } catch {} }, 150);
             }}
             className="mt-10 px-8 py-3 rounded-xl bg-card/65 border border-border text-foreground font-bold hover:bg-card/80 transition-all flex items-center gap-2"
             initial={{ opacity: 0 }}

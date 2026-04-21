@@ -13,7 +13,7 @@ export const ReflectionTransition = ({ onComplete }: ReflectionTransitionProps) 
   const bg = profile?.gender === "female" ? analystReflectingFemaleImg : analystReflectingMaleImg;
 
   useEffect(() => {
-    const timer = setTimeout(onComplete, 4000);
+    const timer = setTimeout(onComplete, 4500);
     return () => clearTimeout(timer);
   }, [onComplete]);
 
