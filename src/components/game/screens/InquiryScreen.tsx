@@ -157,7 +157,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
             title="إعادة المحادثة"
           >
             <RotateCcw className="w-4 h-4" />
-            <span dir="rtl">إعادة</span>
+            <span dir="rtl">إعادة المحادثة</span>
           </motion.button>
         )}
       </AnimatePresence>
@@ -185,7 +185,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
                 <h3 className="text-base font-bold text-foreground">إعادة المحادثة من الأول؟</h3>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                هترجع لأول سؤال مع هشام، وكل اللي جمعته من ملاحظات وتقارير هيتمسح. عندك <span className="text-primary font-bold">محاولة واحدة بس</span> — استخدمها بحكمة.
+                هتبدأ المحادثة من الأول، وكل الملاحظات والتقارير اللي جمعتها هتتمسح  <span className="text-primary font-bold"></span>  
               </p>
               <div className="flex gap-2">
                 <button
