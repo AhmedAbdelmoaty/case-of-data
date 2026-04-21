@@ -9,9 +9,8 @@ import {
   MANSOUR_CALL_MEDIUM,
   MANSOUR_CALL_WEAK,
 } from "@/lib/pf-case/mansour-call-scripts";
-// Placeholder — swap with analyst-on-phone-{gender}.png
-import analystMaleImg from "@/assets/scenes/analyst-reflecting-male.png";
-import analystFemaleImg from "@/assets/scenes/analyst-reflecting-female.png";
+import analystMaleImg from "@/assets/photos/analyst-on-phone-male.png";
+import analystFemaleImg from "@/assets/photos/analyst-on-phone-female.png";
 
 interface PhoneCallDebriefScreenProps {
   onComplete: () => void;

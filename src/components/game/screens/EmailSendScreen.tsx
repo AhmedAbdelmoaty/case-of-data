@@ -3,9 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Send } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSound } from "@/hooks/useSoundEffects";
-// Placeholder background — swap later with analyst-laptop-evening-{gender}.png
-import analystMaleImg from "@/assets/scenes/analyst-reflecting-male.png";
-import analystFemaleImg from "@/assets/scenes/analyst-reflecting-female.png";
+import analystMaleImg from "@/assets/photos/analyst-laptop-evening-male.png";
+import analystFemaleImg from "@/assets/photos/analyst-laptop-evening-female.png";
 
 interface EmailSendScreenProps {
   onComplete: () => void;
