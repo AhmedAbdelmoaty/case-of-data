@@ -103,11 +103,3 @@ export const MANSOUR_DEBRIEF_WEAK: DialogueLine[] = [
   { characterId: "mansour", text: "في الكيس دي، إنت ما مسكتش المرجع الأول، وبالتالي بنيت تقريرك على أرضية ضعيفة. وده كان هيؤدي لقرار غلط.", mood: "disappointed" },
   { characterId: "mansour", text: "اعتبرها محاولة ضعيفة. المرة الجاية: ما تجريش على السبب، وما تجريش على الحل… امسك المرجع الأول.", mood: "serious" },
 ];
-
-export const ABU_SAEED_TIMEOUT_LINE: DialogueLine[] = [
-  {
-    characterId: "abuSaeed",
-    text: "معلش يا فندم، أنا نسيت أقولك… عندي مورّد جايلي بعد شوية ولازم أستقبله. خلينا نقفل النهارده على اللي معانا، وحضرتك شوف الموضوع بنفسك بالمعلومات اللي جمعناها سوا.",
-    mood: "concerned",
-  },
-];
