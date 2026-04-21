@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, Sparkles } from "lucide-react";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSound } from "@/hooks/useSoundEffects";
@@ -149,16 +149,15 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
           <motion.button
             key="restart-btn"
             onClick={() => setShowRestartConfirm(true)}
-            className="fixed top-4 left-4 z-30 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-card/75 backdrop-blur-sm border border-border hover:border-primary/60 hover:bg-card transition-all text-xs text-muted-foreground hover:text-primary group"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            whileHover={{ scale: 1.05 }}
+            className="fixed bottom-24 left-4 z-[60] flex items-center gap-2 px-3 py-2 rounded-full bg-background/80 backdrop-blur border border-border text-sm text-foreground shadow-md hover:shadow-lg hover:scale-[1.04] transition-all"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
             whileTap={{ scale: 0.95 }}
-            title="ابدأ المحادثة من الأول (مرة واحدة بس)"
+            title="إعادة المحادثة"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span dir="rtl">إعادة المحادثة</span>
+            <RotateCcw className="w-4 h-4" />
+            <span dir="rtl">إعادة</span>
           </motion.button>
         )}
       </AnimatePresence>
