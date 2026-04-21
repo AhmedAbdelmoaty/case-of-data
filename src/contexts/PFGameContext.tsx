@@ -83,7 +83,23 @@ export const usePFGame = () => {
 export const PFGameProvider = ({ children }: { children: ReactNode }) => {
   const [state, setState] = useState<PFGameState>(initialState);
 
-  const getChoices = useCallback(() => engineGetChoices(state), [state]);
+  const getChoices = useCallback(
+    () => engineGetChoices(state, state.restartCount * 13),
+    [state]
+  );
+
+  const restartInquiry = useCallback(() => {
+    setState((prev) => {
+      if (prev.restartCount >= 1) return prev;
+      return {
+        ...prev,
+        ...resetInquiryState(),
+        notes: [],
+        collectedReports: [],
+        restartCount: prev.restartCount + 1,
+      };
+    });
+  }, []);
 
   const pickChoice = useCallback(
     (isCorrect: boolean): ChoiceResult | null => {
