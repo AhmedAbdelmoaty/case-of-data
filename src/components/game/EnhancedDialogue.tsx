@@ -37,7 +37,7 @@ const characterColors: Record<string, { bg: string; border: string; name: string
   sara: { bg: "from-purple-900/90 to-purple-950/90", border: "border-purple-500/50", name: "text-purple-400" },
   karim: { bg: "from-red-900/90 to-red-950/90", border: "border-red-500/50", name: "text-red-400" },
   detective: { bg: "from-amber-900/90 to-amber-950/90", border: "border-amber-500/50", name: "text-amber-400" },
-  abuSaeed: { bg: "from-teal-900/90 to-teal-950/90", border: "border-teal-500/50", name: "text-teal-400" },
+  hisham: { bg: "from-teal-900/90 to-teal-950/90", border: "border-teal-500/50", name: "text-teal-400" },
   khaled: { bg: "from-red-900/90 to-red-950/90", border: "border-red-500/50", name: "text-red-400" },
   noura: { bg: "from-purple-900/90 to-purple-950/90", border: "border-purple-500/50", name: "text-purple-400" },
   umFahd: { bg: "from-cyan-900/90 to-cyan-950/90", border: "border-cyan-500/50", name: "text-cyan-400" },
@@ -49,7 +49,7 @@ const characterNames: Record<string, { ar: string; en: string }> = {
   sara: { ar: "سارة", en: "Sara" },
   karim: { ar: "كريم", en: "Karim" },
   detective: { ar: "المحلل", en: "Analyst" },
-  abuSaeed: { ar: "أبو سعيد", en: "Abu Saeed" },
+  hisham: { ar: "أ. هشام", en: "Hisham El Sherif" },
   khaled: { ar: "خالد", en: "Khaled" },
   noura: { ar: "نورة", en: "Noura" },
   umFahd: { ar: "أميرة", en: "Amira" },
@@ -212,7 +212,7 @@ export const EnhancedDialogue = ({
   if (!isActive || !currentDialogue) return null;
 
   const isSaved = currentDialogue.saveId ? savedNoteIds.includes(currentDialogue.saveId) : false;
-  const validCharacterIds: CharacterId[] = ["ahmed", "sara", "karim", "detective", "abuSaeed", "khaled", "noura", "umFahd", "mansour"];
+  const validCharacterIds: CharacterId[] = ["ahmed", "sara", "karim", "detective", "hisham", "khaled", "noura", "umFahd", "mansour"];
   const animCharId = validCharacterIds.includes(currentDialogue.characterId as CharacterId)
     ? (currentDialogue.characterId as CharacterId)
     : "detective";
@@ -297,7 +297,7 @@ export const EnhancedDialogue = ({
                 <FileText className="w-5 h-5 text-primary shrink-0" />
                 <div className="flex flex-col min-w-0">
                   <span className="text-[11px] text-muted-foreground">
-                    أبو سعيد سلّمك تقرير
+                    أ. هشام سلّمك تقرير
                   </span>
                   <span className="text-sm font-bold text-foreground truncate">
                     {currentDialogue.inlineEvidence.title}

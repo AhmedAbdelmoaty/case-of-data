@@ -1,8 +1,8 @@
 import type { DialogueLine } from "./types";
 
-export const ABU_SAEED_GREETING: DialogueLine[] = [
+export const HISHAM_GREETING: DialogueLine[] = [
   {
-    characterId: "abuSaeed",
+    characterId: "hisham",
     text: "أهلاً وسهلاً يا فندم، نوّرت VELARO. اتفضل اقعد، تشرب حاجة؟",
     mood: "happy",
   },
@@ -12,7 +12,7 @@ export const ABU_SAEED_GREETING: DialogueLine[] = [
     mood: "neutral",
   },
   {
-    characterId: "abuSaeed",
+    characterId: "hisham",
     text: "والله يا فندم… الشهر اللي فات ده حاسس إن في حاجة في VELARO مش ماشية. الحركة موجودة، بس فيه حاجة ناقصة.",
     mood: "concerned",
   },

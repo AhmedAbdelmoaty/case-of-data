@@ -136,12 +136,12 @@ export function buildHishamDebrief(framing: FramingSelection): DialogueLine[] {
       mood: "neutral",
     },
     {
-      characterId: "abuSaeed", // legacy id used in PresentationScreen for Hisham
+      characterId: "hisham",
       text: HISHAM_REACTIONS[tf][aligned ? "aligned" : "misaligned"],
       mood: aligned && correctCount >= 2 ? "happy" : "neutral",
     },
     {
-      characterId: "abuSaeed",
+      characterId: "hisham",
       text: buildClosingThanks(correctCount),
       mood: correctCount >= 2 ? "happy" : "neutral",
     },
