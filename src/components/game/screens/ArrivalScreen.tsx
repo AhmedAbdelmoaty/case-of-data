@@ -13,7 +13,7 @@ import hishamGreetingMaleImg from "@/assets/scenes/hisham-greeting-male.png";
 import hishamGreetingFemaleImg from "@/assets/scenes/hisham-greeting-female.png";
 import hishamOfficeSeatedMaleImg from "@/assets/scenes/hisham-office-seated-male.png";
 import hishamOfficeSeatedFemaleImg from "@/assets/scenes/hisham-office-seated-female.png";
-import { ABU_SAEED_GREETING } from "@/data/pf-case";
+import { HISHAM_GREETING } from "@/data/pf-case";
 
 interface ArrivalScreenProps {
   onComplete: () => void;
@@ -69,7 +69,7 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
     }
   }, [phase, playSound]);
 
-  const dialogues = ABU_SAEED_GREETING.map((line) => ({
+  const dialogues = HISHAM_GREETING.map((line) => ({
     characterId: line.characterId,
     text: line.text,
     mood: mapMood(line.mood),
