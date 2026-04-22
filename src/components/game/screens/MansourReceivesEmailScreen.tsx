@@ -44,7 +44,7 @@ export const MansourReceivesEmailScreen = ({ onComplete }: MansourReceivesEmailS
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
         >
-          🏢 في مكتب Pinnacle Consulting…
+          🏢 في مكتب Prism Consulting…
         </motion.p>
 
         <AnimatePresence mode="wait">

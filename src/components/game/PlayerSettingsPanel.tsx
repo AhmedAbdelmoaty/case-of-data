@@ -241,7 +241,7 @@ export const PlayerSettingsPanel = ({ onReplayBriefing, onResetProgress }: Playe
                   <Building2 className="w-5 h-5 text-accent" />
                   <div>
                     <p className="text-sm font-bold">مكتب الشركة</p>
-                    <p className="text-xs text-muted-foreground">إعادة مشاهدة اجتماع Pinnacle Consulting</p>
+                    <p className="text-xs text-muted-foreground">إعادة مشاهدة اجتماع Prism Consulting</p>
                   </div>
                 </button>
 
