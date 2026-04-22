@@ -27,17 +27,17 @@ export const TravelScreen = ({ onComplete }: TravelScreenProps) => {
 
   const driveImg = profile?.gender === "female" ? cityDriveLuxuryFemaleImg : cityDriveLuxuryMaleImg;
 
-  // Fewer, more spaced floating emojis
+  // Faster floating scenery — gives a real sense of speed
   const floatingEmojis = useMemo(
     () =>
-      Array.from({ length: 5 }).map((_, i) => ({
+      Array.from({ length: 7 }).map((_, i) => ({
         id: i,
         emoji: AMBIENT_EMOJIS[i % AMBIENT_EMOJIS.length],
-        top: 15 + i * 14,
-        delay: i * 1.8,
-        duration: 7 + Math.random() * 2,
-        size: 22 + Math.random() * 10,
-        opacity: 0.45,
+        top: 10 + i * 11,
+        delay: i * 0.9,
+        duration: 3 + Math.random() * 1.2,
+        size: 24 + Math.random() * 10,
+        opacity: 0.5,
       })),
     []
   );
@@ -59,20 +59,49 @@ export const TravelScreen = ({ onComplete }: TravelScreenProps) => {
 
   return (
     <div className="min-h-screen bg-background overflow-hidden relative">
-      {/* Background with smooth parallax pan only — no shake */}
+      {/* Camera rig: micro-shake (car vibration) wraps a strong zoom+pan */}
       <motion.div
         className="absolute inset-0"
-        initial={{ scale: 1.1, x: "3%" }}
-        animate={{ scale: 1.04, x: "-3%" }}
-        transition={{ duration: TOTAL_DURATION / 1000, ease: "linear" }}
+        animate={{ y: [0, -1.2, 0.8, -0.6, 1, 0], x: [0, 0.6, -0.4, 0.8, -0.5, 0] }}
+        transition={{ duration: 0.45, repeat: Infinity, ease: "easeInOut" }}
       >
-        <img
-          src={driveImg}
-          alt="Driving toward VELARO"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-background/30" />
+        <motion.div
+          className="absolute inset-0"
+          initial={{ scale: 1.05, x: "5%" }}
+          animate={{ scale: 1.22, x: "-5%" }}
+          transition={{ duration: TOTAL_DURATION / 1000, ease: [0.33, 0, 0.67, 1] }}
+        >
+          <img
+            src={driveImg}
+            alt="Driving toward VELARO"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-background/30" />
+        </motion.div>
       </motion.div>
+
+      {/* Side motion-blur vignette — sells the speed */}
+      <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-background/60 to-transparent pointer-events-none z-10" />
+      <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-background/60 to-transparent pointer-events-none z-10" />
+
+      {/* Subtle horizontal speed streaks */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-10">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <motion.div
+            key={`streak-${i}`}
+            className="absolute h-px bg-foreground/15"
+            style={{ top: `${20 + i * 18}%`, width: "30%" }}
+            initial={{ x: "120vw" }}
+            animate={{ x: "-40vw" }}
+            transition={{
+              duration: 0.9 + Math.random() * 0.4,
+              delay: i * 0.3,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          />
+        ))}
+      </div>
 
       {/* Subtle floating realistic scenery */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
