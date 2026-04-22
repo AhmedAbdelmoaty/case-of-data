@@ -4,14 +4,14 @@ import { motion, AnimatePresence } from "framer-motion";
 // Import character images
 import analystImg from "@/assets/characters/analyst.png";
 import ahmedImg from "@/assets/characters/mansour.png";
-import abuSaeedImg from "@/assets/characters/hesham.png";
+import hishamImg from "@/assets/characters/hesham.png";
 import khaledImg from "@/assets/characters/karim.png";
 import nouraImg from "@/assets/characters/noura.png";
 import amiraImg from "@/assets/characters/sara.png";
 import karimImg from "@/assets/characters/karim.png";
 import detectiveImg from "@/assets/characters/detective.png";
 
-export type CharacterId = "ahmed" | "sara" | "karim" | "detective" | "abuSaeed" | "khaled" | "noura" | "umFahd" | "mansour";
+export type CharacterId = "ahmed" | "sara" | "karim" | "detective" | "hisham" | "khaled" | "noura" | "umFahd" | "mansour";
 
 interface AnimatedCharacterProps {
   characterId: CharacterId;
@@ -32,7 +32,7 @@ const characterData: Record<CharacterId, { name: string; nameEn: string; role: s
   sara: { name: "سارة", nameEn: "Sara", role: "محاسبة", roleEn: "Accountant", image: nouraImg, color: "purple" },
   karim: { name: "كريم", nameEn: "Karim", role: "مسؤول المشتريات", roleEn: "Procurement", image: khaledImg, color: "red" },
   detective: { name: "المحلل", nameEn: "Analyst", role: "أنت", roleEn: "You", image: analystImg, color: "gold" },
-  abuSaeed: { name: "أبو سعيد", nameEn: "Abu Saeed", role: "صاحب المحل", roleEn: "Shop Owner", image: abuSaeedImg, color: "teal" },
+  hisham: { name: "أ. هشام", nameEn: "Hisham El Sherif", role: "مالك VELARO", roleEn: "VELARO Owner", image: hishamImg, color: "teal" },
   khaled: { name: "خالد", nameEn: "Khaled", role: "مدير الصالة", roleEn: "Floor Manager", image: khaledImg, color: "red" },
   noura: { name: "نورة", nameEn: "Noura", role: "الكاشير", roleEn: "Cashier", image: nouraImg, color: "purple" },
   umFahd: { name: "أميرة", nameEn: "Amira", role: "زبونة دائمة", roleEn: "Regular Customer", image: amiraImg, color: "cyan" },
