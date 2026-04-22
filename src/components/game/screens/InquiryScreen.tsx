@@ -9,16 +9,16 @@ import { EnhancedDialogue } from "../EnhancedDialogue";
 import { PFNotebook } from "../PFNotebook";
 import { TOTAL_QUESTION_BUDGET } from "@/lib/pf-case/case-tree";
 import type { EvidenceData } from "@/lib/pf-case/evidence-catalog";
-import velaroInteriorWideImg from "@/assets/scenes/velaro-interior-wide.png";
-import velaroCheckoutBusyImg from "@/assets/scenes/velaro-checkout-busy.png";
-import velaroWomensSectionImg from "@/assets/scenes/velaro-womens-section.png";
-import velaroMensSectionImg from "@/assets/scenes/velaro-mens-section.png";
-import hishamOfficeSeatedMaleImg from "@/assets/scenes/hisham-office-seated-male.png";
-import hishamOfficeSeatedFemaleImg from "@/assets/scenes/hisham-office-seated-female.png";
-import hishamGreetingMaleImg from "@/assets/scenes/hisham-greeting-male.png";
-import hishamGreetingFemaleImg from "@/assets/scenes/hisham-greeting-female.png";
-import hishamHandingReportMaleImg from "@/assets/scenes/hisham-handing-report-male.png";
-import hishamHandingReportFemaleImg from "@/assets/scenes/hisham-handing-report-female.png";
+import velaroInteriorWideImg from "@/assets/scenes/velaro-interior-wide.webp";
+import velaroCheckoutBusyImg from "@/assets/scenes/velaro-checkout-busy.webp";
+import velaroWomensSectionImg from "@/assets/scenes/velaro-womens-section.webp";
+import velaroMensSectionImg from "@/assets/scenes/velaro-mens-section.webp";
+import hishamOfficeSeatedMaleImg from "@/assets/scenes/hisham-office-seated-male.webp";
+import hishamOfficeSeatedFemaleImg from "@/assets/scenes/hisham-office-seated-female.webp";
+import hishamGreetingMaleImg from "@/assets/scenes/hisham-greeting-male.webp";
+import hishamGreetingFemaleImg from "@/assets/scenes/hisham-greeting-female.webp";
+import hishamHandingReportMaleImg from "@/assets/scenes/hisham-handing-report-male.webp";
+import hishamHandingReportFemaleImg from "@/assets/scenes/hisham-handing-report-female.webp";
 
 interface InquiryScreenProps {
   onComplete: () => void;

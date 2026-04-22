@@ -10,9 +10,9 @@ import {
   MANSOUR_DEBRIEF_MEDIUM,
   MANSOUR_DEBRIEF_WEAK,
 } from "@/lib/pf-case/mansour-scripts";
-import prismHallwayImg from "@/assets/scenes/prism-hallway.png";
-import mansourOfficeSeatedMaleImg from "@/assets/scenes/mansour-office-seated-male.png";
-import mansourOfficeSeatedFemaleImg from "@/assets/scenes/mansour-office-seated-female.png";
+import prismHallwayImg from "@/assets/scenes/prism-hallway.webp";
+import mansourOfficeSeatedMaleImg from "@/assets/scenes/mansour-office-seated-male.webp";
+import mansourOfficeSeatedFemaleImg from "@/assets/scenes/mansour-office-seated-female.webp";
 
 interface DebriefScreenProps {
   onComplete: () => void;

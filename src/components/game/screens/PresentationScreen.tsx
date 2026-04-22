@@ -4,8 +4,8 @@ import { usePFGame } from "@/contexts/PFGameContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { EnhancedDialogue } from "../EnhancedDialogue";
 import { buildHishamDebrief } from "@/lib/pf-case/debrief-scripts";
-import hishamReceivingReportMaleImg from "@/assets/scenes/hisham-receiving-report-male.png";
-import hishamReceivingReportFemaleImg from "@/assets/scenes/hisham-receiving-report-female.png";
+import hishamReceivingReportMaleImg from "@/assets/scenes/hisham-receiving-report-male.webp";
+import hishamReceivingReportFemaleImg from "@/assets/scenes/hisham-receiving-report-female.webp";
 
 interface PresentationScreenProps {
   onComplete: () => void;

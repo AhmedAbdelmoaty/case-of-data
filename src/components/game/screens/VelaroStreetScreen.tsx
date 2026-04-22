@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import velaroStreetImg from "@/assets/scenes/velaro-street.png";
+import velaroStreetImg from "@/assets/scenes/velaro-street.webp";
 
 interface VelaroStreetScreenProps {
   onComplete: () => void;

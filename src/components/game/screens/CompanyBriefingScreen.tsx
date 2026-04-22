@@ -7,14 +7,14 @@ import { EnhancedDialogue } from "../EnhancedDialogue";
 import { Rocket, GraduationCap, DoorOpen } from "lucide-react";
 import analystImg from "@/assets/characters/analyst.png";
 import saraImg from "@/assets/characters/sara.png";
-import prismBuildingImg from "@/assets/scenes/prism-building-exterior.png";
-import prismHallwayImg from "@/assets/scenes/prism-hallway.png";
-import prismKnockMaleImg from "@/assets/scenes/prism-knock-male.png";
-import prismKnockFemaleImg from "@/assets/scenes/prism-knock-female.png";
-import mansourWelcomeMaleImg from "@/assets/scenes/mansour-office-welcome-male.png";
-import mansourWelcomeFemaleImg from "@/assets/scenes/mansour-office-welcome-female.png";
-import mansourSeatedMaleImg from "@/assets/scenes/mansour-office-seated-male.png";
-import mansourSeatedFemaleImg from "@/assets/scenes/mansour-office-seated-female.png";
+import prismBuildingImg from "@/assets/scenes/prism-building-exterior.webp";
+import prismHallwayImg from "@/assets/scenes/prism-hallway.webp";
+import prismKnockMaleImg from "@/assets/scenes/prism-knock-male.webp";
+import prismKnockFemaleImg from "@/assets/scenes/prism-knock-female.webp";
+import mansourWelcomeMaleImg from "@/assets/scenes/mansour-office-welcome-male.webp";
+import mansourWelcomeFemaleImg from "@/assets/scenes/mansour-office-welcome-female.webp";
+import mansourSeatedMaleImg from "@/assets/scenes/mansour-office-seated-male.webp";
+import mansourSeatedFemaleImg from "@/assets/scenes/mansour-office-seated-female.webp";
 import { MANSOUR_INTRO_DIALOGUES } from "@/data/pf-case";
 
 interface CompanyBriefingScreenProps {

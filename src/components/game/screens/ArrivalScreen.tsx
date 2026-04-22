@@ -5,14 +5,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSound } from "@/hooks/useSoundEffects";
 import { useAmbientSound, type AmbientScene } from "@/hooks/useAmbientSound";
 import { EnhancedDialogue } from "../EnhancedDialogue";
-import velaroStorefrontImg from "@/assets/scenes/velaro-storefront.png";
-import velaroEnteringMaleImg from "@/assets/scenes/velaro-entering-male.png";
-import velaroEnteringFemaleImg from "@/assets/scenes/velaro-entering-female.png";
-import velaroInteriorWideImg from "@/assets/scenes/velaro-interior-wide.png";
-import hishamGreetingMaleImg from "@/assets/scenes/hisham-greeting-male.png";
-import hishamGreetingFemaleImg from "@/assets/scenes/hisham-greeting-female.png";
-import hishamOfficeSeatedMaleImg from "@/assets/scenes/hisham-office-seated-male.png";
-import hishamOfficeSeatedFemaleImg from "@/assets/scenes/hisham-office-seated-female.png";
+import velaroStorefrontImg from "@/assets/scenes/velaro-storefront.webp";
+import velaroEnteringMaleImg from "@/assets/scenes/velaro-entering-male.webp";
+import velaroEnteringFemaleImg from "@/assets/scenes/velaro-entering-female.webp";
+import velaroInteriorWideImg from "@/assets/scenes/velaro-interior-wide.webp";
+import hishamGreetingMaleImg from "@/assets/scenes/hisham-greeting-male.webp";
+import hishamGreetingFemaleImg from "@/assets/scenes/hisham-greeting-female.webp";
+import hishamOfficeSeatedMaleImg from "@/assets/scenes/hisham-office-seated-male.webp";
+import hishamOfficeSeatedFemaleImg from "@/assets/scenes/hisham-office-seated-female.webp";
 import { HISHAM_GREETING } from "@/data/pf-case";
 
 interface ArrivalScreenProps {

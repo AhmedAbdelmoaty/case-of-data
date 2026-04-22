@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
-import analystReflectingMaleImg from "@/assets/scenes/analyst-reflecting-male.png";
-import analystReflectingFemaleImg from "@/assets/scenes/analyst-reflecting-female.png";
+import analystReflectingMaleImg from "@/assets/scenes/analyst-reflecting-male.webp";
+import analystReflectingFemaleImg from "@/assets/scenes/analyst-reflecting-female.webp";
 
 interface ReflectionTransitionProps {
   onComplete: () => void;

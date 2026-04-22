@@ -2,8 +2,8 @@ import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSound } from "@/hooks/useSoundEffects";
-import cityDriveLuxuryMaleImg from "@/assets/scenes/city-drive-luxury-male.png";
-import cityDriveLuxuryFemaleImg from "@/assets/scenes/city-drive-luxury-female.png";
+import cityDriveLuxuryMaleImg from "@/assets/scenes/city-drive-luxury-male.webp";
+import cityDriveLuxuryFemaleImg from "@/assets/scenes/city-drive-luxury-female.webp";
 
 interface TravelScreenProps {
   onComplete: () => void;

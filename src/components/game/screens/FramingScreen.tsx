@@ -5,7 +5,7 @@ import { usePFGame, FRAMING_SECTIONS } from "@/contexts/PFGameContext";
 import { useSound } from "@/hooks/useSoundEffects";
 import { PFNotebook } from "../PFNotebook";
 import { StampEffect } from "../StampEffect";
-import framingBoardDeskImg from "@/assets/scenes/framing-board-desk.png";
+import framingBoardDeskImg from "@/assets/scenes/framing-board-desk.webp";
 
 interface FramingScreenProps {
   onComplete: () => void;

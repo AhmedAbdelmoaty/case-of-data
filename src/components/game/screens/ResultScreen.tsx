@@ -6,8 +6,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import analystImg from "@/assets/characters/analyst.png";
 import saraImg from "@/assets/characters/sara.png";
-import strongOutcomeImg from "@/assets/scenes/hisham-receiving-report-male.png";
-import otherOutcomeImg from "@/assets/scenes/prism-building-exterior.png";
+import strongOutcomeImg from "@/assets/scenes/hisham-receiving-report-male.webp";
+import otherOutcomeImg from "@/assets/scenes/prism-building-exterior.webp";
 
 interface ResultScreenProps {
   onNavigate: (screen: string) => void;

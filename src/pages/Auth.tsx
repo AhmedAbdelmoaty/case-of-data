@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Mail, Lock, LogIn, UserPlus, AlertCircle } from "lucide-react";
-import storeFrontImg from "@/assets/scenes/prism-building-exterior.png";
+import storeFrontImg from "@/assets/scenes/prism-building-exterior.webp";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);

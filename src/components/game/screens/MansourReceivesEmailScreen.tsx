@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Phone } from "lucide-react";
-import mansourReadingImg from "@/assets/photos/mansour-reading-email.png";
-import mansourPhoneImg from "@/assets/photos/mansour-picking-phone.png";
+import mansourReadingImg from "@/assets/photos/mansour-reading-email.webp";
+import mansourPhoneImg from "@/assets/photos/mansour-picking-phone.webp";
 
 interface MansourReceivesEmailScreenProps {
   onComplete: () => void;

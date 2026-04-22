@@ -9,8 +9,8 @@ import {
   MANSOUR_CALL_MEDIUM,
   MANSOUR_CALL_WEAK,
 } from "@/lib/pf-case/mansour-call-scripts";
-import analystMaleImg from "@/assets/photos/analyst-on-phone-male.png";
-import analystFemaleImg from "@/assets/photos/analyst-on-phone-female.png";
+import analystMaleImg from "@/assets/photos/analyst-on-phone-male.webp";
+import analystFemaleImg from "@/assets/photos/analyst-on-phone-female.webp";
 
 interface PhoneCallDebriefScreenProps {
   onComplete: () => void;
