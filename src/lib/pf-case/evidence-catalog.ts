@@ -1,7 +1,7 @@
 // ============================================================
 // Evidence Catalog — REPORT documents (delivered as printed papers)
 // ============================================================
-// Each "evidence" represents a real report Abu Saeed hands over.
+// Each "evidence" represents a real report Hisham El Sherif hands over.
 // Carries: title, issuer (stamp), date, footnote — to feel like a real document.
 // All numeric facts live HERE, never in dialogue text.
 
@@ -29,7 +29,7 @@ export interface EvidenceData {
   type: EvidenceChartType;
   caption?: string;
   /** Document metadata — gives the report-document feel */
-  issuer?: string;          // "محاسبة محل أبو سعيد"
+  issuer?: string;          // "الإدارة المالية — VELARO"
   reportDate?: string;      // "مارس 2026"
   footnote?: string;        // small note printed on the paper
   rows: EvidenceDataRow[];
@@ -46,7 +46,7 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     id: "ev_year_vs_year",
     title: "تقرير مبيعات شهرية — مقارنة فبراير 2025 / فبراير 2026",
     type: "bar",
-    issuer: "محاسبة محل أبو سعيد",
+    issuer: "الإدارة المالية — VELARO",
     reportDate: "مارس 2026",
     caption: "مقارنة إجمالي المبيعات بين شهر فبراير 2026 وشهر فبراير 2025",
     footnote: "الأرقام بالألف جنيه مصري، صافي مبيعات بعد المرتجعات.",
@@ -62,7 +62,7 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     id: "ev_three_year",
     title: "تقرير مبيعات فبراير — على مدى 3 سنين",
     type: "bar",
-    issuer: "محاسبة محل أبو سعيد",
+    issuer: "الإدارة المالية — VELARO",
     reportDate: "مارس 2026",
     caption: "مبيعات شهر فبراير في السنوات الثلاث الأخيرة.",
     footnote: "الأرقام بالألف جنيه. التقرير بيوضح إن سنة 2025 طالعة بشكل ملحوظ عن السنتين التانيين.",
@@ -79,7 +79,7 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     id: "ev_breakdown",
     title: "تقرير تفصيلي — تقسيم مبيعات فبراير حسب نوع البيع",
     type: "grouped_bar",
-    issuer: "محاسبة محل أبو سعيد",
+    issuer: "الإدارة المالية — VELARO",
     reportDate: "مارس 2026",
     caption: "كل سنة فيها عمودين: بيع أفراد (تجزئة) جنب بيع شركات (جملة) — عشان يبان التدرج في كل نوع لوحده.",
     footnote:
@@ -102,7 +102,7 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     id: "ev_team_performance",
     title: "تقرير أداء فريق البيع — فبراير 2026",
     type: "bar",
-    issuer: "محاسبة محل أبو سعيد",
+    issuer: "الإدارة المالية — VELARO",
     reportDate: "مارس 2026",
     caption: "إجمالي مبيعات كل بائع للشهر الحالي.",
     footnote: "الأرقام بالألف جنيه. الفريق مكوّن من 4 بائعين بدوام كامل.",
@@ -118,7 +118,7 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     id: "ev_team_conversion",
     title: "تقرير نسبة الإقفال (التحويل) لكل بائع",
     type: "table",
-    issuer: "محاسبة محل أبو سعيد",
+    issuer: "الإدارة المالية — VELARO",
     reportDate: "مارس 2026",
     footnote: "نسبة التحويل = عدد البيعات ÷ عدد الزباين اللي تعامل معاهم البائع.",
     headers: ["البائع", "نسبة الإقفال"],
@@ -135,7 +135,7 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     id: "ev_daily_sales",
     title: "تقرير المبيعات اليومية — فبراير 2026",
     type: "line",
-    issuer: "محاسبة محل أبو سعيد",
+    issuer: "الإدارة المالية — VELARO",
     reportDate: "مارس 2026",
     caption: "حركة البيع اليومية على مدار الشهر.",
     footnote: "الأرقام بالألف جنيه/يوم. الإجمالي الشهري حوالي 500 ألف جنيه.",
@@ -156,7 +156,7 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     id: "ev_weekly_sales",
     title: "تقرير المبيعات الأسبوعية — فبراير 2026",
     type: "bar",
-    issuer: "محاسبة محل أبو سعيد",
+    issuer: "الإدارة المالية — VELARO",
     reportDate: "مارس 2026",
     caption: "إجمالي البيع لكل أسبوع في الشهر.",
     footnote: "الأرقام بالألف جنيه. الأسبوع الرابع هو الأقل بشكل واضح.",
@@ -176,7 +176,7 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     id: "ev_competitor_offers",
     title: "ملخص عروض المنافسين الحاليين",
     type: "list",
-    issuer: "متابعة أبو سعيد الشخصية",
+    issuer: "متابعة أ. هشام الشخصية",
     reportDate: "فبراير 2026",
     footnote: "ملاحظات مجمّعة من زيارات شخصية للمحلات المجاورة.",
     rows: [
@@ -190,7 +190,7 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     id: "ev_customer_feedback",
     title: "ملاحظات العملاء الأخيرة",
     type: "list",
-    issuer: "دفتر ملاحظات أبو سعيد",
+    issuer: "دفتر ملاحظات أ. هشام",
     reportDate: "فبراير 2026",
     footnote: "تعليقات شفوية مسجّلة من زباين الفترة الأخيرة.",
     rows: [
@@ -205,7 +205,7 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     id: "ev_marketing",
     title: "ملخص أداء التسويق — فبراير 2025 vs فبراير 2026",
     type: "table",
-    issuer: "متابعة أبو سعيد للحملات",
+    issuer: "متابعة VELARO للحملات",
     reportDate: "مارس 2026",
     footnote: "بيانات مجمّعة من حسابات السوشيال ميديا والإعلانات الممولة.",
     headers: ["المؤشر", "فبراير 2025", "فبراير 2026"],

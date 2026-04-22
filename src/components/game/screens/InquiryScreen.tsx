@@ -92,7 +92,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
       const lines: DialogueLineUI[] = [
         { characterId: "detective", text: result.questionText, mood: "neutral" },
         {
-          characterId: "abuSaeed",
+          characterId: "hisham",
           text: result.responseText,
           mood: isCorrect ? "happy" : "neutral",
           isSaveable: !!result.noteId,

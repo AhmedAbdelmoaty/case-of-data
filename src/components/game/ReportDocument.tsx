@@ -32,7 +32,7 @@ const COLORS = {
  * ReportDocument — renders a chart/table as a printed paper report,
  * with a header (title + issuer + date), the chart body, and a
  * stamp + footnote on the bottom. This makes evidence feel like an
- * artifact Abu Saeed hands over, not a chat-bubble data dump.
+ * artifact Hisham El Sherif hands over, not a chat-bubble data dump.
  */
 export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProps) => {
   const chartHeight = compact ? "h-52" : "h-72";

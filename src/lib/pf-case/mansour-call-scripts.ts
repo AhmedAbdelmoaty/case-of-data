@@ -34,7 +34,7 @@ export const MANSOUR_CALL_WEAK: DialogueLine[] = [
   { characterId: "detective", text: "أهلاً يا أستاذ منصور…", mood: "concerned" },
   { characterId: "mansour", text: "خلّينا نتكلم بصراحة. التقرير ده مش اللي كنت متوقعه منك، خالص.", mood: "disappointed" },
   { characterId: "mansour", text: "إنت دخلت على الحل قبل ما تتأكد إن في مشكلة بيع أصلاً. ده نفس الغلط اللي كان هشام نفسه داخل عليه!", mood: "disappointed" },
-  { characterId: "mansour", text: "إحنا في Prism Consulting شغلنا إننا نمسك المرجع الأول. مش إننا نهز راسنا للعميل ونمشي ورا أول فكرة جايه في دماغه.", mood: "disappointed" },
+  { characterId: "mansour", text: "إحنا في Pinnacle Consulting شغلنا إننا نمسك المرجع الأول. مش إننا نهز راسنا للعميل ونمشي ورا أول فكرة جايه في دماغه.", mood: "disappointed" },
   { characterId: "detective", text: "حضرتك معاك حق… أنا استعجلت.", mood: "concerned" },
   { characterId: "mansour", text: "والله لو كان هشام نفّذ خصومات بناءً على التقرير ده، كان هياكل من الربح، وكان ممكن ييجي يقولنا «إنتو نصحتوني غلط».", mood: "disappointed" },
   { characterId: "mansour", text: "الـ Problem Framing مش رفاهية. هو الفرق بين استشاري حقيقي وحد بيكتب تقارير. إنت النهارده ما عملتش Framing… إنت كرّرت كلام العميل.", mood: "serious" },
