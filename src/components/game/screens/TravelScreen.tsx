@@ -43,10 +43,9 @@ export const TravelScreen = ({ onComplete }: TravelScreenProps) => {
   );
 
   useEffect(() => {
-    try { playSound("carEngine"); } catch {}
     const t = setTimeout(onComplete, TOTAL_DURATION);
     return () => clearTimeout(t);
-  }, [onComplete, playSound]);
+  }, [onComplete]);
 
   useEffect(() => {
     const timers: ReturnType<typeof setTimeout>[] = [];

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useSound } from "./useSoundEffects";
 
-export type AmbientScene = "store" | "office" | "street" | "none";
+export type AmbientScene = "store" | "office" | "none";
 
 /**
  * Plays a subtle synthesized ambient loop for a given scene.
@@ -107,51 +107,8 @@ export const useAmbientSound = (scene: AmbientScene) => {
       intervalsRef.current.push(tick);
     };
 
-    const buildStreet = () => {
-      // Low rumble
-      const bufferSize = 2 * ctx.sampleRate;
-      const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-      const data = noiseBuffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-      const noise = ctx.createBufferSource();
-      noise.buffer = noiseBuffer;
-      noise.loop = true;
-      const lp = ctx.createBiquadFilter();
-      lp.type = "lowpass";
-      lp.frequency.value = 180;
-      const ng = ctx.createGain();
-      ng.gain.value = 0.8;
-      noise.connect(lp).connect(ng).connect(master);
-      noise.start();
-      track(noise); track(lp); track(ng);
-
-      // Occasional car whoosh
-      const whoosh = window.setInterval(() => {
-        if (cancelled) return;
-        const t = ctx.currentTime;
-        const wb = ctx.createBuffer(1, ctx.sampleRate * 1.5, ctx.sampleRate);
-        const wd = wb.getChannelData(0);
-        for (let i = 0; i < wd.length; i++) wd[i] = Math.random() * 2 - 1;
-        const ws = ctx.createBufferSource();
-        ws.buffer = wb;
-        const wf = ctx.createBiquadFilter();
-        wf.type = "bandpass";
-        wf.frequency.setValueAtTime(400, t);
-        wf.frequency.linearRampToValueAtTime(900, t + 1.4);
-        const wg = ctx.createGain();
-        wg.gain.setValueAtTime(0, t);
-        wg.gain.linearRampToValueAtTime(0.05, t + 0.4);
-        wg.gain.linearRampToValueAtTime(0, t + 1.4);
-        ws.connect(wf).connect(wg).connect(master);
-        ws.start(t);
-        ws.stop(t + 1.5);
-      }, 4500);
-      intervalsRef.current.push(whoosh);
-    };
-
     if (scene === "store") buildStore();
     else if (scene === "office") buildOffice();
-    else if (scene === "street") buildStreet();
 
     return () => {
       cancelled = true;
