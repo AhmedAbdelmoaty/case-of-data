@@ -42,7 +42,7 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
   const [phase, setPhase] = useState<Phase>("storefront");
   const [dialogueIndex, setDialogueIndex] = useState(0);
 
-  const ambientScene: AmbientScene = phase === "storefront" ? "street" : "store";
+  const ambientScene: AmbientScene = phase === "storefront" ? "none" : "store";
   useAmbientSound(ambientScene);
 
   const enteringImg = g === "female" ? velaroEnteringFemaleImg : velaroEnteringMaleImg;

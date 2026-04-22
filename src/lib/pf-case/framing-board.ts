@@ -1,7 +1,7 @@
 // ============================================================
-// Framing Board — 4 sections × 4 options, in plain shopkeeper Arabic
+// Framing Board — 3 sections × 4 options, in plain shopkeeper Arabic
+// (Removed redundant "hypothesis" section — it duplicated true_frame)
 // ============================================================
-// Rewritten to remove technical jargon (baseline, patterns, تشغيلي, etc.)
 
 export interface FramingChoice {
   id: string;
@@ -9,14 +9,13 @@ export interface FramingChoice {
 }
 
 export interface FramingSection {
-  id: "client_view" | "hypothesis" | "true_frame" | "next_decision";
+  id: "client_view" | "true_frame" | "next_decision";
   title: string;
   options: FramingChoice[];
 }
 
 export interface FramingSelection {
   client_view: string | null;
-  hypothesis: string | null;
   true_frame: string | null;
   next_decision: string | null;
 }
@@ -33,30 +32,8 @@ export const FRAMING_SECTIONS: FramingSection[] = [
     ],
   },
   {
-    id: "hypothesis",
-    title: "2. الفرضية اللي مشيت وراها أثناء الأسئلة",
-    options: [
-      {
-        id: "hp_baseline_unchecked",
-        text: "المقارنة اللي بنى عليها كلامه نفسها مش مفحوصة — يمكن المرجع غلط.",
-      },
-      {
-        id: "hp_internal_execution",
-        text: "في ضعف في تنفيذ الفريق الداخلي.",
-      },
-      {
-        id: "hp_ops_disruption",
-        text: "في خلل في الشغل اليومي — البضاعة بتتأخر، والبيع بيتأثر.",
-      },
-      {
-        id: "hp_external_pressure",
-        text: "في ضغط من بره — منافسين أو ضعف طلب في السوق.",
-      },
-    ],
-  },
-  {
     id: "true_frame",
-    title: "3. التأطير الأدق للمشكلة",
+    title: "2. التأطير الأدق للمشكلة",
     options: [
       {
         id: "tf_misleading_baseline",
@@ -78,7 +55,7 @@ export const FRAMING_SECTIONS: FramingSection[] = [
   },
   {
     id: "next_decision",
-    title: "4. القرار التالي اللي تنصح بيه",
+    title: "3. القرار التالي اللي تنصح بيه",
     options: [
       {
         id: "nd_revalidate_baseline",
@@ -102,15 +79,15 @@ export const FRAMING_SECTIONS: FramingSection[] = [
 
 export const CORRECT_FRAMING = {
   client_view: "cv_lower_than_expected",
-  hypothesis: "hp_baseline_unchecked",
   true_frame: "tf_misleading_baseline",
   next_decision: "nd_revalidate_baseline",
 } as const;
 
+export const TOTAL_FRAMING_SECTIONS = 3;
+
 export function countCorrectFraming(selection: FramingSelection): number {
   let n = 0;
   if (selection.client_view === CORRECT_FRAMING.client_view) n++;
-  if (selection.hypothesis === CORRECT_FRAMING.hypothesis) n++;
   if (selection.true_frame === CORRECT_FRAMING.true_frame) n++;
   if (selection.next_decision === CORRECT_FRAMING.next_decision) n++;
   return n;
