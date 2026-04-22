@@ -56,12 +56,12 @@ export const DebriefScreen = ({ onComplete }: DebriefScreenProps) => {
     return (
       <div className="min-h-screen bg-background relative overflow-hidden">
         <motion.div className="absolute inset-0" initial={{ scale: 1.1, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 1.5 }}>
-          <img src={prismHallwayImg} alt="Pinnacle hallway" className="w-full h-full object-cover" />
+          <img src={prismHallwayImg} alt="Prism hallway" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/65 to-transparent" />
         </motion.div>
         <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="space-y-3 max-w-md">
-              <p className="text-muted-foreground text-sm tracking-widest">🏢 PINNACLE</p>
+              <p className="text-muted-foreground text-sm tracking-widest">🏢 PRISM</p>
             <h2 className="text-foreground text-lg font-bold" dir="rtl">{hallwayTitle}</h2>
           </motion.div>
           <motion.button onClick={() => { try { playSound("door"); } catch {}; setPhase("dialogue"); }} className="mt-8 px-8 py-3 rounded-xl bg-card/60 border border-border text-foreground font-bold hover:bg-card/80 transition-all" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5 }} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>

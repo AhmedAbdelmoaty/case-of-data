@@ -106,13 +106,13 @@ export const CompanyBriefingScreen = ({
     return (
       <div className="min-h-screen bg-background relative overflow-hidden">
         <motion.div className="absolute inset-0" initial={{ scale: 1.08, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 2 }}>
-          <img src={prismBuildingImg} alt="Pinnacle Consulting" className="w-full h-full object-cover" />
+          <img src={prismBuildingImg} alt="Prism Consulting" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
         </motion.div>
         <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-4">
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="space-y-3">
             <p className="text-muted-foreground text-sm tracking-[0.35em] uppercase">Consulting Tower</p>
-            <h1 className="text-accent font-bold text-3xl">Pinnacle Consulting</h1>
+            <h1 className="text-accent font-bold text-3xl">Prism Consulting</h1>
             <p className="text-foreground/80 text-sm" dir="rtl">رحلتك بتبدأ من هنا</p>
           </motion.div>
         </div>
@@ -124,14 +124,14 @@ export const CompanyBriefingScreen = ({
     return (
       <div className="min-h-screen bg-background relative overflow-hidden">
         <motion.div className="absolute inset-0" initial={{ scale: 1.08, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 1.6, ease: "easeOut" }}>
-          <img src={prismHallwayImg} alt="Pinnacle hallway" className="w-full h-full object-cover" />
+          <img src={prismHallwayImg} alt="Prism hallway" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
         </motion.div>
 
         <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-4">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.8 }} className="space-y-3">
             <p className="text-muted-foreground text-sm tracking-widest uppercase">Floor 12</p>
-            <h1 className="text-accent font-bold text-2xl">Pinnacle Consulting</h1>
+            <h1 className="text-accent font-bold text-2xl">Prism Consulting</h1>
             <p className="text-muted-foreground text-sm" dir="rtl">مكتب أ. منصور</p>
           </motion.div>
 
@@ -246,7 +246,7 @@ export const CompanyBriefingScreen = ({
 
       <motion.div className="relative z-10 pt-12 pb-4 text-center" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
         <p className="text-muted-foreground text-sm">🏢 مكتب الشركة</p>
-        <h2 className="text-accent font-bold text-lg">Pinnacle Consulting</h2>
+        <h2 className="text-accent font-bold text-lg">Prism Consulting</h2>
         <p className="text-muted-foreground text-xs">Executive Briefing</p>
       </motion.div>
 
