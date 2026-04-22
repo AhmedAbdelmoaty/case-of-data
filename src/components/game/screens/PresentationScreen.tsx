@@ -3,11 +3,7 @@ import { motion } from "framer-motion";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { EnhancedDialogue } from "../EnhancedDialogue";
-import {
-  ABU_SAEED_DEBRIEF_STRONG,
-  ABU_SAEED_DEBRIEF_MEDIUM,
-  ABU_SAEED_DEBRIEF_WEAK,
-} from "@/lib/pf-case/debrief-scripts";
+import { buildHishamDebrief } from "@/lib/pf-case/debrief-scripts";
 import hishamReceivingReportMaleImg from "@/assets/scenes/hisham-receiving-report-male.png";
 import hishamReceivingReportFemaleImg from "@/assets/scenes/hisham-receiving-report-female.png";
 
@@ -38,9 +34,9 @@ export const PresentationScreen = ({ onComplete }: PresentationScreenProps) => {
   const outcome = state.outcome || "medium";
 
   const dialogues = useMemo(() => {
-    const source = outcome === "strong" ? ABU_SAEED_DEBRIEF_STRONG : outcome === "weak" ? ABU_SAEED_DEBRIEF_WEAK : ABU_SAEED_DEBRIEF_MEDIUM;
+    const source = buildHishamDebrief(state.framing);
     return source.map((line) => ({ characterId: line.characterId, text: line.text, mood: mapMood(line.mood) }));
-  }, [outcome]);
+  }, [state.framing]);
 
   const backgroundImg = g === "female" ? hishamReceivingReportFemaleImg : hishamReceivingReportMaleImg;
   const titleText = outcome === "strong" ? "قدّمت تأطير قوي" : outcome === "weak" ? "أستاذ هشام لسه محتاج صورة أوضح" : "بدأت توضح الصورة... لكن لسه محتاجة حسم أكتر";
