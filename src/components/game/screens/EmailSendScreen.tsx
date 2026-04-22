@@ -70,11 +70,11 @@ export const EmailSendScreen = ({ onComplete }: EmailSendScreenProps) => {
           <div className="p-4 space-y-3 text-sm" dir="rtl">
             <div className="flex gap-2 border-b border-border/40 pb-2">
               <span className="text-muted-foreground w-14 shrink-0">إلى:</span>
-              <span className="text-foreground font-mono text-xs">ahmed.mansour@prism-consulting.com</span>
+              <span className="text-foreground font-mono text-xs">ahmed.mansour@pinnacle-consulting.com</span>
             </div>
             <div className="flex gap-2 border-b border-border/40 pb-2">
               <span className="text-muted-foreground w-14 shrink-0">من:</span>
-              <span className="text-foreground font-mono text-xs">{playerName.toLowerCase().replace(/\s+/g, ".")}@prism-consulting.com</span>
+              <span className="text-foreground font-mono text-xs">{playerName.toLowerCase().replace(/\s+/g, ".")}@pinnacle-consulting.com</span>
             </div>
             <div className="flex gap-2 border-b border-border/40 pb-2">
               <span className="text-muted-foreground w-14 shrink-0">الموضوع:</span>

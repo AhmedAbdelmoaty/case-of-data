@@ -75,7 +75,7 @@ export const IncomingCallScreen = ({ onAnswer }: IncomingCallScreenProps) => {
             </motion.div>
 
             <h3 className="text-white text-xl font-bold" dir="rtl">أ. أحمد منصور</h3>
-            <p className="text-white/50 text-xs mt-1">Prism Consulting</p>
+            <p className="text-white/50 text-xs mt-1">Pinnacle Consulting</p>
 
             <motion.div
               className="mt-3 text-emerald-400 text-xs flex items-center justify-center gap-1.5"

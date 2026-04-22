@@ -106,7 +106,7 @@ export function applyChoice(
 
   return {
     nextState,
-    responseText: option.abuSaeedReply,
+    responseText: option.hishamReply,
     evidenceId: option.evidenceId,
     note: option.note ? { id: option.note.id, text: option.note.text } : undefined,
     questionText: option.text,
@@ -160,9 +160,9 @@ export function evaluate(
     state.hasUsedRecovery;
 
   let outcome: CaseOutcome;
-  if (wentFullSpine && correctCount === 4) outcome = "strong";
-  else if (wentSpineWithRecovery && correctCount >= 3) outcome = "medium";
-  else if (!state.trackEntered && correctCount >= 3) outcome = "medium";
+  if (wentFullSpine && correctCount === 3) outcome = "strong";
+  else if (wentSpineWithRecovery && correctCount >= 2) outcome = "medium";
+  else if (!state.trackEntered && correctCount >= 2) outcome = "medium";
   else outcome = "weak";
 
   return { outcome, correctCount };

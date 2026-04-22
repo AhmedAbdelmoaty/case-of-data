@@ -23,7 +23,7 @@ export interface FramingSelection {
 export const FRAMING_SECTIONS: FramingSection[] = [
   {
     id: "client_view",
-    title: "1. أبو سعيد كان شايف المشكلة إزاي؟",
+    title: "1. هشام الشريف كان شايف المشكلة إزاي؟",
     options: [
       { id: "cv_lower_than_expected", text: "إن مبيعات الشهر أقل من اللي هو متوقّعها." },
       { id: "cv_team_weak", text: "إن فريق البيع ضعيف ومش بيشتغل صح." },

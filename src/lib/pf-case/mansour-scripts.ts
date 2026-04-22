@@ -36,7 +36,7 @@ export const MANSOUR_INTRO_DIALOGUES: DialogueLine[] = [
   },
   {
     characterId: "mansour",
-    text: "العميل اسمه هشام الشريف، مؤسس ومالك VELARO. طلب من Prism Consulting نقعد معاه لأن في موضوع شاغله في الشغل اليومين دول.",
+    text: "العميل اسمه هشام الشريف، مؤسس ومالك VELARO. طلب من Pinnacle Consulting نقعد معاه لأن في موضوع شاغله في الشغل اليومين دول.",
     mood: "neutral",
   },
   {
