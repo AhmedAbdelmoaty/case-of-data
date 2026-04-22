@@ -234,7 +234,7 @@ export const NODES: Record<NodeId, CaseNode> = {
       },
     },
     wrong: {
-      text: "طب نبص على نسبة الإقفال (التحويل) لكل واحد فيهم؟",
+      text: "طب نبص على نسبة الإغلاق (التحويل) لكل واحد فيهم؟",
       hishamReply: "اتفضل، ده تقرير عملته المحاسبة الأسبوع اللي فات. فيه الفرق في التحويل واضح كمان.",
       evidenceId: "ev_team_conversion",
       note: {
@@ -248,8 +248,8 @@ export const NODES: Record<NodeId, CaseNode> = {
   TRACK_A_2: {
     id: "TRACK_A_2",
     correct: {
-      text: "ومن ناحية الإقفال، نسبة التحويل لكل واحد كام؟",
-      hishamReply: "اتفضل، ده تقرير التحويلات. هتلاقي إن الفرق فعلاً مش بس في الكميات، الفرق في الإقفال نفسه.",
+      text: "ومن ناحية الإغلاق، نسبة التحويل لكل واحد كام؟",
+      hishamReply: "اتفضل، ده تقرير التحويلات. هتلاقي إن الفرق فعلاً مش بس في الكميات، الفرق في الإغلاق نفسه.",
       evidenceId: "ev_team_conversion",
       note: {
         id: "n_a2",
