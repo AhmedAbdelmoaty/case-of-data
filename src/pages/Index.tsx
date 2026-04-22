@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { CompanyBriefingScreen } from "@/components/game/screens/CompanyBriefingScreen";
 import { TravelScreen } from "@/components/game/screens/TravelScreen";
+import { VelaroStreetScreen } from "@/components/game/screens/VelaroStreetScreen";
 import { ArrivalScreen } from "@/components/game/screens/ArrivalScreen";
 import { InquiryScreen } from "@/components/game/screens/InquiryScreen";
 import { FramingScreen } from "@/components/game/screens/FramingScreen";
@@ -22,6 +23,7 @@ import { ProgressTimeline } from "@/components/game/ProgressTimeline";
 type Screen =
   | "company-briefing"
   | "travel"
+  | "velaro-street"
   | "arrival"
   | "inquiry"
   | "reflection"
@@ -135,7 +137,11 @@ const GameContent = () => {
       )}
 
       {currentScreen === "travel" && (
-        <TravelScreen onComplete={() => handleNavigate("arrival")} />
+        <TravelScreen onComplete={() => handleNavigate("velaro-street")} />
+      )}
+
+      {currentScreen === "velaro-street" && (
+        <VelaroStreetScreen onComplete={() => handleNavigate("arrival")} />
       )}
 
       {currentScreen === "arrival" && (
