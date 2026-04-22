@@ -63,7 +63,7 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
   const summary = [
     { label: "عدد الأسئلة", value: `${state.questionsUsed} / 5`, icon: <Target className="w-4 h-4" /> },
     { label: "الملاحظات المحفوظة", value: `${state.savedNoteIds.length}`, icon: <NotebookPen className="w-4 h-4" /> },
-    { label: "صحة التأطير", value: `${state.framingCorrectCount} / 4`, icon: <Brain className="w-4 h-4" /> },
+    { label: "صحة التأطير", value: `${state.framingCorrectCount} / 3`, icon: <Brain className="w-4 h-4" /> },
     { label: "Recovery", value: state.hasUsedRecovery ? "اتستخدمت" : "ما استُخدمتش", icon: <CheckCircle className="w-4 h-4" /> },
   ];
 

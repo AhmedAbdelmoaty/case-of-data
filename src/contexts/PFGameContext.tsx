@@ -64,7 +64,7 @@ interface PFGameContextValue {
 const initialState: PFGameState = {
   ...initialGameState,
   notes: [],
-  framing: { client_view: null, hypothesis: null, true_frame: null, next_decision: null },
+  framing: { client_view: null, true_frame: null, next_decision: null },
   framingSubmitted: false,
   outcome: null,
   framingCorrectCount: 0,
