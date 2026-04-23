@@ -11,26 +11,22 @@
 
 export type NodeId =
   | "S1"
-  | "R1"
   | "S2"
   | "S3"
   | "S4"
   | "S5"
+  | "BRIDGE_D"
   | "TRACK_A_1"
   | "TRACK_A_2"
   | "TRACK_A_3"
-  | "TRACK_B_1"
-  | "TRACK_B_2"
-  | "TRACK_B_3"
   | "TRACK_C_1"
   | "TRACK_C_2"
   | "TRACK_C_3"
-  | "TRACK_D_1"
   | "TRACK_D_2"
   | "TRACK_D_3"
   | "END";
 
-export type TrackId = "A" | "B" | "C" | "D";
+export type TrackId = "A" | "C" | "D";
 
 export type CaseOutcome = "strong" | "medium" | "weak";
 
