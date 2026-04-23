@@ -9,12 +9,12 @@ interface TravelScreenProps {
   onComplete: () => void;
 }
 
-const TOTAL_DURATION = 9000;
+const TOTAL_DURATION = 7000;
 
 const MONOLOGUES = [
-  { text: "يا ترى الصورة الحقيقية عاملة إزاي...", at: 1400, dur: 2400 },
-  { text: "لازم أسمع كويس قبل أي حكم...", at: 4400, dur: 2400 },
-  { text: "وصلنا تقريباً... ركّز.", at: 7000, dur: 1800 },
+  { text: "يا ترى الصورة الحقيقية عاملة إزاي...", at: 1000, dur: 2000 },
+  { text: "لازم أسمع كويس قبل أي حكم...", at: 3300, dur: 2000 },
+  { text: "وصلنا تقريباً... ركّز.", at: 5500, dur: 1500 },
 ];
 
 // Realistic street-side scenery only

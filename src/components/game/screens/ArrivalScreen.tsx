@@ -60,11 +60,11 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
   useEffect(() => {
     if (phase === "entering") {
       try { playSound("storeBell"); } catch {}
-      const t = setTimeout(() => setPhase("interior"), 2200);
+      const t = setTimeout(() => setPhase("interior"), 1700);
       return () => clearTimeout(t);
     }
     if (phase === "interior") {
-      const t = setTimeout(() => setPhase("dialogue"), 2500);
+      const t = setTimeout(() => setPhase("dialogue"), 2000);
       return () => clearTimeout(t);
     }
   }, [phase, playSound]);
