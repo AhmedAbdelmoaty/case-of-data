@@ -7,7 +7,7 @@ import { ArrivalScreen } from "@/components/game/screens/ArrivalScreen";
 import { InquiryScreen } from "@/components/game/screens/InquiryScreen";
 import { FramingScreen } from "@/components/game/screens/FramingScreen";
 import { ReflectionTransition } from "@/components/game/screens/ReflectionTransition";
-import { PresentationScreen } from "@/components/game/screens/PresentationScreen";
+
 import { EmailSendScreen } from "@/components/game/screens/EmailSendScreen";
 import { MansourReceivesEmailScreen } from "@/components/game/screens/MansourReceivesEmailScreen";
 import { IncomingCallScreen } from "@/components/game/screens/IncomingCallScreen";
@@ -28,7 +28,6 @@ type Screen =
   | "inquiry"
   | "reflection"
   | "framing"
-  | "presentation"
   | "email-send"
   | "mansour-receives"
   | "incoming-call"
@@ -157,11 +156,7 @@ const GameContent = () => {
       )}
 
       {currentScreen === "framing" && (
-        <FramingScreen onComplete={() => handleNavigate("presentation")} />
-      )}
-
-      {currentScreen === "presentation" && (
-        <PresentationScreen onComplete={() => handleNavigate("email-send")} />
+        <FramingScreen onComplete={() => handleNavigate("email-send")} />
       )}
 
       {currentScreen === "email-send" && (
