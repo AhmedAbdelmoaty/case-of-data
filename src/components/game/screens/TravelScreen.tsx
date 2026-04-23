@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSound } from "@/hooks/useSoundEffects";
+import { useAmbientSound } from "@/hooks/useAmbientSound";
 import cityDriveLuxuryMaleImg from "@/assets/scenes/city-drive-luxury-male.webp";
 import cityDriveLuxuryFemaleImg from "@/assets/scenes/city-drive-luxury-female.webp";
 
@@ -24,6 +25,8 @@ export const TravelScreen = ({ onComplete }: TravelScreenProps) => {
   const { profile } = useAuth();
   const { playSound } = useSound();
   const [currentMonologue, setCurrentMonologue] = useState<string | null>(null);
+
+  useAmbientSound("street");
 
   const driveImg = profile?.gender === "female" ? cityDriveLuxuryFemaleImg : cityDriveLuxuryMaleImg;
 
@@ -53,8 +56,11 @@ export const TravelScreen = ({ onComplete }: TravelScreenProps) => {
       timers.push(setTimeout(() => setCurrentMonologue(m.text), m.at));
       timers.push(setTimeout(() => setCurrentMonologue(null), m.at + m.dur));
     });
+    // Two distant car horns at expressive moments
+    timers.push(setTimeout(() => { try { playSound("carHornDistant"); } catch {/* noop */} }, 2200));
+    timers.push(setTimeout(() => { try { playSound("carHornDistant"); } catch {/* noop */} }, 5200));
     return () => timers.forEach(clearTimeout);
-  }, []);
+  }, [playSound]);
 
   return (
     <div className="min-h-screen bg-background overflow-hidden relative">
