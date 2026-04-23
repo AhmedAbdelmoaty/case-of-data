@@ -32,8 +32,10 @@ export interface PFGameState extends GameState {
   framingCorrectCount: number;
   /** Reports (evidence ids) Hisham handed over, in receipt order */
   collectedReports: string[];
-  /** Number of times the player restarted the inquiry (max 1) */
+  /** Number of times the player restarted the inquiry (max 2) */
   restartCount: number;
+  /** Transient flag: navigate back to the start of the in-store flow */
+  restartFromBeginning: boolean;
 }
 
 interface ChoiceResult {
@@ -51,9 +53,10 @@ interface PFGameContextValue {
   pickChoice: (choice: ChoicePresentation) => ChoiceResult | null;
   saveNote: (id: string, text: string) => void;
   removeNote: (roundId: number) => void;
-  // Restart inquiry (limited to 1 use)
+  // Restart inquiry (limited to 2 uses)
   restartInquiry: () => void;
   canRestart: boolean;
+  consumeRestartFlag: () => void;
   // Framing
   framingSections: FramingSection[];
   setFramingSelection: (sectionId: keyof FramingSelection, optionId: string) => void;
@@ -73,6 +76,7 @@ const initialState: PFGameState = {
   framingCorrectCount: 0,
   collectedReports: [],
   restartCount: 0,
+  restartFromBeginning: false,
 };
 
 const PFGameContext = createContext<PFGameContextValue | null>(null);
@@ -93,15 +97,20 @@ export const PFGameProvider = ({ children }: { children: ReactNode }) => {
 
   const restartInquiry = useCallback(() => {
     setState((prev) => {
-      if (prev.restartCount >= 1) return prev;
+      if (prev.restartCount >= 2) return prev;
       return {
         ...prev,
         ...resetInquiryState(),
         notes: [],
         collectedReports: [],
         restartCount: prev.restartCount + 1,
+        restartFromBeginning: true,
       };
     });
+  }, []);
+
+  const consumeRestartFlag = useCallback(() => {
+    setState((prev) => (prev.restartFromBeginning ? { ...prev, restartFromBeginning: false } : prev));
   }, []);
 
   const pickChoice = useCallback(
@@ -196,7 +205,8 @@ export const PFGameProvider = ({ children }: { children: ReactNode }) => {
         saveNote,
         removeNote,
         restartInquiry,
-        canRestart: state.restartCount < 1,
+        canRestart: state.restartCount < 2,
+        consumeRestartFlag,
         framingSections,
         setFramingSelection,
         submitFraming,
