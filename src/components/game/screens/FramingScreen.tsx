@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Target, BookOpen, CheckCircle2 } from "lucide-react";
-import { usePFGame, FRAMING_SECTIONS } from "@/contexts/PFGameContext";
+import { usePFGame } from "@/contexts/PFGameContext";
 import { useSound } from "@/hooks/useSoundEffects";
 import { PFNotebook } from "../PFNotebook";
 import { StampEffect } from "../StampEffect";
