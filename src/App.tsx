@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { SoundProvider } from "@/hooks/useSoundEffects";
+import { MusicProvider } from "@/hooks/useBackgroundMusic";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Setup from "./pages/Setup";
@@ -29,22 +31,26 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/auth" element={<AuthRedirect><Auth /></AuthRedirect>} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/setup" element={
-              <ProtectedRoute>
-                <Setup />
-              </ProtectedRoute>
-            } />
-            <Route path="/" element={
-              <ProtectedRoute requireProfile>
-                <Index />
-              </ProtectedRoute>
-            } />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <MusicProvider>
+            <SoundProvider>
+              <Routes>
+                <Route path="/auth" element={<AuthRedirect><Auth /></AuthRedirect>} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/setup" element={
+                  <ProtectedRoute>
+                    <Setup />
+                  </ProtectedRoute>
+                } />
+                <Route path="/" element={
+                  <ProtectedRoute requireProfile>
+                    <Index />
+                  </ProtectedRoute>
+                } />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </SoundProvider>
+          </MusicProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
