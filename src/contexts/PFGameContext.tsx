@@ -1,15 +1,18 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from "react";
 import {
   initialGameState,
   resetInquiryState,
   applyChoice as engineApply,
   getChoices as engineGetChoices,
   evaluate as engineEvaluate,
+  askedS1Correct as engineAskedS1Correct,
+  walkedFullSpine as engineWalkedFullSpine,
   type GameState,
   type ChoicePresentation,
 } from "@/lib/pf-case-engine/gameStateMachine";
 import {
-  FRAMING_SECTIONS,
+  buildFramingSections,
+  type FramingSection,
   type FramingSelection,
 } from "@/lib/pf-case/framing-board";
 import type { CaseOutcome } from "@/lib/pf-case/case-tree";
@@ -52,6 +55,7 @@ interface PFGameContextValue {
   restartInquiry: () => void;
   canRestart: boolean;
   // Framing
+  framingSections: FramingSection[];
   setFramingSelection: (sectionId: keyof FramingSelection, optionId: string) => void;
   submitFraming: () => CaseOutcome;
   // Lifecycle
@@ -173,6 +177,16 @@ export const PFGameProvider = ({ children }: { children: ReactNode }) => {
 
   const isInquiryComplete = useCallback(() => state.isComplete, [state.isComplete]);
 
+  const framingSections = useMemo<FramingSection[]>(
+    () =>
+      buildFramingSections({
+        askedS1Correct: engineAskedS1Correct(state),
+        walkedFullSpine: engineWalkedFullSpine(state),
+        shuffleSeed: 7,
+      }),
+    [state]
+  );
+
   return (
     <PFGameContext.Provider
       value={{
@@ -183,6 +197,7 @@ export const PFGameProvider = ({ children }: { children: ReactNode }) => {
         removeNote,
         restartInquiry,
         canRestart: state.restartCount < 1,
+        framingSections,
         setFramingSelection,
         submitFraming,
         resetGame,
@@ -194,4 +209,3 @@ export const PFGameProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export { FRAMING_SECTIONS };
