@@ -134,55 +134,57 @@ export const useSoundEffects = () => {
   // ---- Custom synth implementations ----
   const synthPhoneRing = (ctx: AudioContext, vol: number) => {
     const now = ctx.currentTime;
-    // Two alternating tones, classic ringback feel
-    [
-      { f: 1318, t: 0 },
-      { f: 1175, t: 0.4 },
-      { f: 1318, t: 0.8 },
-      { f: 1175, t: 1.2 },
-    ].forEach(({ f, t }) => {
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.type = "sine";
-      o.frequency.setValueAtTime(f, now + t);
-      g.gain.setValueAtTime(0, now + t);
-      g.gain.linearRampToValueAtTime(vol * 0.85, now + t + 0.04);
-      g.gain.linearRampToValueAtTime(vol * 0.7, now + t + 0.3);
-      g.gain.exponentialRampToValueAtTime(0.001, now + t + 0.38);
-      o.connect(g).connect(ctx.destination);
-      o.start(now + t);
-      o.stop(now + t + 0.4);
+    // Classic dual-tone ringback (480Hz + 440Hz) — warm, realistic, like a real phone.
+    // Two short rings ~0.45s each with a brief gap, gentle envelopes.
+    const ringTimes = [0, 0.55];
+    ringTimes.forEach((startOffset) => {
+      const t0 = now + startOffset;
+      [480, 440].forEach((freq, i) => {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = "sine";
+        o.frequency.setValueAtTime(freq, t0);
+        g.gain.setValueAtTime(0, t0);
+        g.gain.linearRampToValueAtTime(vol * (i === 0 ? 0.55 : 0.45), t0 + 0.05);
+        g.gain.linearRampToValueAtTime(vol * (i === 0 ? 0.5 : 0.4), t0 + 0.35);
+        g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.45);
+        o.connect(g).connect(ctx.destination);
+        o.start(t0);
+        o.stop(t0 + 0.5);
+      });
     });
   };
 
   const synthFootstep = (ctx: AudioContext, vol: number, hard: boolean) => {
     const now = ctx.currentTime;
-    // Low thump
-    const thump = ctx.createOscillator();
-    const tg = ctx.createGain();
-    thump.type = "sine";
-    thump.frequency.setValueAtTime(hard ? 75 : 55, now);
-    thump.frequency.exponentialRampToValueAtTime(40, now + 0.12);
-    tg.gain.setValueAtTime(0, now);
-    tg.gain.linearRampToValueAtTime(vol * (hard ? 1 : 0.6), now + 0.005);
-    tg.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
-    thump.connect(tg).connect(ctx.destination);
-    thump.start(now);
-    thump.stop(now + 0.16);
+    // Soft, natural thump — pure layered sines, no harsh noise burst.
+    const body = ctx.createOscillator();
+    const bg = ctx.createGain();
+    body.type = "sine";
+    body.frequency.setValueAtTime(hard ? 110 : 85, now);
+    body.frequency.exponentialRampToValueAtTime(hard ? 55 : 45, now + 0.09);
+    bg.gain.setValueAtTime(0, now);
+    bg.gain.linearRampToValueAtTime(vol * (hard ? 0.55 : 0.35), now + 0.008);
+    bg.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
+    body.connect(bg).connect(ctx.destination);
+    body.start(now);
+    body.stop(now + 0.15);
 
-    // Click (noise burst, filtered)
-    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.06, ctx.sampleRate);
-    const d = buf.getChannelData(0);
-    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
-    const noise = ctx.createBufferSource();
-    noise.buffer = buf;
-    const bp = ctx.createBiquadFilter();
-    bp.type = hard ? "highpass" : "lowpass";
-    bp.frequency.value = hard ? 1200 : 600;
-    const ng = ctx.createGain();
-    ng.gain.value = vol * (hard ? 0.35 : 0.15);
-    noise.connect(bp).connect(ng).connect(ctx.destination);
-    noise.start(now);
+    // Filtered triangle for subtle mid presence (sounds like material under foot)
+    const mid = ctx.createOscillator();
+    const mg = ctx.createGain();
+    const lp = ctx.createBiquadFilter();
+    mid.type = "triangle";
+    mid.frequency.setValueAtTime(hard ? 220 : 160, now);
+    mid.frequency.exponentialRampToValueAtTime(110, now + 0.05);
+    lp.type = "lowpass";
+    lp.frequency.value = hard ? 600 : 380;
+    mg.gain.setValueAtTime(0, now);
+    mg.gain.linearRampToValueAtTime(vol * (hard ? 0.18 : 0.1), now + 0.005);
+    mg.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+    mid.connect(lp).connect(mg).connect(ctx.destination);
+    mid.start(now);
+    mid.stop(now + 0.08);
   };
 
   const synthCarHorn = (ctx: AudioContext, vol: number, distant: boolean) => {
