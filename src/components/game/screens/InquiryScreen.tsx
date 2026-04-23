@@ -38,7 +38,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
   const { state, getChoices, pickChoice, saveNote, restartInquiry, canRestart } = usePFGame();
   const { profile } = useAuth();
   const { playSound } = useSound();
-  useAmbientSound("store");
+  useAmbientSound("storeRich");
 
   const [phase, setPhase] = useState<"choosing" | "dialogue">("choosing");
   const [currentLines, setCurrentLines] = useState<DialogueLineUI[]>([]);
@@ -84,8 +84,8 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
 
   const handlePick = useCallback(
     (option: typeof choices[number]) => {
-      try { playSound("pageFlip"); } catch {}
-      try { playSound("tick"); } catch {}
+      try { playSound("paperRustle"); } catch {/* noop */}
+      try { playSound("tick"); } catch {/* noop */}
       const result = pickChoice(option);
       if (!result) return;
 
