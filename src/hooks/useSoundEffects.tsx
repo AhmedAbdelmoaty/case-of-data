@@ -1,14 +1,14 @@
 import { useCallback, useRef, useEffect, createContext, useContext, ReactNode, useState } from "react";
 
-type SoundType = 
-  | "click" 
-  | "hover" 
-  | "success" 
-  | "error" 
-  | "navigate" 
-  | "collect" 
-  | "reveal" 
-  | "dialogue" 
+type SoundType =
+  | "click"
+  | "hover"
+  | "success"
+  | "error"
+  | "navigate"
+  | "collect"
+  | "reveal"
+  | "dialogue"
   | "suspense"
   | "accuse"
   | "door"
@@ -25,7 +25,18 @@ type SoundType =
   | "lowTension"
   | "fanfare"
   | "somber"
-  | "whoosh";
+  | "whoosh"
+  // New cinematic sounds
+  | "phoneRingModern"
+  | "footstepHard"
+  | "footstepSoft"
+  | "carHorn"
+  | "carHornDistant"
+  | "paperRustle"
+  | "notification"
+  | "successChime"
+  | "failureBuzz"
+  | "keyboardKey";
 
 interface SoundConfig {
   frequency: number;
@@ -36,12 +47,9 @@ interface SoundConfig {
   decay?: number;
   detune?: number;
   secondaryFreq?: number;
-  /** if true, skip secondary oscillator pitch-glide overlap that creates buzz */
   noSecondary?: boolean;
 }
 
-// All volumes raised significantly (~3-4x) and cleaned up.
-// REMOVED: carEngine (was the source of the annoying buzz).
 const soundConfigs: Record<SoundType, SoundConfig> = {
   click: { frequency: 850, duration: 0.07, type: "sine", volume: 0.55, attack: 0.005, decay: 0.05 },
   hover: { frequency: 620, duration: 0.04, type: "sine", volume: 0.25, attack: 0.005, decay: 0.03 },
@@ -53,31 +61,53 @@ const soundConfigs: Record<SoundType, SoundConfig> = {
   dialogue: { frequency: 360, duration: 0.05, type: "sine", volume: 0.18, attack: 0.005, decay: 0.04 },
   suspense: { frequency: 160, duration: 0.5, type: "triangle", volume: 0.3, attack: 0.08, decay: 0.4 },
   accuse: { frequency: 260, duration: 0.55, type: "triangle", volume: 0.5, attack: 0.03, secondaryFreq: 200 },
-  // Solid wooden knock (louder + sharper)
   door: { frequency: 130, duration: 0.35, type: "sine", volume: 0.7, attack: 0.002, decay: 0.3, secondaryFreq: 90 },
   storeBell: { frequency: 1250, duration: 0.55, type: "sine", volume: 0.5, attack: 0.005, decay: 0.45, secondaryFreq: 1680 },
   confetti: { frequency: 660, duration: 0.32, type: "sine", volume: 0.55, attack: 0.005, secondaryFreq: 990 },
-  // SHARP loud knock
   doorKnock: { frequency: 180, duration: 0.14, type: "sine", volume: 0.95, attack: 0.001, decay: 0.12, secondaryFreq: 110 },
   pageFlip: { frequency: 2400, duration: 0.13, type: "triangle", volume: 0.32, attack: 0.002, decay: 0.12 },
   stamp: { frequency: 95, duration: 0.25, type: "square", volume: 0.85, attack: 0.001, decay: 0.22, secondaryFreq: 60 },
   penWrite: { frequency: 2400, duration: 0.06, type: "triangle", volume: 0.18, attack: 0.002, decay: 0.05 },
   sparkle: { frequency: 1800, duration: 0.35, type: "sine", volume: 0.4, attack: 0.005, decay: 0.3, secondaryFreq: 2700 },
   tick: { frequency: 1400, duration: 0.03, type: "sine", volume: 0.18, attack: 0.001, decay: 0.025 },
-  // Realistic footstep (low thud)
   footstep: { frequency: 95, duration: 0.12, type: "sine", volume: 0.45, attack: 0.002, decay: 0.1 },
   doorCreak: { frequency: 200, duration: 0.6, type: "triangle", volume: 0.4, attack: 0.08, decay: 0.5 },
   lowTension: { frequency: 90, duration: 1.0, type: "triangle", volume: 0.35, attack: 0.12, decay: 0.85 },
   fanfare: { frequency: 523.25, duration: 0.65, type: "triangle", volume: 0.6, attack: 0.005, secondaryFreq: 783.99 },
   somber: { frequency: 196, duration: 0.9, type: "sine", volume: 0.5, attack: 0.04, decay: 0.75, secondaryFreq: 164.81 },
-  // Page transition whoosh
   whoosh: { frequency: 600, duration: 0.35, type: "sine", volume: 0.35, attack: 0.05, decay: 0.3 },
+  // Stubs — handled by custom synths below (config preserves shape but unused)
+  phoneRingModern: { frequency: 1318, duration: 2.0, type: "sine", volume: 0.6 },
+  footstepHard: { frequency: 60, duration: 0.18, type: "sine", volume: 0.7 },
+  footstepSoft: { frequency: 80, duration: 0.18, type: "sine", volume: 0.4 },
+  carHorn: { frequency: 440, duration: 0.4, type: "square", volume: 0.55 },
+  carHornDistant: { frequency: 392, duration: 0.5, type: "square", volume: 0.3 },
+  paperRustle: { frequency: 4000, duration: 0.25, type: "sine", volume: 0.35 },
+  notification: { frequency: 880, duration: 0.35, type: "sine", volume: 0.55, secondaryFreq: 1320 },
+  successChime: { frequency: 523.25, duration: 1.2, type: "sine", volume: 0.65 },
+  failureBuzz: { frequency: 110, duration: 0.6, type: "square", volume: 0.55 },
+  keyboardKey: { frequency: 1200, duration: 0.04, type: "square", volume: 0.25 },
+};
+
+// Sounds that use a custom synth path (skip the generic oscillator)
+const CUSTOM_SYNTHS: Record<string, true> = {
+  phoneRingModern: true,
+  footstepHard: true,
+  footstepSoft: true,
+  carHorn: true,
+  carHornDistant: true,
+  paperRustle: true,
+  notification: true,
+  successChime: true,
+  failureBuzz: true,
+  keyboardKey: true,
 };
 
 export const useSoundEffects = () => {
   const audioContextRef = useRef<AudioContext | null>(null);
   const enabledRef = useRef(true);
   const masterVolumeRef = useRef(1);
+  const activeLoopsRef = useRef<Set<number>>(new Set());
 
   useEffect(() => {
     const initAudio = () => {
@@ -93,21 +123,209 @@ export const useSoundEffects = () => {
     };
   }, []);
 
-  const playSound = useCallback((soundType: SoundType) => {
-    if (!enabledRef.current) return;
+  const getCtx = (): AudioContext => {
     if (!audioContextRef.current) {
       audioContextRef.current = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
     }
-    const audioCtx = audioContextRef.current;
-    if (audioCtx.state === "suspended") audioCtx.resume();
+    if (audioContextRef.current.state === "suspended") audioContextRef.current.resume();
+    return audioContextRef.current;
+  };
 
+  // ---- Custom synth implementations ----
+  const synthPhoneRing = (ctx: AudioContext, vol: number) => {
+    const now = ctx.currentTime;
+    // Two alternating tones, classic ringback feel
+    [
+      { f: 1318, t: 0 },
+      { f: 1175, t: 0.4 },
+      { f: 1318, t: 0.8 },
+      { f: 1175, t: 1.2 },
+    ].forEach(({ f, t }) => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = "sine";
+      o.frequency.setValueAtTime(f, now + t);
+      g.gain.setValueAtTime(0, now + t);
+      g.gain.linearRampToValueAtTime(vol * 0.85, now + t + 0.04);
+      g.gain.linearRampToValueAtTime(vol * 0.7, now + t + 0.3);
+      g.gain.exponentialRampToValueAtTime(0.001, now + t + 0.38);
+      o.connect(g).connect(ctx.destination);
+      o.start(now + t);
+      o.stop(now + t + 0.4);
+    });
+  };
+
+  const synthFootstep = (ctx: AudioContext, vol: number, hard: boolean) => {
+    const now = ctx.currentTime;
+    // Low thump
+    const thump = ctx.createOscillator();
+    const tg = ctx.createGain();
+    thump.type = "sine";
+    thump.frequency.setValueAtTime(hard ? 75 : 55, now);
+    thump.frequency.exponentialRampToValueAtTime(40, now + 0.12);
+    tg.gain.setValueAtTime(0, now);
+    tg.gain.linearRampToValueAtTime(vol * (hard ? 1 : 0.6), now + 0.005);
+    tg.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+    thump.connect(tg).connect(ctx.destination);
+    thump.start(now);
+    thump.stop(now + 0.16);
+
+    // Click (noise burst, filtered)
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.06, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+    const noise = ctx.createBufferSource();
+    noise.buffer = buf;
+    const bp = ctx.createBiquadFilter();
+    bp.type = hard ? "highpass" : "lowpass";
+    bp.frequency.value = hard ? 1200 : 600;
+    const ng = ctx.createGain();
+    ng.gain.value = vol * (hard ? 0.35 : 0.15);
+    noise.connect(bp).connect(ng).connect(ctx.destination);
+    noise.start(now);
+  };
+
+  const synthCarHorn = (ctx: AudioContext, vol: number, distant: boolean) => {
+    const now = ctx.currentTime;
+    const dur = distant ? 0.55 : 0.4;
+    [440, 392].forEach((f, i) => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = "square";
+      o.frequency.setValueAtTime(distant ? f * 0.95 : f, now);
+      g.gain.setValueAtTime(0, now);
+      g.gain.linearRampToValueAtTime(vol * (i === 0 ? 1 : 0.6) * (distant ? 0.4 : 1), now + 0.02);
+      g.gain.linearRampToValueAtTime(vol * (i === 0 ? 0.7 : 0.4) * (distant ? 0.35 : 1), now + dur * 0.7);
+      g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+      if (distant) {
+        const lp = ctx.createBiquadFilter();
+        lp.type = "lowpass";
+        lp.frequency.value = 900;
+        o.connect(lp).connect(g).connect(ctx.destination);
+      } else {
+        o.connect(g).connect(ctx.destination);
+      }
+      o.start(now);
+      o.stop(now + dur + 0.05);
+    });
+  };
+
+  const synthPaperRustle = (ctx: AudioContext, vol: number) => {
+    const now = ctx.currentTime;
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.25, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) {
+      const env = Math.sin((i / d.length) * Math.PI);
+      d[i] = (Math.random() * 2 - 1) * env;
+    }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buf;
+    const hp = ctx.createBiquadFilter();
+    hp.type = "highpass";
+    hp.frequency.value = 3000;
+    const g = ctx.createGain();
+    g.gain.value = vol * 0.5;
+    noise.connect(hp).connect(g).connect(ctx.destination);
+    noise.start(now);
+  };
+
+  const synthNotification = (ctx: AudioContext, vol: number) => {
+    const now = ctx.currentTime;
+    [{ f: 880, t: 0 }, { f: 1320, t: 0.12 }].forEach(({ f, t }) => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = "sine";
+      o.frequency.setValueAtTime(f, now + t);
+      g.gain.setValueAtTime(0, now + t);
+      g.gain.linearRampToValueAtTime(vol * 0.7, now + t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.001, now + t + 0.25);
+      o.connect(g).connect(ctx.destination);
+      o.start(now + t);
+      o.stop(now + t + 0.28);
+    });
+  };
+
+  const synthSuccessChime = (ctx: AudioContext, vol: number) => {
+    const now = ctx.currentTime;
+    const notes = [523.25, 659.25, 783.99, 1046.5];
+    notes.forEach((f, i) => {
+      const t = i * 0.13;
+      [1, 2].forEach((harmonic) => {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = "sine";
+        o.frequency.setValueAtTime(f * harmonic, now + t);
+        g.gain.setValueAtTime(0, now + t);
+        g.gain.linearRampToValueAtTime(vol * (harmonic === 1 ? 0.7 : 0.18), now + t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, now + t + 0.7);
+        o.connect(g).connect(ctx.destination);
+        o.start(now + t);
+        o.stop(now + t + 0.75);
+      });
+    });
+  };
+
+  const synthFailureBuzz = (ctx: AudioContext, vol: number) => {
+    const now = ctx.currentTime;
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = "square";
+    o.frequency.setValueAtTime(180, now);
+    o.frequency.exponentialRampToValueAtTime(80, now + 0.6);
+    g.gain.setValueAtTime(0, now);
+    g.gain.linearRampToValueAtTime(vol * 0.55, now + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+    const lp = ctx.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.value = 800;
+    o.connect(lp).connect(g).connect(ctx.destination);
+    o.start(now);
+    o.stop(now + 0.65);
+  };
+
+  const synthKeyboardKey = (ctx: AudioContext, vol: number) => {
+    const now = ctx.currentTime;
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.04, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+    const noise = ctx.createBufferSource();
+    noise.buffer = buf;
+    const bp = ctx.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.frequency.value = 800 + Math.random() * 1400;
+    bp.Q.value = 2;
+    const g = ctx.createGain();
+    g.gain.value = vol * 0.6;
+    noise.connect(bp).connect(g).connect(ctx.destination);
+    noise.start(now);
+  };
+
+  const playSound = useCallback((soundType: SoundType) => {
+    if (!enabledRef.current) return;
+    const ctx = getCtx();
     const config = soundConfigs[soundType];
     if (!config) return;
-    const now = audioCtx.currentTime;
     const vol = config.volume * masterVolumeRef.current;
 
-    const oscillator = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
+    if (CUSTOM_SYNTHS[soundType]) {
+      switch (soundType) {
+        case "phoneRingModern": return synthPhoneRing(ctx, vol);
+        case "footstepHard": return synthFootstep(ctx, vol, true);
+        case "footstepSoft": return synthFootstep(ctx, vol, false);
+        case "carHorn": return synthCarHorn(ctx, vol, false);
+        case "carHornDistant": return synthCarHorn(ctx, vol, true);
+        case "paperRustle": return synthPaperRustle(ctx, vol);
+        case "notification": return synthNotification(ctx, vol);
+        case "successChime": return synthSuccessChime(ctx, vol);
+        case "failureBuzz": return synthFailureBuzz(ctx, vol);
+        case "keyboardKey": return synthKeyboardKey(ctx, vol);
+      }
+      return;
+    }
+
+    const now = ctx.currentTime;
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
 
     oscillator.type = config.type;
     oscillator.frequency.setValueAtTime(config.frequency, now);
@@ -118,20 +336,20 @@ export const useSoundEffects = () => {
     gainNode.gain.exponentialRampToValueAtTime(0.001, now + config.duration);
 
     oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
+    gainNode.connect(ctx.destination);
     oscillator.start(now);
     oscillator.stop(now + config.duration);
 
     if (config.secondaryFreq) {
-      const osc2 = audioCtx.createOscillator();
-      const gain2 = audioCtx.createGain();
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
       osc2.type = config.type;
       osc2.frequency.setValueAtTime(config.secondaryFreq, now);
       gain2.gain.setValueAtTime(0, now);
       gain2.gain.linearRampToValueAtTime(vol * 0.65, now + (config.attack || 0.005) + 0.04);
       gain2.gain.exponentialRampToValueAtTime(0.001, now + config.duration + 0.08);
       osc2.connect(gain2);
-      gain2.connect(audioCtx.destination);
+      gain2.connect(ctx.destination);
       osc2.start(now + 0.03);
       osc2.stop(now + config.duration + 0.1);
     }
@@ -147,6 +365,40 @@ export const useSoundEffects = () => {
     playSound("dialogue");
   }, [playSound]);
 
+  /**
+   * Play a sound repeatedly at intervalMs for durationMs total.
+   * Returns a cancel function.
+   */
+  const playLoopingSound = useCallback(
+    (soundType: SoundType, intervalMs: number, durationMs: number) => {
+      if (!enabledRef.current) return () => {};
+      let count = 0;
+      const maxCount = Math.ceil(durationMs / intervalMs);
+      playSound(soundType);
+      count++;
+      const id = window.setInterval(() => {
+        if (count >= maxCount) {
+          clearInterval(id);
+          activeLoopsRef.current.delete(id);
+          return;
+        }
+        playSound(soundType);
+        count++;
+      }, intervalMs);
+      activeLoopsRef.current.add(id);
+      return () => {
+        clearInterval(id);
+        activeLoopsRef.current.delete(id);
+      };
+    },
+    [playSound]
+  );
+
+  const stopAllLoops = useCallback(() => {
+    activeLoopsRef.current.forEach((id) => clearInterval(id));
+    activeLoopsRef.current.clear();
+  }, []);
+
   const toggleSound = useCallback((enabled: boolean) => {
     enabledRef.current = enabled;
   }, []);
@@ -159,6 +411,8 @@ export const useSoundEffects = () => {
     playSound,
     playDoorKnock,
     playDialogueTyping,
+    playLoopingSound,
+    stopAllLoops,
     toggleSound,
     setMasterVolume,
     isEnabled: () => enabledRef.current,
@@ -169,6 +423,8 @@ interface SoundContextType {
   playSound: (type: SoundType) => void;
   playDoorKnock: () => void;
   playDialogueTyping: () => void;
+  playLoopingSound: (type: SoundType, intervalMs: number, durationMs: number) => () => void;
+  stopAllLoops: () => void;
   toggleSound: (enabled: boolean) => void;
   isSoundEnabled: boolean;
   setIsSoundEnabled: (enabled: boolean) => void;
@@ -179,13 +435,14 @@ interface SoundContextType {
 const SoundContext = createContext<SoundContextType | null>(null);
 
 export const SoundProvider = ({ children }: { children: ReactNode }) => {
-  const { playSound, playDoorKnock, playDialogueTyping, toggleSound, setMasterVolume } = useSoundEffects();
+  const { playSound, playDoorKnock, playDialogueTyping, playLoopingSound, stopAllLoops, toggleSound, setMasterVolume } = useSoundEffects();
   const [isSoundEnabled, setIsSoundEnabled] = useState(true);
   const [masterVolume, setMasterVolumeState] = useState(1);
 
   const handleToggle = (enabled: boolean) => {
     setIsSoundEnabled(enabled);
     toggleSound(enabled);
+    if (!enabled) stopAllLoops();
   };
 
   const handleSetVolume = (v: number) => {
@@ -205,12 +462,22 @@ export const SoundProvider = ({ children }: { children: ReactNode }) => {
     if (isSoundEnabled) playDialogueTyping();
   }, [isSoundEnabled, playDialogueTyping]);
 
+  const contextPlayLooping = useCallback(
+    (type: SoundType, intervalMs: number, durationMs: number) => {
+      if (!isSoundEnabled) return () => {};
+      return playLoopingSound(type, intervalMs, durationMs);
+    },
+    [isSoundEnabled, playLoopingSound]
+  );
+
   return (
     <SoundContext.Provider
       value={{
         playSound: contextPlaySound,
         playDoorKnock: contextPlayDoorKnock,
         playDialogueTyping: contextPlayDialogueTyping,
+        playLoopingSound: contextPlayLooping,
+        stopAllLoops,
         toggleSound: handleToggle,
         isSoundEnabled,
         setIsSoundEnabled: handleToggle,
