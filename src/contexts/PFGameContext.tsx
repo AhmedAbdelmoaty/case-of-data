@@ -55,6 +55,7 @@ interface PFGameContextValue {
   restartInquiry: () => void;
   canRestart: boolean;
   // Framing
+  framingSections: FramingSection[];
   setFramingSelection: (sectionId: keyof FramingSelection, optionId: string) => void;
   submitFraming: () => CaseOutcome;
   // Lifecycle
