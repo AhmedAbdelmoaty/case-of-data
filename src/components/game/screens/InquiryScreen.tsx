@@ -83,10 +83,10 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
   }, [currentLines, g, phase, state.currentNodeId, state.questionsUsed]);
 
   const handlePick = useCallback(
-    (isCorrect: boolean) => {
+    (option: typeof choices[number]) => {
       try { playSound("pageFlip"); } catch {}
       try { playSound("tick"); } catch {}
-      const result = pickChoice(isCorrect);
+      const result = pickChoice(option);
       if (!result) return;
 
       const lines: DialogueLineUI[] = [
@@ -94,7 +94,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
         {
           characterId: "hisham",
           text: result.responseText,
-          mood: isCorrect ? "happy" : "neutral",
+          mood: option.isCorrect ? "happy" : "neutral",
           isSaveable: !!result.noteId,
           saveId: result.noteId,
           saveText: result.noteText,
@@ -219,7 +219,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
               {choices.map((option, i) => (
                 <motion.button
                   key={option.id}
-                  onClick={() => handlePick(option.isCorrect)}
+                  onClick={() => handlePick(option)}
                   onMouseEnter={() => { try { playSound("tick"); } catch {} }}
                   className="w-full p-4 rounded-xl bg-card/85 border border-border hover:border-primary/60 hover:bg-card hover:shadow-[0_0_24px_hsl(var(--primary)/0.18)] transition-all text-right group"
                   dir="rtl"
