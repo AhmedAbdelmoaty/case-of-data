@@ -1,30 +1,14 @@
 // ============================================================
-// Case Tree — Single source of truth for the new game logic
+// Case Tree — Spine (S1..S5) + Topic Pools for wrong tracks (A/C/D)
 // ============================================================
-// LOGIC UNCHANGED. Only narrative content rewritten:
-//  - No early leaks (Hisham never mentions years/numbers before player asks)
-//  - Real dates: Feb 2024 / Feb 2025 / Feb 2026 (current month)
-//  - All numeric facts moved into REPORT documents (not into reply text)
-//  - Player questions = natural shopkeeper conversation, not interrogation
-//  - S5 question is GENERAL ("breakdown report") — no leak of "individuals/corporate"
+// Spine nodes use fixed correct/wrong options.
+// Wrong tracks (A/C/D) use TOPIC POOLS — engine picks 2 unasked
+// topics each round, so no question repeats and the order changes
+// based on what the player picks.
 // ------------------------------------------------------------
 
-export type NodeId =
-  | "S1"
-  | "S2"
-  | "S3"
-  | "S4"
-  | "S5"
-  | "BRIDGE_D"
-  | "TRACK_A_1"
-  | "TRACK_A_2"
-  | "TRACK_A_3"
-  | "TRACK_C_1"
-  | "TRACK_C_2"
-  | "TRACK_C_3"
-  | "TRACK_D_2"
-  | "TRACK_D_3"
-  | "END";
+export type SpineNodeId = "S1" | "S2" | "S3" | "S4" | "S5" | "END";
+export type NodeId = SpineNodeId | "ON_TRACK";
 
 export type TrackId = "A" | "C" | "D";
 
@@ -42,21 +26,42 @@ export interface CaseQuestionOption {
   note?: CaseNoteCandidate;
 }
 
-export interface CaseNode {
-  id: NodeId;
-  /** Short context label shown above choices */
+export interface SpineNode {
+  id: SpineNodeId;
   context?: string;
   correct: CaseQuestionOption;
   wrong: CaseQuestionOption;
-  nextOnCorrect: NodeId;
-  nextOnWrong: NodeId;
-  /** When entering a wrong branch, mark the player as on this track */
+  nextOnCorrect: SpineNodeId;
+  /** When wrong is chosen, player enters this track (or END) */
+  nextOnWrong: SpineNodeId | "ON_TRACK";
+  /** Track to enter when wrong is chosen */
   wrongEntersTrack?: TrackId;
+  /** Optional: which topic in the track is auto-skipped because the wrong question already covered it */
+  wrongConsumesTopicId?: string;
 }
 
-// ----- Spine -----
+/** A single inquiry topic inside a wrong track */
+export interface TrackTopic {
+  id: string;
+  text: string;
+  hishamReply: string;
+  evidenceId?: string;
+  note?: CaseNoteCandidate;
+}
 
-export const NODES: Record<NodeId, CaseNode> = {
+/** A wrong track is a pool of topics + a final "conclusion" option */
+export interface TrackPool {
+  id: TrackId;
+  topics: TrackTopic[];
+  /** Final wrap-up shown when player has exhausted topics or reaches last question */
+  conclusion: TrackTopic;
+}
+
+// ============================================================
+// SPINE — unchanged narrative on the correct path
+// ============================================================
+
+export const SPINE: Record<SpineNodeId, SpineNode> = {
   S1: {
     id: "S1",
     context: "البداية: أستاذ هشام قاعد قدامك، حاطط إيده على راسه. لسه ما قال أرقام ولا سنين.",
@@ -72,14 +77,14 @@ export const NODES: Record<NodeId, CaseNode> = {
     wrong: {
       text: "أستاذ هشام، عندي إحساس إن المشكلة دي غالبًا من فريق البيع — يمكن مش بيتحركوا زي الأول. ممكن نبص على شغلهم الأول؟",
       hishamReply:
-        "هممم… والله ممكن يا فندم. الفريق عندي من زمان، بس فعلاً ممكن يكونوا اتراخوا في حاجة. لو حضرتك شايف نبدأ من هناك، أنا معاك.",
+        "هممم… والله ممكن يا فندم. الفريق عندي من زمان، بس فعلاً ممكن يكونوا اتراخوا في حاجة. تعالى نشوف سوا.",
       note: {
         id: "n_s1_jump_internal",
         text: "اقتراح مبكر إن المشكلة من فريق البيع — قبل ما المشكلة نفسها تتحدد.",
       },
     },
     nextOnCorrect: "S2",
-    nextOnWrong: "TRACK_A_1",
+    nextOnWrong: "ON_TRACK",
     wrongEntersTrack: "A",
   },
 
@@ -106,7 +111,7 @@ export const NODES: Record<NodeId, CaseNode> = {
       },
     },
     nextOnCorrect: "S3",
-    nextOnWrong: "BRIDGE_D",
+    nextOnWrong: "ON_TRACK",
     wrongEntersTrack: "D",
   },
 
@@ -124,18 +129,21 @@ export const NODES: Record<NodeId, CaseNode> = {
       },
     },
     wrong: {
-      text: "طب قبل ما نكمل، في حملات ترويج شغّالة الفترة دي؟ يمكن السوق محتاج تذكير بالمحل والمنافسين بياخدوا منك العملاء.",
+      // Pure competitors framing — no marketing/campaign mention
+      text: "طب قبل ما نكمل، المنافسين حواليك بيعملوا إيه دلوقتي؟ ممكن السوق بقى أصعب.",
       hishamReply:
-        "بصراحة يا فندم، حملاتنا قليلة الفترة دي. وفي نفس الوقت المنافسين حواليّا بيعملوا عروض كل أسبوع تقريبًا. ممكن ده اللي بيسحب الزباين مني.",
+        "صراحة يا فندم، المحلات حواليّا بيعملوا عروض وخصومات كل أسبوع تقريبًا. ممكن ده بيسحب مني زباين فعلاً.",
       evidenceId: "ev_competitor_offers",
       note: {
         id: "n_s3_jumped_external",
-        text: "اللاعب قفز للمنافسين والترويج قبل ما يتأكد من أصل المقارنة.",
+        text: "اللاعب قفز للمنافسين قبل ما يتأكد من أصل المقارنة.",
       },
     },
     nextOnCorrect: "S4",
-    nextOnWrong: "TRACK_C_1",
+    nextOnWrong: "ON_TRACK",
     wrongEntersTrack: "C",
+    // S3 wrong already showed competitor offers report — skip that topic in track C
+    wrongConsumesTopicId: "c_competitor_offers",
   },
 
   S4: {
@@ -152,8 +160,9 @@ export const NODES: Record<NodeId, CaseNode> = {
       },
     },
     wrong: {
-      text: "طب ممكن نقارن أسعارنا والعروض اللي بيعملها المنافسين دلوقتي؟",
-      hishamReply: "ماشي يا فندم. أنا جمعت من زمان آخر العروض من المحلات اللي حوالينا. اتفضل، ده اللي عندي.",
+      text: "طب ممكن نقارن أسعارنا بأسعار المنافسين دلوقتي؟ يمكن السعر هو اللي بيفرق.",
+      hishamReply:
+        "ماشي يا فندم. أنا جمعت من زمان آخر العروض من المحلات اللي حوالينا. اتفضل، ده اللي عندي.",
       evidenceId: "ev_competitor_offers",
       note: {
         id: "n_s4_jumped_external",
@@ -161,8 +170,9 @@ export const NODES: Record<NodeId, CaseNode> = {
       },
     },
     nextOnCorrect: "S5",
-    nextOnWrong: "TRACK_C_1",
+    nextOnWrong: "ON_TRACK",
     wrongEntersTrack: "C",
+    wrongConsumesTopicId: "c_competitor_offers",
   },
 
   S5: {
@@ -180,7 +190,8 @@ export const NODES: Record<NodeId, CaseNode> = {
     },
     wrong: {
       text: "طب ممكن نبص على أداء الحملات الإعلانية الأخيرة؟",
-      hishamReply: "اتفضل يا فندم، ده تقرير التسويق بتاع السنة دي والسنة اللي فاتت. هتلاقي فيه الميزانية والأرقام.",
+      hishamReply:
+        "اتفضل يا فندم، ده تقرير التسويق بتاع السنة دي والسنة اللي فاتت. هتلاقي فيه الميزانية والأرقام.",
       evidenceId: "ev_marketing",
       note: {
         id: "n_s5_jumped_marketing",
@@ -188,223 +199,10 @@ export const NODES: Record<NodeId, CaseNode> = {
       },
     },
     nextOnCorrect: "END",
-    nextOnWrong: "TRACK_D_2",
+    nextOnWrong: "ON_TRACK",
     wrongEntersTrack: "D",
-  },
-
-  // ============= TRACK A — Internal execution =============
-  TRACK_A_1: {
-    id: "TRACK_A_1",
-    context: "دخلت في مسار «الفريق» — هتشوف تقارير بتأكد الفرضية دي.",
-    correct: {
-      text: "ممكن أشوف أداء كل واحد في الفريق على حدة؟",
-      hishamReply: "أكيد يا فندم. اتفضل، ده الجدول. هتلاقي فرق واضح بين الأول والأخير.",
-      evidenceId: "ev_team_performance",
-      note: {
-        id: "n_a1",
-        text: "تقرير أداء البائعين في الدفتر — كريم الأعلى، هاني الأقل.",
-      },
-    },
-    wrong: {
-      text: "طب نبص على نسبة الإغلاق (التحويل) لكل واحد فيهم؟",
-      hishamReply: "اتفضل، ده تقرير عملته المحاسبة الأسبوع اللي فات. فيه الفرق في التحويل واضح كمان.",
-      evidenceId: "ev_team_conversion",
-      note: {
-        id: "n_a1_alt",
-        text: "تقرير نسب التحويل في الدفتر.",
-      },
-    },
-    nextOnCorrect: "TRACK_A_2",
-    nextOnWrong: "TRACK_A_2",
-  },
-  TRACK_A_2: {
-    id: "TRACK_A_2",
-    correct: {
-      text: "ومن ناحية الإغلاق، نسبة التحويل لكل واحد كام؟",
-      hishamReply: "اتفضل، ده تقرير التحويلات. هتلاقي إن الفرق فعلاً مش بس في الكميات، الفرق في الإغلاق نفسه.",
-      evidenceId: "ev_team_conversion",
-      note: {
-        id: "n_a2",
-        text: "تقرير التحويلات في الدفتر — الفرق بين البائعين كبير.",
-      },
-    },
-    wrong: {
-      text: "في تدريب أو متابعة ناقصة عند الفريق؟",
-      hishamReply:
-        "بصراحة يا فندم… آخر تدريب عملته للفريق بقاله سنة. والمتابعة اليومية أنا اللي بعملها بإيدي، بس مش منتظمة قوي.",
-      note: {
-        id: "n_a2_alt",
-        text: "أستاذ هشام بيعترف إن التدريب والمتابعة اليومية مش منتظمين.",
-      },
-    },
-    nextOnCorrect: "TRACK_A_3",
-    nextOnWrong: "TRACK_A_3",
-  },
-  TRACK_A_3: {
-    id: "TRACK_A_3",
-    correct: {
-      text: "إيه آخر تدريب أو متابعة عملتها للفريق؟",
-      hishamReply:
-        "زي ما قلت لحضرتك، آخر تدريب بقاله سنة، والمتابعة بقت متفرقة. الصورة بقت أوضح يا فندم… بس صدّقني، أنا لسه عندي حاجة جوايا مش مرتاح لها 100%.",
-      note: {
-        id: "n_a3",
-        text: "اعتراف بضعف التدريب والمتابعة. أستاذ هشام لسه عنده شك خفيف.",
-      },
-    },
-    wrong: {
-      text: "تمام، يبقى المشكلة محسومة — ضعف تنفيذ من الفريق.",
-      hishamReply: "ماشي يا فندم… الصورة بقت أوضح. بس بصراحة لسه عندي حاجة جوايا مش مرتاح لها.",
-      note: {
-        id: "n_a3_alt",
-        text: "اللاعب حسم الفرضية بدري، أستاذ هشام لسه متردد.",
-      },
-    },
-    nextOnCorrect: "END",
-    nextOnWrong: "END",
-  },
-
-  // ============= BRIDGE D — Transition from daily report to marketing =============
-  BRIDGE_D: {
-    id: "BRIDGE_D",
-    context: "بصيت على التقرير اليومي… الأسبوع الأخير ضعيف. لازم تفهم ليه الحركة هدت.",
-    correct: {
-      text: "شفت الأسبوع الأخير ضعيف فعلاً. طب الفترة دي في حملات إعلانية أو ترويج شغّال للمحل؟",
-      hishamReply:
-        "والله يا فندم، الحملات قليلة الفترة دي. كنا بنعتمد كتير على الزبون الدائم، بس الجدد قلوا. اتفضل ده ملخص التسويق اللي عندي.",
-      evidenceId: "ev_marketing",
-      note: {
-        id: "n_bridge_d",
-        text: "أستاذ هشام أكد إن الحملات قلّت — اللاعب بدأ يربط الضعف بالتسويق بدون ما يتأكد من أصل المقارنة.",
-      },
-    },
-    wrong: {
-      text: "شفت الأسبوع الأخير ضعيف فعلاً. طب الفترة دي في حملات إعلانية أو ترويج شغّال للمحل؟",
-      hishamReply:
-        "والله يا فندم، الحملات قليلة الفترة دي. كنا بنعتمد كتير على الزبون الدائم، بس الجدد قلوا. اتفضل ده ملخص التسويق اللي عندي.",
-      evidenceId: "ev_marketing",
-      note: {
-        id: "n_bridge_d",
-        text: "أستاذ هشام أكد إن الحملات قلّت — اللاعب بدأ يربط الضعف بالتسويق بدون ما يتأكد من أصل المقارنة.",
-      },
-    },
-    nextOnCorrect: "TRACK_D_2",
-    nextOnWrong: "TRACK_D_2",
-  },
-
-  // ============= TRACK C — Price / competitors =============
-  TRACK_C_1: {
-    id: "TRACK_C_1",
-    context: "دخلت في مسار «المنافسة والسعر».",
-    correct: {
-      text: "إيه طبيعة العروض اللي بيقدمها المنافسين دلوقتي؟",
-      hishamReply: "اتفضل يا فندم، ده اللي جمعته من حوالينا. أكتر حاجة شايفها خصومات وعروض 2+1 على بعض الموديلات.",
-      evidenceId: "ev_competitor_offers",
-      note: {
-        id: "n_c1",
-        text: "تقرير عروض المنافسين في الدفتر.",
-      },
-    },
-    wrong: {
-      text: "العملاء عندك بيشتكوا من السعر؟",
-      hishamReply:
-        "بعض الزباين فعلاً قالوا «ده غالي شوية» الفترة الأخيرة، بس مش كلهم. اتفضل ده اللي سجلته من ملاحظاتهم.",
-      evidenceId: "ev_customer_feedback",
-      note: {
-        id: "n_c1_alt",
-        text: "ملاحظات العملاء في الدفتر — شكاوى متفرقة من السعر.",
-      },
-    },
-    nextOnCorrect: "TRACK_C_2",
-    nextOnWrong: "TRACK_C_2",
-  },
-  TRACK_C_2: {
-    id: "TRACK_C_2",
-    correct: {
-      text: "العملاء عندك بيقولوا إيه عن أسعارك مقارنة بالسوق؟",
-      hishamReply: "بعضهم بيقول غالي شوية يا فندم. بس أنا حاسس إن الجودة بتاعتي أحسن، ومش حابب أنزل.",
-      evidenceId: "ev_customer_feedback",
-      note: {
-        id: "n_c2",
-        text: "انطباع بأن السعر مرتفع نسبياً عن المنافسين.",
-      },
-    },
-    wrong: {
-      text: "محتاج تنزل الأسعار في خط معيّن وتشوف؟",
-      hishamReply: "وارد يا فندم… بس ده قرار محتاج دراسة، مش حاجة آخدها على ضربة.",
-      note: {
-        id: "n_c2_alt",
-        text: "اقتراح تخفيض سعر مباشر بدون أساس.",
-      },
-    },
-    nextOnCorrect: "TRACK_C_3",
-    nextOnWrong: "TRACK_C_3",
-  },
-  TRACK_C_3: {
-    id: "TRACK_C_3",
-    correct: {
-      text: "يبقى محتاجين رد سعري تنافسي — عرض محدد لفترة قصيرة.",
-      hishamReply: "ممكن يا فندم. الصورة بقت أوضح… بس صدقني، لسه عندي حاجة جوايا مش مرتاح لها 100%.",
-      note: {
-        id: "n_c3",
-        text: "توصية بعرض سعري. أستاذ هشام متردد.",
-      },
-    },
-    wrong: {
-      text: "نعمل خصم 15% على المحل كله شهر كامل؟",
-      hishamReply: "ده هياكل من الربح يا فندم… الصورة بقت أوضح، بس لسه في حاجة جوايا مش مرتاح لها.",
-      note: {
-        id: "n_c3_alt",
-        text: "توصية خصم شامل خطرة على هامش الربح.",
-      },
-    },
-    nextOnCorrect: "END",
-    nextOnWrong: "END",
-  },
-
-  // ============= TRACK D — Marketing / demand =============
-  // Entry is via BRIDGE_D (from S2 wrong) or directly from S5 wrong → TRACK_D_2.
-  TRACK_D_2: {
-    id: "TRACK_D_2",
-    correct: {
-      text: "في حملة تنشيط طلقتها الشهر ده؟",
-      hishamReply:
-        "لأ يا فندم، ما عملتش حملة تنشيط مخصوصة الشهر ده. السنة اللي فاتت كان فيه حملة موسمية بميزانية أكبر.",
-      note: {
-        id: "n_d2",
-        text: "مفيش حملة تنشيط الشهر ده، عكس السنة اللي فاتت.",
-      },
-    },
-    wrong: {
-      text: "محتاجين نزود ميزانية الإعلانات؟",
-      hishamReply: "ممكن يا فندم… بس مش متأكد ده هيرجّع البيع ولا لأ.",
-      note: {
-        id: "n_d2_alt",
-        text: "اقتراح زيادة ميزانية بدون عائد محسوب.",
-      },
-    },
-    nextOnCorrect: "TRACK_D_3",
-    nextOnWrong: "TRACK_D_3",
-  },
-  TRACK_D_3: {
-    id: "TRACK_D_3",
-    correct: {
-      text: "يبقى محتاجين حملة تنشيط مدروسة قبل الموسم الجاي.",
-      hishamReply: "كلام منطقي يا فندم. الصورة بقت أوضح… بس صدقني، لسه عندي حاجة جوايا مش مرتاح لها 100%.",
-      note: {
-        id: "n_d3",
-        text: "توصية حملة تنشيط. شك خفيف من أستاذ هشام.",
-      },
-    },
-    wrong: {
-      text: "نزوّد ميزانية الإعلانات على طول.",
-      hishamReply: "هممم… الصورة بقت أوضح يا فندم، بس لسه في حاجة جوايا مش مرتاح لها.",
-      note: {
-        id: "n_d3_alt",
-        text: "قرار صرف بدون قياس.",
-      },
-    },
-    nextOnCorrect: "END",
-    nextOnWrong: "END",
+    // S5 wrong already showed the marketing report — skip that topic in track D
+    wrongConsumesTopicId: "d_marketing_report",
   },
 
   END: {
@@ -413,6 +211,155 @@ export const NODES: Record<NodeId, CaseNode> = {
     wrong: { text: "", hishamReply: "" },
     nextOnCorrect: "END",
     nextOnWrong: "END",
+  },
+};
+
+// ============================================================
+// TRACKS — Topic pools (shown 2-at-a-time, never repeating)
+// ============================================================
+
+export const TRACKS: Record<TrackId, TrackPool> = {
+  // -------- TRACK A — Sales team --------
+  A: {
+    id: "A",
+    topics: [
+      {
+        id: "a_team_performance",
+        text: "ممكن أشوف أداء كل واحد في الفريق على حدة؟",
+        hishamReply:
+          "أكيد يا فندم. اتفضل، ده الجدول. هتلاقي فرق واضح بين الأول والأخير.",
+        evidenceId: "ev_team_performance",
+        note: {
+          id: "n_a_perf",
+          text: "تقرير أداء البائعين في الدفتر — كريم الأعلى، هاني الأقل.",
+        },
+      },
+      {
+        id: "a_team_conversion",
+        text: "طب نبص على نسبة الإغلاق (التحويل) لكل واحد فيهم؟",
+        hishamReply:
+          "اتفضل، ده تقرير التحويلات. الفرق في الإغلاق نفسه واضح، مش بس في الكميات.",
+        evidenceId: "ev_team_conversion",
+        note: {
+          id: "n_a_conv",
+          text: "تقرير نسب التحويل في الدفتر — فروق واضحة بين البائعين.",
+        },
+      },
+      {
+        id: "a_team_training",
+        text: "في تدريب أو متابعة منتظمة بتعملها للفريق؟ آخر تدريب كان امتى؟",
+        hishamReply:
+          "بصراحة يا فندم… آخر تدريب عملته للفريق بقاله سنة. والمتابعة اليومية أنا اللي بعملها بإيدي، بس مش منتظمة قوي.",
+        note: {
+          id: "n_a_train",
+          text: "أستاذ هشام بيعترف إن التدريب والمتابعة اليومية مش منتظمين.",
+        },
+      },
+    ],
+    conclusion: {
+      id: "a_conclude",
+      text: "تمام، الصورة بقت أوضح: ضعف تنفيذ ومتابعة من ناحية الفريق.",
+      hishamReply:
+        "ماشي يا فندم… الصورة بقت أوضح. بس بصراحة لسه عندي حاجة جوايا مش مرتاح لها 100%.",
+      note: {
+        id: "n_a_conclude",
+        text: "اللاعب حسم الفرضية على الفريق — أستاذ هشام لسه عنده شك خفيف.",
+      },
+    },
+  },
+
+  // -------- TRACK C — Competitors / pricing (NO marketing) --------
+  C: {
+    id: "C",
+    topics: [
+      {
+        id: "c_competitor_offers",
+        text: "إيه طبيعة العروض اللي بيقدمها المنافسين دلوقتي؟",
+        hishamReply:
+          "اتفضل يا فندم، ده اللي جمعته من حوالينا. أكتر حاجة شايفها خصومات وعروض 2+1 على بعض الموديلات.",
+        evidenceId: "ev_competitor_offers",
+        note: { id: "n_c_offers", text: "تقرير عروض المنافسين في الدفتر." },
+      },
+      {
+        id: "c_customer_price_feedback",
+        text: "العملاء عندك بيشتكوا من السعر مقارنة بالسوق؟",
+        hishamReply:
+          "بعض الزباين فعلاً قالوا «ده غالي شوية» الفترة الأخيرة، بس مش كلهم. اتفضل ده اللي سجلته من ملاحظاتهم.",
+        evidenceId: "ev_customer_feedback",
+        note: {
+          id: "n_c_feedback",
+          text: "ملاحظات العملاء — شكاوى متفرقة من السعر.",
+        },
+      },
+      {
+        id: "c_price_response",
+        text: "نعمل رد سعري تنافسي — عرض محدد لفترة قصيرة على خط معين؟",
+        hishamReply:
+          "ممكن يا فندم. بس ده قرار محتاج دراسة، مش حاجة آخدها على ضربة واحدة.",
+        note: {
+          id: "n_c_response",
+          text: "اقتراح رد سعري محدود — أستاذ هشام متردد.",
+        },
+      },
+    ],
+    conclusion: {
+      id: "c_conclude",
+      text: "يبقى الصورة بقت أوضح: السوق بيضغط على السعر ومحتاجين تحرك سعري.",
+      hishamReply:
+        "كلام منطقي يا فندم. بس صدّقني، لسه عندي حاجة جوايا مش مرتاح لها 100%.",
+      note: {
+        id: "n_c_conclude",
+        text: "اللاعب حسم على فرضية المنافسين/السعر. أستاذ هشام لسه متردد.",
+      },
+    },
+  },
+
+  // -------- TRACK D — Marketing / demand (NO competitors) --------
+  D: {
+    id: "D",
+    topics: [
+      {
+        id: "d_active_campaign",
+        text: "في حملة تنشيط أو ترويج طلقتها الشهر ده؟",
+        hishamReply:
+          "لأ يا فندم، ما عملتش حملة تنشيط مخصوصة الشهر ده. السنة اللي فاتت كان فيه حملة موسمية بميزانية أكبر.",
+        note: {
+          id: "n_d_campaign",
+          text: "مفيش حملة تنشيط الشهر ده، عكس السنة اللي فاتت.",
+        },
+      },
+      {
+        id: "d_new_vs_returning",
+        text: "الفترة دي اللي بيشتري عملاء جدد ولا الاعتماد كله على الزبون الدائم؟",
+        hishamReply:
+          "بصراحة الجدد قلوا الفترة دي يا فندم. الاعتماد بقى كله تقريبًا على الزباين القدام.",
+        note: {
+          id: "n_d_new_customers",
+          text: "تراجع واضح في العملاء الجدد — الاعتماد على القاعدة الحالية.",
+        },
+      },
+      {
+        id: "d_marketing_report",
+        text: "ممكن نبص على ملخص أداء التسويق — السنة دي والسنة اللي فاتت؟",
+        hishamReply:
+          "اتفضل يا فندم. ده تقرير التسويق بميزانية وأرقام السنتين جنب بعض.",
+        evidenceId: "ev_marketing",
+        note: {
+          id: "n_d_marketing",
+          text: "تقرير التسويق في الدفتر — ميزانية وحملات أقل عن السنة اللي فاتت.",
+        },
+      },
+    ],
+    conclusion: {
+      id: "d_conclude",
+      text: "يبقى محتاجين حملة تنشيط مدروسة قبل الموسم الجاي، بميزانية محسوبة.",
+      hishamReply:
+        "كلام منطقي يا فندم. الصورة بقت أوضح… بس صدقني، لسه عندي حاجة جوايا مش مرتاح لها 100%.",
+      note: {
+        id: "n_d_conclude",
+        text: "اللاعب حسم على فرضية التسويق. أستاذ هشام لسه متردد.",
+      },
+    },
   },
 };
 
