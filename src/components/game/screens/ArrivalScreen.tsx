@@ -59,9 +59,8 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
   // Auto-advance entering → interior → dialogue
   useEffect(() => {
     if (phase === "entering") {
-      try { playSound("footstepHard"); } catch { /* noop */ }
-      setTimeout(() => { try { playSound("footstepSoft"); } catch { /* noop */ } }, 350);
-      setTimeout(() => { try { playSound("storeBell"); } catch { /* noop */ } }, 600);
+      // Footstep SFX removed (was harsh) — bell is the only entry cue now.
+      setTimeout(() => { try { playSound("storeBell"); } catch { /* noop */ } }, 400);
       const t = setTimeout(() => setPhase("interior"), 1700);
       return () => clearTimeout(t);
     }

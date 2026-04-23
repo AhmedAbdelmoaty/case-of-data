@@ -43,8 +43,8 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
   const handleSelect = (sectionId: keyof typeof state.framing, optionId: string) => {
     if (confirmed) return;
     setFramingSelection(sectionId, optionId);
-    try { playSound("paperRustle"); } catch { /* noop */ }
-    try { playSound("tick"); } catch { /* noop */ }
+    // Removed paperRustle + tick — harsh "tssss" on every selection.
+    try { playSound("click"); } catch { /* noop */ }
 
     // Auto-advance to next section after a small beat
     setTimeout(() => {
