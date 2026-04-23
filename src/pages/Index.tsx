@@ -37,7 +37,7 @@ type Screen =
 
 const GameContent = () => {
   const { user } = useAuth();
-  const { resetGame } = usePFGame();
+  const { resetGame, state: pfState, consumeRestartFlag } = usePFGame();
 
   const userId = user?.id || "guest";
   const storageKey = `pf-game-screen-${userId}`;
@@ -55,6 +55,18 @@ const GameContent = () => {
       localStorage.setItem(storageKey, currentScreen);
     }
   }, [currentScreen, storageKey]);
+
+  // Handle "restart from beginning" — navigate back to store-arrival scene
+  useEffect(() => {
+    if (pfState.restartFromBeginning) {
+      consumeRestartFlag();
+      setTransitioning(true);
+      setTimeout(() => {
+        setCurrentScreen("arrival");
+        setTimeout(() => setTransitioning(false), 100);
+      }, 400);
+    }
+  }, [pfState.restartFromBeginning, consumeRestartFlag]);
 
   const navigateWithTransition = useCallback(
     (screen: Screen, options?: { reset?: boolean; clearStorage?: boolean }) => {

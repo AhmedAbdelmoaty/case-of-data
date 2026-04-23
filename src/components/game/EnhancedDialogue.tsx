@@ -286,34 +286,34 @@ export const EnhancedDialogue = ({
           </p>
 
           {!isTyping && currentDialogue.inlineEvidence && (
-            <motion.div
-              className="mt-3 rounded-xl border border-primary/40 bg-primary/5 p-3 flex items-center justify-between gap-3"
+            <motion.button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setReportOpen(true);
+              }}
+              className="mt-3 w-full rounded-xl border-2 border-primary/40 bg-primary/5 hover:bg-primary/15 hover:border-primary/70 hover:shadow-[0_0_24px_hsl(var(--primary)/0.25)] p-3 flex items-center justify-between gap-3 transition-all text-right group"
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
               dir="rtl"
+              aria-label="افتح التقرير"
             >
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <FileText className="w-5 h-5 text-primary shrink-0" />
-                <div className="flex flex-col min-w-0">
+                <div className="flex flex-col min-w-0 text-right">
                   <span className="text-[11px] text-muted-foreground">
-                    أ. هشام سلّمك تقرير
+                    أ. هشام سلّمك تقرير — اضغط للفتح
                   </span>
                   <span className="text-sm font-bold text-foreground truncate">
                     {currentDialogue.inlineEvidence.title}
                   </span>
                 </div>
               </div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setReportOpen(true);
-                }}
-                className="shrink-0 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-colors"
-              >
-                افتح التقرير
-              </button>
-            </motion.div>
+              <ChevronRight className="w-5 h-5 text-primary shrink-0 rotate-180 group-hover:-translate-x-1 transition-transform" />
+            </motion.button>
           )}
 
           {/* Report modal */}

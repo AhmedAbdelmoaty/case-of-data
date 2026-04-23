@@ -90,7 +90,8 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
       if (!result) return;
 
       const lines: DialogueLineUI[] = [
-        { characterId: "detective", text: result.questionText, mood: "neutral" },
+        // TEMPORARILY HIDDEN — uncomment to restore the analyst question line before Hisham's response
+        // { characterId: "detective", text: result.questionText, mood: "neutral" },
         {
           characterId: "hisham",
           text: result.responseText,
@@ -143,21 +144,33 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
 
       <PFNotebook />
 
-      {/* Restart inquiry button — limited to 1 use, only mid-game */}
+      {/* Restart inquiry button — up to 2 uses, only mid-game */}
       <AnimatePresence>
         {showRestartButton && (
           <motion.button
             key="restart-btn"
             onClick={() => setShowRestartConfirm(true)}
-            className="fixed bottom-24 left-4 z-[60] flex items-center gap-2 px-3 py-2 rounded-full bg-background/80 backdrop-blur border border-border text-sm text-foreground shadow-md hover:shadow-lg hover:scale-[1.04] transition-all"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
+            className="fixed top-4 left-4 z-[55] flex items-center gap-2 px-4 py-2.5 rounded-full border-2 border-amber-400/60 bg-gradient-to-r from-amber-500/25 to-orange-500/25 backdrop-blur-md text-amber-200 font-bold text-xs shadow-lg shadow-amber-500/30 hover:shadow-amber-500/60 hover:scale-105 transition-all"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              boxShadow: [
+                "0 4px 14px hsl(38 92% 50% / 0.25)",
+                "0 4px 22px hsl(38 92% 50% / 0.55)",
+                "0 4px 14px hsl(38 92% 50% / 0.25)",
+              ],
+            }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{
+              boxShadow: { duration: 2.4, repeat: Infinity, ease: "easeInOut" },
+            }}
             whileTap={{ scale: 0.95 }}
-            title="إعادة المحادثة"
+            title="اطلب محادثة جديدة من البداية"
+            dir="rtl"
           >
-            <RotateCcw className="w-4 h-4" />
-            <span dir="rtl">إعادة المحادثة</span>
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>اطلب محادثة جديدة من البداية</span>
           </motion.button>
         )}
       </AnimatePresence>
@@ -166,14 +179,14 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
       <AnimatePresence>
         {showRestartConfirm && (
           <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4"
+            className="fixed inset-0 z-[80] flex items-center justify-center bg-background/80 backdrop-blur-sm p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setShowRestartConfirm(false)}
           >
             <motion.div
-              className="max-w-sm w-full bg-card border border-border rounded-2xl p-5 shadow-2xl"
+              className="max-w-sm w-full bg-card border border-amber-400/40 rounded-2xl p-5 shadow-2xl"
               dir="rtl"
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
@@ -181,11 +194,12 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center gap-2 mb-3">
-                <RotateCcw className="w-5 h-5 text-primary" />
-                <h3 className="text-base font-bold text-foreground">إعادة المحادثة من الأول؟</h3>
+                <Sparkles className="w-5 h-5 text-amber-400" />
+                <h3 className="text-base font-bold text-foreground">اطلب محادثة جديدة من البداية؟</h3>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                هتبدأ المحادثة من الأول، وكل الملاحظات والتقارير اللي جمعتها هتتمسح  <span className="text-primary font-bold"></span>  
+                هترجع تاني لمشهد دخولك المحل ومحادثة الترحيب مع أ. هشام، وكل الملاحظات والتقارير اللي جمعتها هتتمسح. متبقّى لك{" "}
+                <span className="text-amber-400 font-bold">{2 - state.restartCount}</span> محاولة.
               </p>
               <div className="flex gap-2">
                 <button
@@ -196,9 +210,9 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
                 </button>
                 <button
                   onClick={handleConfirmRestart}
-                  className="flex-1 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm font-bold"
+                  className="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:opacity-90 transition-opacity text-sm font-bold"
                 >
-                  أيوه، ابدأ من تاني
+                  أيوه، ابدأ من الأول
                 </button>
               </div>
             </motion.div>

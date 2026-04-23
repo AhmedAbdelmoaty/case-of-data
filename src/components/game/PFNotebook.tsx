@@ -57,12 +57,12 @@ export const PFNotebook = () => {
       {/* Floating button */}
       <motion.button
         onClick={() => { try { playSound("pageFlip"); } catch {} ; setIsOpen(true); }}
-        className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl bg-card/90 backdrop-blur-md border text-foreground shadow-lg transition-all ${
+        className={`fixed top-16 right-4 z-[55] flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-card/90 backdrop-blur-md border text-foreground shadow-lg transition-all ${
           justAdded ? "border-primary shadow-primary/40 shadow-2xl animate-breathing-glow" : "border-border hover:border-primary/50"
         }`}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        initial={{ y: 50, opacity: 0 }}
+        initial={{ y: -50, opacity: 0 }}
         animate={{
           y: 0,
           opacity: 1,
