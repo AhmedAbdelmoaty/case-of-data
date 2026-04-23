@@ -362,30 +362,7 @@ export const NODES: Record<NodeId, CaseNode> = {
   },
 
   // ============= TRACK D — Marketing / demand =============
-  TRACK_D_1: {
-    id: "TRACK_D_1",
-    context: "دخلت في مسار «التسويق والطلب».",
-    correct: {
-      text: "ممكن أشوف تفاصيل الميزانية والحملات الأخيرة؟",
-      hishamReply: "اتفضل يا فندم، ده ملخص التسويق اللي عندي. هتلاقي فيه ميزانية الإعلانات والأرقام كلها.",
-      evidenceId: "ev_marketing",
-      note: {
-        id: "n_d1",
-        text: "تقرير التسويق في الدفتر — ميزانية الإعلانات نزلت عن السنة اللي فاتت.",
-      },
-    },
-    wrong: {
-      text: "الـ engagement على السوشيال أقل بكتير عن الأول؟",
-      hishamReply: "فرق بسيط يا فندم بصراحة. اتفضل ده التقرير، شوف بنفسك مش حاجة كبيرة تبرّر النزول كله.",
-      evidenceId: "ev_marketing",
-      note: {
-        id: "n_d1_alt",
-        text: "تقرير التسويق — التفاعل تقريبًا ثابت، مش مفسّر للنزول.",
-      },
-    },
-    nextOnCorrect: "TRACK_D_2",
-    nextOnWrong: "TRACK_D_2",
-  },
+  // Entry is via BRIDGE_D (from S2 wrong) or directly from S5 wrong → TRACK_D_2.
   TRACK_D_2: {
     id: "TRACK_D_2",
     correct: {
