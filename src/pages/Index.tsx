@@ -197,11 +197,7 @@ const GameContent = () => {
 const Index = () => {
   return (
     <PFGameProvider>
-      <MusicProvider>
-        <SoundProvider>
-          <GameContent />
-        </SoundProvider>
-      </MusicProvider>
+      <GameContent />
     </PFGameProvider>
   );
 };
