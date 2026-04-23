@@ -106,8 +106,8 @@ export const NODES: Record<NodeId, CaseNode> = {
       },
     },
     nextOnCorrect: "S3",
-    nextOnWrong: "TRACK_B_1",
-    wrongEntersTrack: "B",
+    nextOnWrong: "BRIDGE_D",
+    wrongEntersTrack: "D",
   },
 
   S3: {
@@ -124,17 +124,18 @@ export const NODES: Record<NodeId, CaseNode> = {
       },
     },
     wrong: {
-      text: "طب قبل ما نكمل، ممكن نبص على أداء فريق البيع؟ مين أحسن واحد فيهم ومين الأقل؟",
-      hishamReply: "ماشي يا فندم، عندي تقرير لكل واحد فيهم. اتفضل، خد ده، فيه الأرقام بتاعتهم كلها.",
-      evidenceId: "ev_team_performance",
+      text: "طب قبل ما نكمل، في حملات ترويج شغّالة الفترة دي؟ يمكن السوق محتاج تذكير بالمحل والمنافسين بياخدوا منك العملاء.",
+      hishamReply:
+        "بصراحة يا فندم، حملاتنا قليلة الفترة دي. وفي نفس الوقت المنافسين حواليّا بيعملوا عروض كل أسبوع تقريبًا. ممكن ده اللي بيسحب الزباين مني.",
+      evidenceId: "ev_competitor_offers",
       note: {
-        id: "n_s3_jumped_internal",
-        text: "بعد ما بان إن في فرق، اللاعب قفز لفرضية الفريق بدل ما يفحص المقارنة نفسها.",
+        id: "n_s3_jumped_external",
+        text: "اللاعب قفز للمنافسين والترويج قبل ما يتأكد من أصل المقارنة.",
       },
     },
     nextOnCorrect: "S4",
-    nextOnWrong: "TRACK_A_1",
-    wrongEntersTrack: "A",
+    nextOnWrong: "TRACK_C_1",
+    wrongEntersTrack: "C",
   },
 
   S4: {
