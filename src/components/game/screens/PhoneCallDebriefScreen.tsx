@@ -46,7 +46,8 @@ export const PhoneCallDebriefScreen = ({ onComplete }: PhoneCallDebriefScreenPro
   const [dialogueIndex, setDialogueIndex] = useState(0);
   const [seconds, setSeconds] = useState(0);
 
-  useAmbientSound("phoneCall");
+  // Ambient phone-line static was removed — it was unpleasant.
+  useAmbientSound("none");
 
   // Pause background music for the duration of the phone call (it clashes with the call vibe)
   useEffect(() => {
