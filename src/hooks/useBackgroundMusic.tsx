@@ -47,7 +47,7 @@ const CROSSFADE_SEC = 2;
 export const MusicProvider = ({ children }: { children: ReactNode }) => {
   const [currentRoom, setCurrentRoomState] = useState<RoomType>("intro");
   const [volume, setVolume] = useState(0.4);
-  const [isMusicEnabled, setIsMusicEnabled] = useState(true);
+  const [isMusicEnabled, setIsMusicEnabled] = useState(false);
 
   const ctxRef = useRef<AudioContext | null>(null);
   const masterGainRef = useRef<GainNode | null>(null);
