@@ -113,7 +113,7 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
                 />
                 <Bar dataKey="value" radius={[6, 6, 0, 0]}>
                   {evidence.rows.map((_, i) => (
-                    <Cell key={i} fill={i === evidence.rows.length - 1 ? COLORS.accent : COLORS.primary} />
+                    <Cell key={i} fill={COLORS.primary} />
                   ))}
                   <LabelList dataKey="value" position="top" style={{ fontSize: 11, fontWeight: 700, fill: "hsl(20 14% 18%)" }} />
                 </Bar>
