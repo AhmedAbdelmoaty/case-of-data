@@ -84,8 +84,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
 
   const handlePick = useCallback(
     (option: typeof choices[number]) => {
-      try { playSound("paperRustle"); } catch {/* noop */}
-      try { playSound("tick"); } catch {/* noop */}
+      // Removed paperRustle + tick — harsh "tssss" on every selection.
       const result = pickChoice(option);
       if (!result) return;
 
@@ -108,7 +107,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
       setDialogueKey((k) => k + 1);
       setPhase("dialogue");
     },
-    [pickChoice, playSound]
+    [pickChoice]
   );
 
   const handleDialogueComplete = useCallback(() => {
@@ -234,7 +233,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
                 <motion.button
                   key={option.id}
                   onClick={() => handlePick(option)}
-                  onMouseEnter={() => { try { playSound("tick"); } catch {} }}
+                  onMouseEnter={() => { /* hover tick removed — too noisy */ }}
                   className="w-full p-4 rounded-xl bg-card/85 border border-border hover:border-primary/60 hover:bg-card hover:shadow-[0_0_24px_hsl(var(--primary)/0.18)] transition-all text-right group"
                   dir="rtl"
                   initial={{ opacity: 0, y: 20 }}

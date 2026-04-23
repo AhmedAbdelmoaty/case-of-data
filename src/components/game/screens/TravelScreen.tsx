@@ -56,9 +56,13 @@ export const TravelScreen = ({ onComplete }: TravelScreenProps) => {
       timers.push(setTimeout(() => setCurrentMonologue(m.text), m.at));
       timers.push(setTimeout(() => setCurrentMonologue(null), m.at + m.dur));
     });
-    // Two distant car horns at expressive moments
-    timers.push(setTimeout(() => { try { playSound("carHornDistant"); } catch {/* noop */} }, 2200));
-    timers.push(setTimeout(() => { try { playSound("carHornDistant"); } catch {/* noop */} }, 5200));
+    // Multiple distant horns + a passing whoosh — sells the busy street feel
+    timers.push(setTimeout(() => { try { playSound("carHornDistant"); } catch {/* noop */} }, 800));
+    timers.push(setTimeout(() => { try { playSound("whoosh"); } catch {/* noop */} }, 1900));
+    timers.push(setTimeout(() => { try { playSound("carHornDistant"); } catch {/* noop */} }, 2600));
+    timers.push(setTimeout(() => { try { playSound("carHorn"); } catch {/* noop */} }, 4100));
+    timers.push(setTimeout(() => { try { playSound("whoosh"); } catch {/* noop */} }, 4900));
+    timers.push(setTimeout(() => { try { playSound("carHornDistant"); } catch {/* noop */} }, 6100));
     return () => timers.forEach(clearTimeout);
   }, [playSound]);
 
