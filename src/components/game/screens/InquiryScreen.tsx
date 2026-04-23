@@ -74,13 +74,13 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
     const reportScene = g === "female" ? hishamHandingReportFemaleImg : hishamHandingReportMaleImg;
 
     if (currentLines.some((line) => line.inlineEvidence)) return reportScene;
-    if (state.currentNodeId?.includes("TRACK_A")) return velaroMensSectionImg;
-    if (state.currentNodeId?.includes("TRACK_C")) return velaroWomensSectionImg;
-    if (state.currentNodeId?.includes("TRACK_B") || state.currentNodeId?.includes("TRACK_D")) return velaroCheckoutBusyImg;
+    if (state.trackEntered === "A") return velaroMensSectionImg;
+    if (state.trackEntered === "C") return velaroWomensSectionImg;
+    if (state.trackEntered === "D") return velaroCheckoutBusyImg;
     if (phase === "dialogue") return ownerOffice;
     if (state.questionsUsed === 0) return ownerBase;
     return velaroInteriorWideImg;
-  }, [currentLines, g, phase, state.currentNodeId, state.questionsUsed]);
+  }, [currentLines, g, phase, state.trackEntered, state.questionsUsed]);
 
   const handlePick = useCallback(
     (option: typeof choices[number]) => {
