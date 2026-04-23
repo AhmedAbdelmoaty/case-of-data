@@ -67,17 +67,10 @@ function pickTrackOptions(
   shuffleSalt: number
 ): { options: ChoicePresentation[]; conclusion: TrackTopic } {
   const pool = TRACKS[trackId];
+  // Preserve the authored topic order from the pool — earlier topics surface first
   const remaining = pool.topics.filter((t) => !askedTopicIds.includes(t.id));
   const conclusion = pool.conclusion;
-
-  // Deterministic order based on track + round + salt — stable across re-renders
-  const seed =
-    trackId.charCodeAt(0) * 31 + questionsUsed * 7 + shuffleSalt;
-  const ordered = [...remaining].sort((a, b) => {
-    const ha = (a.id.charCodeAt(0) + a.id.length + seed) % 100;
-    const hb = (b.id.charCodeAt(0) + b.id.length + seed) % 100;
-    return ha - hb;
-  });
+  const ordered = remaining;
 
   const opts: ChoicePresentation[] = [];
 
