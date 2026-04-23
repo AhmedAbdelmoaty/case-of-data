@@ -14,7 +14,7 @@ interface FramingScreenProps {
 type Stage = "background" | "sections" | "summary";
 
 export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
-  const { state, setFramingSelection, submitFraming } = usePFGame();
+  const { state, framingSections, setFramingSelection, submitFraming } = usePFGame();
   const { playSound } = useSound();
 
   const [stage, setStage] = useState<Stage>("background");
