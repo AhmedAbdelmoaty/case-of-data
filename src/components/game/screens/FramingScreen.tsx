@@ -47,7 +47,7 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
 
     // Auto-advance to next section after a small beat
     setTimeout(() => {
-      if (activeSectionIdx < FRAMING_SECTIONS.length - 1) {
+      if (activeSectionIdx < framingSections.length - 1) {
         try { playSound("whoosh"); } catch {}
         setActiveSectionIdx((i) => i + 1);
       } else {
@@ -71,7 +71,7 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
     }, 1500);
   };
 
-  const currentSection = FRAMING_SECTIONS[activeSectionIdx];
+  const currentSection = framingSections[activeSectionIdx];
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
@@ -141,7 +141,7 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
           >
             {/* Progress dots */}
             <div className="flex gap-2 mb-5">
-              {FRAMING_SECTIONS.map((_, i) => (
+              {framingSections.map((_, i) => (
                 <motion.div
                   key={i}
                   className={`h-2 rounded-full transition-all ${
@@ -238,7 +238,7 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
               </div>
 
               <div className="space-y-2.5 mb-5">
-                {FRAMING_SECTIONS.map((section) => {
+                {framingSections.map((section) => {
                   const selectedOption = section.options.find(
                     (o) => o.id === state.framing[section.id]
                   );
