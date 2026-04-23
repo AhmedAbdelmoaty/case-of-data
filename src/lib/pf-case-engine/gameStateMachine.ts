@@ -313,6 +313,20 @@ export function applyChoice(
 // EVALUATION
 // ============================================================
 
+/** Did the player open the S1 correct option at any point? */
+export function askedS1Correct(state: GameState): boolean {
+  return state.history.some((h) => h.nodeId === "S1" && h.choice === "correct");
+}
+
+/** Did the player walk the full correct spine without ever entering a wrong track? */
+export function walkedFullSpine(state: GameState): boolean {
+  return (
+    !state.trackEntered &&
+    state.history.length >= 5 &&
+    state.history.every((h) => h.choice === "correct")
+  );
+}
+
 export function evaluate(
   state: GameState,
   framing: FramingSelection
