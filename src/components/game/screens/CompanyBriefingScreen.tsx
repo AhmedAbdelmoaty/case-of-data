@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSound } from "@/hooks/useSoundEffects";
-import { useAmbientSound } from "@/hooks/useAmbientSound";
+import { useAmbientSound, type AmbientScene } from "@/hooks/useAmbientSound";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { EnhancedDialogue } from "../EnhancedDialogue";
@@ -54,11 +54,20 @@ export const CompanyBriefingScreen = ({
   const { profile } = useAuth();
   const name = profile?.display_name || "محلل";
   const g = (profile?.gender || "male") as "male" | "female";
-  const { playSound, playDoorKnock } = useSound();
-
-  useAmbientSound("office");
+  const { playSound, playDoorKnock, playLoopingSound } = useSound();
 
   const [phase, setPhase] = useState<BriefingPhase>(isReviewMode ? "dialogue" : "exterior");
+
+  // Ambient changes per phase: hallway echo while walking, office once seated
+  const ambient: AmbientScene = phase === "hallway" || phase === "door-knock" ? "hallway" : "office";
+  useAmbientSound(ambient);
+
+  // Walking footsteps loop during hallway phase
+  useEffect(() => {
+    if (phase !== "hallway") return;
+    const cancel = playLoopingSound("footstepHard", 600, 4000);
+    return () => cancel();
+  }, [phase, playLoopingSound]);
 
   const avatarImgEarly = g === "female" ? saraImg : analystImg;
   const knockImgEarly = g === "female" ? prismKnockFemaleImg : prismKnockMaleImg;

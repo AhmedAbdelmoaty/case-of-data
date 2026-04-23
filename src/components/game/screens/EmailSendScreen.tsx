@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Send } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,7 +12,7 @@ interface EmailSendScreenProps {
 
 export const EmailSendScreen = ({ onComplete }: EmailSendScreenProps) => {
   const { profile } = useAuth();
-  const { playSound } = useSound();
+  const { playSound, playLoopingSound } = useSound();
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -20,16 +20,21 @@ export const EmailSendScreen = ({ onComplete }: EmailSendScreenProps) => {
   const playerName = profile?.display_name || "محلل";
   const bg = g === "female" ? analystFemaleImg : analystMaleImg;
 
+  // Light keyboard typing ambience while composing (until sent)
+  useEffect(() => {
+    if (sent || sending) return;
+    const cancel = playLoopingSound("keyboardKey", 180, 6000);
+    return () => cancel();
+  }, [sent, sending, playLoopingSound]);
+
   const handleSend = () => {
     if (sending || sent) return;
     setSending(true);
-    try {
-      playSound("collect");
-    } catch {
-      /* noop */
-    }
+    try { playSound("whoosh"); } catch { /* noop */ }
+    try { playSound("collect"); } catch { /* noop */ }
     setTimeout(() => {
       setSent(true);
+      try { playSound("notification"); } catch { /* noop */ }
       setTimeout(onComplete, 1800);
     }, 900);
   };

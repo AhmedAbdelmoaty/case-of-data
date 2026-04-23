@@ -19,11 +19,11 @@ export const IncomingCallScreen = ({ onAnswer }: IncomingCallScreenProps) => {
   const g = (profile?.gender || "male") as "male" | "female";
   const bg = g === "female" ? analystFemaleImg : analystMaleImg;
 
-  // Ringtone — beep loop using existing storeBell-ish sound
+  // Modern iPhone-like ringtone — 2s ring + 1s pause pattern
   useEffect(() => {
-    const ring = () => { try { playSound("storeBell"); } catch { /* noop */ } };
+    const ring = () => { try { playSound("phoneRingModern"); } catch { /* noop */ } };
     ring();
-    ringIntervalRef.current = window.setInterval(ring, 1800);
+    ringIntervalRef.current = window.setInterval(ring, 3000);
     return () => {
       if (ringIntervalRef.current !== null) window.clearInterval(ringIntervalRef.current);
     };

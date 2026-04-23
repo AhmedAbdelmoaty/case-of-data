@@ -42,7 +42,7 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
   const [phase, setPhase] = useState<Phase>("storefront");
   const [dialogueIndex, setDialogueIndex] = useState(0);
 
-  const ambientScene: AmbientScene = phase === "storefront" ? "none" : "store";
+  const ambientScene: AmbientScene = phase === "storefront" ? "street" : "storeRich";
   useAmbientSound(ambientScene);
 
   const enteringImg = g === "female" ? velaroEnteringFemaleImg : velaroEnteringMaleImg;
@@ -59,7 +59,9 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
   // Auto-advance entering → interior → dialogue
   useEffect(() => {
     if (phase === "entering") {
-      try { playSound("storeBell"); } catch {}
+      try { playSound("footstepHard"); } catch { /* noop */ }
+      setTimeout(() => { try { playSound("footstepSoft"); } catch { /* noop */ } }, 350);
+      setTimeout(() => { try { playSound("storeBell"); } catch { /* noop */ } }, 600);
       const t = setTimeout(() => setPhase("interior"), 1700);
       return () => clearTimeout(t);
     }

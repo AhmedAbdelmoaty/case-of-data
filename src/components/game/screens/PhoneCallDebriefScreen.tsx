@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Phone } from "lucide-react";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAmbientSound } from "@/hooks/useAmbientSound";
 import { EnhancedDialogue } from "../EnhancedDialogue";
 import {
   MANSOUR_CALL_STRONG,
@@ -42,6 +43,8 @@ export const PhoneCallDebriefScreen = ({ onComplete }: PhoneCallDebriefScreenPro
   const { profile } = useAuth();
   const [dialogueIndex, setDialogueIndex] = useState(0);
   const [seconds, setSeconds] = useState(0);
+
+  useAmbientSound("phoneCall");
 
   const g = (profile?.gender || "male") as "male" | "female";
   const playerName = profile?.display_name || "محلل";
