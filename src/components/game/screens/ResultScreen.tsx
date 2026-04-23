@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import analystImg from "@/assets/characters/analyst.png";
 import saraImg from "@/assets/characters/sara.png";
-import strongOutcomeImg from "@/assets/scenes/hisham-receiving-report-male.webp";
+import strongOutcomeImg from "@/assets/scenes/hisham-handing-report-male.webp";
 import otherOutcomeImg from "@/assets/scenes/prism-building-exterior.webp";
 
 interface ResultScreenProps {
