@@ -23,7 +23,11 @@ export const EmailSendScreen = ({ onComplete }: EmailSendScreenProps) => {
   const handleSend = () => {
     if (sending || sent) return;
     setSending(true);
-    try { playSound("collect"); } catch { /* noop */ }
+    try {
+      playSound("collect");
+    } catch {
+      /* noop */
+    }
     setTimeout(() => {
       setSent(true);
       setTimeout(onComplete, 1800);
@@ -51,7 +55,7 @@ export const EmailSendScreen = ({ onComplete }: EmailSendScreenProps) => {
         >
           <p className="text-muted-foreground text-xs tracking-widest">📧 إرسال التقرير</p>
           <h2 className="text-foreground text-lg font-bold mt-2" dir="rtl">
-            ابعت التقرير لأستاذ منصور قبل ما تخلص يومك
+            ابعت التقرير لمديرك المباشر قبل ما تخلص يومك
           </h2>
         </motion.div>
 
@@ -74,7 +78,9 @@ export const EmailSendScreen = ({ onComplete }: EmailSendScreenProps) => {
             </div>
             <div className="flex gap-2 border-b border-border/40 pb-2">
               <span className="text-muted-foreground w-14 shrink-0">من:</span>
-              <span className="text-foreground font-mono text-xs">{playerName.toLowerCase().replace(/\s+/g, ".")}@prism-consulting.com</span>
+              <span className="text-foreground font-mono text-xs">
+                {playerName.toLowerCase().replace(/\s+/g, ".")}@prism-consulting.com
+              </span>
             </div>
             <div className="flex gap-2 border-b border-border/40 pb-2">
               <span className="text-muted-foreground w-14 shrink-0">الموضوع:</span>
@@ -82,7 +88,9 @@ export const EmailSendScreen = ({ onComplete }: EmailSendScreenProps) => {
             </div>
             <div className="pt-2 text-foreground/80 text-xs leading-relaxed">
               <p>أستاذ منصور،</p>
-              <p className="mt-2">مرفق تقرير قضية VELARO مع تأطير المشكلة كاملاً، نتائج المقابلة مع أستاذ هشام الشريف، والتوصية النهائية.</p>
+              <p className="mt-2">
+                مرفق تقرير قضية VELARO مع تأطير المشكلة كاملاً، نتائج المقابلة مع أستاذ هشام الشريف، والتوصية النهائية.
+              </p>
               <p className="mt-2">في انتظار ملاحظاتك.</p>
               <p className="mt-2 text-muted-foreground">📎 VELARO_Framing_Report.pdf</p>
             </div>
@@ -124,7 +132,7 @@ export const EmailSendScreen = ({ onComplete }: EmailSendScreenProps) => {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            ✓ التقرير وصل لأستاذ منصور…
+            ✓ التقرير وصل لمديرك انتظر مكالمة منه…
           </motion.p>
         )}
       </div>
