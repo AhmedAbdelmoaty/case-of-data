@@ -4,7 +4,6 @@ import {
   resetInquiryState,
   applyChoice as engineApply,
   getChoices as engineGetChoices,
-  getNode as engineGetNode,
   evaluate as engineEvaluate,
   type GameState,
   type ChoicePresentation,
@@ -46,7 +45,7 @@ interface PFGameContextValue {
   state: PFGameState;
   // Inquiry
   getChoices: () => ChoicePresentation[];
-  pickChoice: (isCorrect: boolean) => ChoiceResult | null;
+  pickChoice: (choice: ChoicePresentation) => ChoiceResult | null;
   saveNote: (id: string, text: string) => void;
   removeNote: (roundId: number) => void;
   // Restart inquiry (limited to 1 use)
@@ -102,8 +101,7 @@ export const PFGameProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const pickChoice = useCallback(
-    (isCorrect: boolean): ChoiceResult | null => {
-      const choice = isCorrect ? "correct" : "wrong";
+    (choice: ChoicePresentation): ChoiceResult | null => {
       const result = engineApply(state, choice);
       setState((prev) => {
         const newReports =
