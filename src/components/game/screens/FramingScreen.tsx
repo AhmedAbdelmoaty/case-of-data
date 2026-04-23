@@ -43,15 +43,16 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
   const handleSelect = (sectionId: keyof typeof state.framing, optionId: string) => {
     if (confirmed) return;
     setFramingSelection(sectionId, optionId);
-    try { playSound("tick"); } catch {}
+    try { playSound("paperRustle"); } catch { /* noop */ }
+    try { playSound("tick"); } catch { /* noop */ }
 
     // Auto-advance to next section after a small beat
     setTimeout(() => {
       if (activeSectionIdx < framingSections.length - 1) {
-        try { playSound("whoosh"); } catch {}
+        try { playSound("whoosh"); } catch { /* noop */ }
         setActiveSectionIdx((i) => i + 1);
       } else {
-        try { playSound("pageFlip"); } catch {}
+        try { playSound("pageFlip"); } catch { /* noop */ }
         setStage("summary");
       }
     }, 350);
