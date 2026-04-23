@@ -1,129 +1,248 @@
-# 🎯 الخطة: تسريع مكالمة منصور النهائية + حتة تسويقية لـ IMP
 
-## 1) فهمي للطلب
 
-عايز المكالمة النهائية مع منصور تبقى **أسرع وأكثر حسمًا**:
+# 🎯 الخطة: تحسينات السلاسة والواجهة في مرحلة الأسئلة
 
-- **لا ترحيب** ("ألو معاك منصور…") → يدخل في الموضوع على طول.
-- **دمج جمل منصور** اللي ينفع تتدمج في رد واحد بدل ما تكون مقطّعة على كذا EnhancedDialogue منفصل (تقليل عدد ضغطات "استمرار").
-- **تقليل ردود المحلل** لأقل حاجة ممكنة (رد أو اتنين بالكتير).
-- **النبرة العاطفية تفضل** على حسب النهاية: مكافأة لو صح، توجيه لو متوسط، تعنيف لو غلط.
-- **في النهايتين متوسط/غلط** → يضيف **جملة تسويقية لـ IMP** ("روح ذاكر كورسات IMP علشان تتقن Problem Framing").
-- **في النهاية الصح** → ممكن نحط جملة IMP بنبرة فخر (اختياري بسيط) بس بدون إلزام.
+## أولاً: ملخص فهمي لطلباتك (٦ تعديلات)
 
----
-
-## 2) الملف الوحيد اللي هيتعدل
-
-`src/lib/pf-case/mansour-call-scripts.ts` — إعادة كتابة الـ 3 سكريبتات بالكامل:
-
-- `MANSOUR_CALL_STRONG`
-- `MANSOUR_CALL_MEDIUM`
-- `MANSOUR_CALL_WEAK`
-
-**لا تغييرات** في `PhoneCallDebriefScreen.tsx` أو أي ملف تاني — البنية نفسها شغّالة.
+| # | التعديل | الحالة |
+|---|---|---|
+| 1 | **حذف سؤال المحلل** من الـ dialogue بعد اختيار الخيار → يظهر رد هشام مباشرة (مؤقت، قابل للرجوع) | تسريع |
+| 2 | **مستطيل التقرير كله Clickable** بدل زر "افتح التقرير" بس | UX |
+| 3 | **مشهد العربية (TravelScreen)** يقل ٢ ثانية: 9s → 7s | تسريع |
+| 4 | **مشهد الوصول (ArrivalScreen)** يقل ١ ثانية في الانتقالات الأوتوماتيكية | تسريع |
+| 5 | **الدفتر** يفضل ظاهر دايمًا ومش يتدارى تحت الـ Dialogue (نقله أو رفع z-index) | UX |
+| 6 | **زر إعادة المحادثة**: تغيير الاسم + الشكل + المكان + يرجع من أول دخول المتجر + ٢ محاولات | UX + Logic |
 
 ---
 
-## 3) السكريبتات الجديدة الكاملة
+## ثانياً: التفاصيل الدقيقة لكل تعديل
 
-### 🟢 `MANSOUR_CALL_STRONG` (نهاية ممتازة) — 5 أسطر بدل 10
+### 1️⃣ حذف سؤال المحلل من الـ Dialogue (مؤقتًا)
 
+**الملف:** `src/components/game/screens/InquiryScreen.tsx` (السطور ٩٢–١٠٣)
+
+**الحالي:**
 ```ts
-[
-  { characterId: "mansour",
-    text: "شوف يا فندم… التقرير اللي بعتهولي ده شغل محترم جدًا. هشام الشريف بعتلي رسالة بعد ما قراه، قال حرفيًا: «الراجل ده فهمني أكتر مما أنا فاهم نفسي».",
-    mood: "happy" },
-  { characterId: "mansour",
-    text: "أهم حاجة عملتها صح إنك ما خدتش وصف العميل للمشكلة على إنه الحقيقة. ده بالظبط Problem Framing سليم. وعرفت كويس انو بيقارن غلط والمبيعات مش اقل، لو كنت جريت ورا تفسير العميل الخاطئ كان ممكن يحصل مشاكل اكبر والشركة كانت هتخسر عميل كبير.",
-    mood: "serious" },
-  { characterId: "detective",
-    text: "ده شرف ليّا يا أستاذ منصور.",
-    mood: "happy" },
-  { characterId: "mansour",
-    text: "تستاهل. هاكتب لك على مكافأة.وهاكلمك الأسبوع الجاي على استشارة جديدة.",
-    mood: "happy" },
-  { characterId: "mansour",
-    text: "وكمل اللي إنت بتعمله — خليك ماشي على منهج IMP في التحليل، ده اللي فرّق معاك النهارده. سلام.",
-    mood: "happy" },
-]
+const lines: DialogueLineUI[] = [
+  { characterId: "detective", text: result.questionText, mood: "neutral" },  // ← السؤال
+  { characterId: "hisham", text: result.responseText, ... },                  // ← الرد
+];
 ```
 
-**عدد الضغطات: 5 بدل 10** — مفيش "ألو/أهلًا"، الدخول مباشر بالنتيجة.
-
----
-
-### 🟡 `MANSOUR_CALL_MEDIUM` (نهاية متوسطة) — 5 أسطر بدل 10
-
+**الجديد:** نعلّق سطر المحلل بـ comment واضح للرجوع لاحقًا:
 ```ts
-[
-  { characterId: "mansour",
-    text: "خلّينا نتكلم بصراحة في التقرير… شغلك كويس بس مش كويس بالشكل اللي كنت متوقعه منك. مسكت إن سنة 2025 كانت استثنائية، وده تمام، لكن ما حسمتش الموضوع لآخره.",
-    mood: "neutral" },
-  { characterId: "detective",
-    text: "أيوه، حسيت إن لسه فيه جزء ناقص.",
-    mood: "concerned" },
-  { characterId: "mansour",
-    text: "بالظبط. كان لازم تربط بوضوح إن المقارنة الغلط كانت هتودي العميل لقرار خصومات ضايع. الـ Framing مش بس إنك تشوف الحقيقة، ده إنك توصّلها بحسم عشان العميل يغيّر اتجاهه.",
-    mood: "serious" },
-  { characterId: "mansour",
-    text: "هاحسبها لك تقييم متوسط، مش هاخصم منك كتير. بس خد بالك المرة الجاية: حسم أكتر، وضوح أكتر.",
-    mood: "neutral" },
-  { characterId: "mansour",
-    text: "نصيحة مني — راجع كورسات IMP في Problem Framing تاني، فيه شروحات هتساعدك توصل المعنى للعميل بشكل أقوى. سلام.",
-    mood: "neutral" },
-]
+const lines: DialogueLineUI[] = [
+  // TEMPORARILY HIDDEN — uncomment to restore analyst question line
+  // { characterId: "detective", text: result.questionText, mood: "neutral" },
+  { characterId: "hisham", text: result.responseText, ... },
+];
 ```
 
-**عدد الضغطات: 5 بدل 10** — رد واحد بس من المحلل + جملة IMP في الآخر.
+✅ بضغطة واحدة في المستقبل ترجع زي ما كانت.
 
 ---
 
-### 🔴 `MANSOUR_CALL_WEAK` (نهاية ضعيفة) — 5 أسطر بدل 11
+### 2️⃣ مستطيل التقرير كله Clickable
 
-```ts
-[
-  { characterId: "mansour",
-    text: "خلّينا نتكلم بصراحة. التقرير ده مش اللي كنت متوقعه منك خالص. إنت دخلت على الحل قبل ما تتأكد إن في مشكلة بيع أصلًا — ده نفس الغلط اللي هشام نفسه داخل عليه!",
-    mood: "disappointed" },
-  { characterId: "detective",
-    text: "حضرتك معاك حق… أنا استعجلت.",
-    mood: "concerned" },
-  { characterId: "mansour",
-    text: "لو هشام نفّذ اللي في تقريرك ده هيروح في داهيه، وهييجي يقولنا «إنتو نصحتوني غلط». شغلنا إننا نفهم المشكلة صح الأول، مش نمشي ورا أول فكرة في دماغ العميل.",
-    mood: "disappointed" },
-  { characterId: "mansour",
-    text: "الـ Problem Framing مش رفاهية — ده الفرق بين استشاري حقيقي وحد بيكتب تقارير. إنت النهارده ما عملتش Framing، إنت محددتش المشكلة صح اصلا. هاخصم لك يومين والتقييم ضعيف.",
-    mood: "serious" },
-  { characterId: "mansour",
-    text: "روح ذاكر كورس IMP في Problem Framing من الأول، خصوصًا جزء «امسك المشكلة قبل ما تجري على الحل». لما تتقنه، كلمني. سلام.",
-    mood: "disappointed" },
-]
+**الملف:** `src/components/game/EnhancedDialogue.tsx` (السطور ٢٨٨–٣١٧)
+
+**التغيير:**
+- نحوّل الـ `motion.div` للتقرير من container عادي إلى **زر كامل**.
+- نشيل زر "افتح التقرير" المنفصل، ونحط مكانه **أيقونة بسيطة** (سهم ◀ أو chevron) في الجهة الشمال كإشارة بصرية فقط.
+- نضيف `onClick` على الـ container كله مع `e.stopPropagation()` عشان ما يتقدمش الـ dialogue.
+- نضيف `hover` effect (border يبقى أوضح + scale خفيف) للوضوح إنه قابل للضغط.
+
+**النتيجة البصرية:**
+```
+┌──────────────────────────────────────┐
+│ 📄 أ. هشام سلّمك تقرير               │
+│    تقرير المبيعات الشهري        ◀  │  ← المستطيل كله Clickable
+└──────────────────────────────────────┘
 ```
 
-**عدد الضغطات: 5 بدل 11** — تعنيف مباشر + جملة IMP حاسمة في الآخر.
+✅ مفيش مخاطرة إن المستخدم يعدّي الرد عن طريق الخطأ.
 
 ---
 
-## 4) جدول المقارنة قبل/بعد
+### 3️⃣ تسريع TravelScreen بمقدار ٢ ثانية
 
+**الملف:** `src/components/game/screens/TravelScreen.tsx` (السطر ١٢)
 
-| النهاية | قبل (عدد الـ dialogues) | بعد | تخفيض |
-| ------- | ----------------------- | --- | ----- |
-| Strong  | 10                      | 5   | -50%  |
-| Medium  | 10                      | 5   | -50%  |
-| Weak    | 11                      | 5   | -55%  |
+**التغيير:**
+- `TOTAL_DURATION: 9000` → `7000`
+- إعادة ضبط توقيتات الـ MONOLOGUES عشان تفضل متوزّعة بشكل طبيعي:
+  - `{ at: 1000, dur: 2000 }` (بدل 1400/2400)
+  - `{ at: 3300, dur: 2000 }` (بدل 4400/2400)
+  - `{ at: 5500, dur: 1500 }` (بدل 7000/1800)
 
-
-كل النهايات: **مفيش ترحيب**، **دخول مباشر**، **ردود محلل أقل**، **جمل منصور مدموجة بذكاء**.
+✅ نفس الإحساس السينمائي بس أسرع، مفيش تغيير في الصورة أو الحركة.
 
 ---
 
-## 5) ضمانات
+### 4️⃣ تسريع ArrivalScreen بمقدار ١ ثانية
 
-✅ النبرة العاطفية لكل نهاية محفوظة (فرح/توجيه/تعنيف).  
-✅ كل جملة مدموجة منطقيًا — مفيش حشو ولا تشتيت.  
-✅ المحلل يرد مرة واحدة فقط في medium/weak، ومرة واحدة في strong (لحظة الفخر).  
-✅ جملة IMP موجودة في الـ 3 نهايات بنبرة مناسبة (فخر/نصيحة/توبيخ).  
-✅ مفيش تغيير في `PhoneCallDebriefScreen.tsx` ولا في الـ types — الـ moods المستخدمة كلها موجودة في الـ mapping الحالي.  
-✅ مفيش تأثير على أي ملف تاني في المشروع.
+**الملف:** `src/components/game/screens/ArrivalScreen.tsx` (السطور ٦٠–٧٠)
+
+**التغيير:**
+- `entering → interior`: `2200ms` → `1700ms` (-500ms)
+- `interior → dialogue`: `2500ms` → `2000ms` (-500ms)
+- **المجموع:** -1000ms = ثانية كاملة
+
+✅ مفيش تغيير في الصور ولا الانتقالات البصرية.
+
+---
+
+### 5️⃣ الدفتر يفضل ظاهر فوق الـ Dialogue
+
+**المشكلة الحالية:** زر الدفتر `z-50` والـ Dialogue كمان `z-50` → الـ Dialogue بيغطي على الزر لأنه بياخد مساحة أكبر من الأسفل.
+
+**الملف:** `src/components/game/PFNotebook.tsx` (السطر ٦٠)
+
+**الحل المقترح (الأنسب):**
+- نرفع z-index الزر إلى **`z-[55]`** (فوق الـ Dialogue اللي عند `z-50`).
+- ننقل الزر من `bottom-6 right-6` إلى **`top-20 right-6`** (أعلى الشاشة على اليمين، تحت progress dots مباشرة) → كده مش بيتعارض مع الـ Dialogue اللي بياخد النصف السفلي بالكامل.
+- نخلّي البادج (العدد) والـ glow effect واضحين عشان يلفت النظر.
+
+**النتيجة:**
+```
+┌─────────────────────────────────┐
+│  ●●○○○○      📓 الدفتر [3] ←  │  ← موضع جديد ثابت
+│                                  │
+│         [خلفية]                  │
+│                                  │
+│  ┌───────────────────────────┐  │
+│  │  🗨️  Dialogue هشام        │  │  ← الديالوج تحت
+│  └───────────────────────────┘  │
+└─────────────────────────────────┘
+```
+
+✅ ظاهر دايمًا، وفي مكان منطقي بعيد عن الـ Dialogue.
+
+---
+
+### 6️⃣ زر "اطلب محادثة جديدة من البداية" — إعادة تصميم كامل
+
+#### أ) الملف: `src/components/game/screens/InquiryScreen.tsx`
+
+**المشاكل الحالية:**
+- اسمه: "إعادة المحادثة" → نغيّره
+- مكانه: `fixed bottom-24 left-4` → بيتعارض مع الـ Dialogue
+- شكله: زر صغير أبيض عادي → مش لافت
+- وظيفته: بترجّع لبداية الأسئلة فقط
+- العدد: محاولة واحدة → نخليها اتنين
+
+#### ب) التغييرات:
+
+**1. الاسم:**
+```
+"إعادة المحادثة" → "اطلب محادثة جديدة من البداية"
+```
+
+**2. الشكل والمكان:**
+```tsx
+className="fixed top-4 left-4 z-[55] flex items-center gap-2 px-4 py-2.5 
+  rounded-full border-2 border-amber-400/60 
+  bg-gradient-to-r from-amber-500/20 to-orange-500/20 
+  backdrop-blur-md text-amber-300 font-bold text-xs 
+  shadow-lg shadow-amber-500/30 
+  hover:shadow-amber-500/50 hover:scale-105 
+  animate-pulse-subtle transition-all"
+```
+- **المكان:** `top-4 left-4` (أعلى يسار، بعيد عن progress dots اللي على اليمين، وبعيد عن الـ Dialogue).
+- **الحجم:** صغير ومتزن (`px-4 py-2.5`).
+- **اللون:** ذهبي/برتقالي مميز (مش primary) عشان يلفت النظر بدون إزعاج.
+- **z-index:** `z-[55]` فوق الـ Dialogue.
+- **Animation:** pulse خفيف عشان واضح إنه فعّال.
+
+**3. زيادة المحاولات إلى ٢:**
+
+**الملف:** `src/contexts/PFGameContext.tsx`
+```ts
+canRestart: state.restartCount < 2,  // كان < 1
+```
+
+**الملف:** `src/lib/pf-case-engine/gameStateMachine.ts` (داخل `restartInquiry` لو فيه فحص)
+```ts
+if (prev.restartCount >= 2) return prev;  // كان >= 1
+```
+
+**4. الإعادة من بداية الترحيب (مش الأسئلة فقط):**
+
+**الملف:** `src/contexts/PFGameContext.tsx` — إضافة flag جديد:
+```ts
+interface PFGameContextValue {
+  // ...
+  restartFromBeginning: boolean;  // جديد
+  consumeRestartFlag: () => void; // جديد
+}
+```
+
+**الملف:** `src/pages/Index.tsx` — نراقب الـ flag:
+```ts
+const { restartFromBeginning, consumeRestartFlag } = usePFGame();
+
+useEffect(() => {
+  if (restartFromBeginning) {
+    consumeRestartFlag();
+    setCurrentScreen("arrival");  // يرجع لمشهد دخول المتجر + ترحيب هشام
+  }
+}, [restartFromBeginning]);
+```
+
+**في `restartInquiry` بـ PFGameContext:**
+```ts
+const restartInquiry = useCallback(() => {
+  setState((prev) => {
+    if (prev.restartCount >= 2) return prev;
+    return {
+      ...prev,
+      ...resetInquiryState(),
+      notes: [],
+      collectedReports: [],
+      restartCount: prev.restartCount + 1,
+      restartFromBeginning: true,  // ← يطلق الـ navigation
+    };
+  });
+}, []);
+```
+
+**5. تحديث شرط ظهور الزر** — يفضل ظاهر طول ما `restartCount < 2`:
+```ts
+const showRestartButton =
+  canRestart &&  // الآن يسمح بمحاولتين
+  state.questionsUsed >= 1 &&
+  state.questionsUsed < 4 &&
+  !state.isComplete &&
+  phase === "choosing";
+```
+
+**6. تحديث الـ Modal:**
+- العنوان: "اطلب محادثة جديدة من البداية؟"
+- الرسالة الجديدة: "هترجع تاني لمشهد دخولك المحل ومحادثة الترحيب مع أ. هشام، وكل الملاحظات والتقارير اللي جمعتها هتتمسح. متبقّى لك **{2 - restartCount}** محاولة."
+- زرار التأكيد: "أيوه، ابدأ من الأول"
+
+---
+
+## ثالثاً: الملفات اللي هتتعدل (جدول مختصر)
+
+| الملف | التعديلات |
+|---|---|
+| `src/components/game/screens/InquiryScreen.tsx` | حذف سؤال المحلل (مؤقت) + إعادة تصميم زر Restart + تحديث الـ modal |
+| `src/components/game/EnhancedDialogue.tsx` | مستطيل التقرير Clickable كله |
+| `src/components/game/screens/TravelScreen.tsx` | TOTAL_DURATION من 9000 → 7000 + توقيتات monologues |
+| `src/components/game/screens/ArrivalScreen.tsx` | تخفيض timeouts من 2200/2500 → 1700/2000 |
+| `src/components/game/PFNotebook.tsx` | نقل الزر من `bottom-6 right-6` → `top-20 right-6` + رفع z-index |
+| `src/contexts/PFGameContext.tsx` | `restartCount < 2` + flag `restartFromBeginning` + `consumeRestartFlag` |
+| `src/pages/Index.tsx` | useEffect يرجع لـ `arrival` لما الـ flag ينطلق |
+
+---
+
+## رابعاً: ضمانات
+
+✅ **سؤال المحلل مؤقت بس** — comment واضح للرجوع لاحقًا.  
+✅ **مستطيل التقرير** سهل الفتح من أي نقطة + مفيش مخاطرة لتجاوز الرد.  
+✅ **التوقيتات أسرع** بدون تشويه الإحساس السينمائي.  
+✅ **الدفتر ظاهر دايمًا** فوق الـ Dialogue ومش يتدارى.  
+✅ **زر Restart** فخم، واضح، قابل للضغط، ٢ محاولات، يرجّع لأول دخول المحل.  
+✅ مفيش تأثير على شجرة الأسئلة، السكوريبتات، أو الـ Framing Board.
+
