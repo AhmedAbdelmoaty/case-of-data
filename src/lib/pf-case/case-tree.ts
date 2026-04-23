@@ -11,26 +11,22 @@
 
 export type NodeId =
   | "S1"
-  | "R1"
   | "S2"
   | "S3"
   | "S4"
   | "S5"
+  | "BRIDGE_D"
   | "TRACK_A_1"
   | "TRACK_A_2"
   | "TRACK_A_3"
-  | "TRACK_B_1"
-  | "TRACK_B_2"
-  | "TRACK_B_3"
   | "TRACK_C_1"
   | "TRACK_C_2"
   | "TRACK_C_3"
-  | "TRACK_D_1"
   | "TRACK_D_2"
   | "TRACK_D_3"
   | "END";
 
-export type TrackId = "A" | "B" | "C" | "D";
+export type TrackId = "A" | "C" | "D";
 
 export type CaseOutcome = "strong" | "medium" | "weak";
 
@@ -83,31 +79,6 @@ export const NODES: Record<NodeId, CaseNode> = {
       },
     },
     nextOnCorrect: "S2",
-    nextOnWrong: "R1",
-    wrongEntersTrack: "A",
-  },
-
-  R1: {
-    id: "R1",
-    context: "فرصة تصحيح وحدة بس — لو مشيت في الفرضية الداخلية هتتوّه.",
-    correct: {
-      text: "طب ممكن تقولي إيه اللي شد انتباهك وخلاك تحس إن في حاجة مش ماشية… احكيلي ايه المشكلة؟",
-      hishamReply:
-        "تمام يا فندم. الموضوع كله إن الحركة في المحل كويسة بس لما بصيت على ارقام المبيعات في آخر الشهر، لقيت إن الرقم النهائي أقل من اللي انا كنت متوقعه..",
-      note: {
-        id: "n_r1_recover",
-        text: "بعد توجيه السؤال للمشكلة نفسها: قلق أستاذ هشام مبني على شعور إن الرقم النهائي أقل من المتوقع.",
-      },
-    },
-    wrong: {
-      text: "طب مين تحديدًا من الفريق حاسس إن أداؤه أقل من غيره؟",
-      hishamReply: "والله… ممكن وليد وهاني. كريم وسامح شغلهم تمام. بس مش متأكد. لو تحب نطلع تقرير لكل واحد فيهم؟",
-      note: {
-        id: "n_r1_deeper_internal",
-        text: "تعميق نفس الفرضية الداخلية بدون فحص أصل المشكلة.",
-      },
-    },
-    nextOnCorrect: "S2",
     nextOnWrong: "TRACK_A_1",
     wrongEntersTrack: "A",
   },
@@ -135,8 +106,8 @@ export const NODES: Record<NodeId, CaseNode> = {
       },
     },
     nextOnCorrect: "S3",
-    nextOnWrong: "TRACK_B_1",
-    wrongEntersTrack: "B",
+    nextOnWrong: "BRIDGE_D",
+    wrongEntersTrack: "D",
   },
 
   S3: {
@@ -153,17 +124,18 @@ export const NODES: Record<NodeId, CaseNode> = {
       },
     },
     wrong: {
-      text: "طب قبل ما نكمل، ممكن نبص على أداء فريق البيع؟ مين أحسن واحد فيهم ومين الأقل؟",
-      hishamReply: "ماشي يا فندم، عندي تقرير لكل واحد فيهم. اتفضل، خد ده، فيه الأرقام بتاعتهم كلها.",
-      evidenceId: "ev_team_performance",
+      text: "طب قبل ما نكمل، في حملات ترويج شغّالة الفترة دي؟ يمكن السوق محتاج تذكير بالمحل والمنافسين بياخدوا منك العملاء.",
+      hishamReply:
+        "بصراحة يا فندم، حملاتنا قليلة الفترة دي. وفي نفس الوقت المنافسين حواليّا بيعملوا عروض كل أسبوع تقريبًا. ممكن ده اللي بيسحب الزباين مني.",
+      evidenceId: "ev_competitor_offers",
       note: {
-        id: "n_s3_jumped_internal",
-        text: "بعد ما بان إن في فرق، اللاعب قفز لفرضية الفريق بدل ما يفحص المقارنة نفسها.",
+        id: "n_s3_jumped_external",
+        text: "اللاعب قفز للمنافسين والترويج قبل ما يتأكد من أصل المقارنة.",
       },
     },
     nextOnCorrect: "S4",
-    nextOnWrong: "TRACK_A_1",
-    wrongEntersTrack: "A",
+    nextOnWrong: "TRACK_C_1",
+    wrongEntersTrack: "C",
   },
 
   S4: {
@@ -216,7 +188,7 @@ export const NODES: Record<NodeId, CaseNode> = {
       },
     },
     nextOnCorrect: "END",
-    nextOnWrong: "TRACK_D_1",
+    nextOnWrong: "TRACK_D_2",
     wrongEntersTrack: "D",
   },
 
@@ -291,71 +263,32 @@ export const NODES: Record<NodeId, CaseNode> = {
     nextOnWrong: "END",
   },
 
-  // ============= TRACK B — Daily ops =============
-  TRACK_B_1: {
-    id: "TRACK_B_1",
-    context: "البيانات اليومية ظهرت — مفيش مرجع تاني، خلينا نلف فيها.",
+  // ============= BRIDGE D — Transition from daily report to marketing =============
+  BRIDGE_D: {
+    id: "BRIDGE_D",
+    context: "بصيت على التقرير اليومي… الأسبوع الأخير ضعيف. لازم تفهم ليه الحركة هدت.",
     correct: {
-      text: "خلينا نبص على البيع أسبوعياً، يمكن نلاقي نمط معيّن.",
-      hishamReply: "اتفضل، ده تقرير المبيعات الأسبوعية هتلاقي فيه الأسبوع الأخير بالذات الأضعف.",
-      evidenceId: "ev_weekly_sales",
+      text: "شفت الأسبوع الأخير ضعيف فعلاً. طب الفترة دي في حملات إعلانية أو ترويج شغّال للمحل؟",
+      hishamReply:
+        "والله يا فندم، الحملات قليلة الفترة دي. كنا بنعتمد كتير على الزبون الدائم، بس الجدد قلوا. اتفضل ده ملخص التسويق اللي عندي.",
+      evidenceId: "ev_marketing",
       note: {
-        id: "n_b1",
-        text: "تقرير المبيعات الأسبوعية في الدفتر — الأسبوع الأخير الأضعف.",
+        id: "n_bridge_d",
+        text: "أستاذ هشام أكد إن الحملات قلّت — اللاعب بدأ يربط الضعف بالتسويق بدون ما يتأكد من أصل المقارنة.",
       },
     },
     wrong: {
-      text: "في حاجة في الشغل اليومي حصلت الشهر ده؟ بضاعة اتأخرت أو حاجة شبه كده؟",
-      hishamReply: "آه فعلاً يا فندم. فيه شحنة اتأخرت أسبوع كامل تقريبًا، ومنتجات معينة خلصت من على الرفوف لفترة.",
+      text: "شفت الأسبوع الأخير ضعيف فعلاً. طب الفترة دي في حملات إعلانية أو ترويج شغّال للمحل؟",
+      hishamReply:
+        "والله يا فندم، الحملات قليلة الفترة دي. كنا بنعتمد كتير على الزبون الدائم، بس الجدد قلوا. اتفضل ده ملخص التسويق اللي عندي.",
+      evidenceId: "ev_marketing",
       note: {
-        id: "n_b1_alt",
-        text: "أستاذ هشام يعترف بتأخير شحنة ونفاد منتجات.",
+        id: "n_bridge_d",
+        text: "أستاذ هشام أكد إن الحملات قلّت — اللاعب بدأ يربط الضعف بالتسويق بدون ما يتأكد من أصل المقارنة.",
       },
     },
-    nextOnCorrect: "TRACK_B_2",
-    nextOnWrong: "TRACK_B_2",
-  },
-  TRACK_B_2: {
-    id: "TRACK_B_2",
-    correct: {
-      text: "في ظرف معيّن في الشغل اتأثر بيه المحل الشهر ده؟ حاجة في البضاعة مثلاً؟",
-      hishamReply: "أيوه يا فندم. فيه شحنة اتأخرت، وفيه منتجات خلصت من على الرف لفترة. ممكن ده أثّر فعلاً.",
-      note: {
-        id: "n_b2",
-        text: "تأخير شحنة + نفاد منتجات الشهر ده.",
-      },
-    },
-    wrong: {
-      text: "ساعات الذروة بتاعت البيع متأثرة برضو؟",
-      hishamReply: "بصراحة يا فندم مش متابع الساعات بدقة. بس الموظفين بيقولوا فترة بعد العصر بقت أهدى عن قبل كده.",
-      note: {
-        id: "n_b2_alt",
-        text: "انطباع بضعف فترة العصر، بدون قياس دقيق.",
-      },
-    },
-    nextOnCorrect: "TRACK_B_3",
-    nextOnWrong: "TRACK_B_3",
-  },
-  TRACK_B_3: {
-    id: "TRACK_B_3",
-    correct: {
-      text: "يبقى محتاجين نحسّن الشغل اليومي — متابعة البضاعة وساعات الذروة.",
-      hishamReply: "كلام معقول يا فندم. الصورة بقت أوضح… بس صدّقني، لسه عندي حاجة جوايا مش مرتاح لها 100%.",
-      note: {
-        id: "n_b3",
-        text: "توصية تشغيلية. أستاذ هشام لسه عنده شك خفيف.",
-      },
-    },
-    wrong: {
-      text: "نغيّر مواعيد الشغل عشان نوفّر تكلفة الفترات الضعيفة؟",
-      hishamReply: "هممم… ممكن، بس ده قرار كبير يا فندم. الصورة بقت أوضح، بس لسه في حاجة مش مرتاح لها.",
-      note: {
-        id: "n_b3_alt",
-        text: "اقتراح تغيير مواعيد بدون أساس قوي.",
-      },
-    },
-    nextOnCorrect: "END",
-    nextOnWrong: "END",
+    nextOnCorrect: "TRACK_D_2",
+    nextOnWrong: "TRACK_D_2",
   },
 
   // ============= TRACK C — Price / competitors =============
@@ -429,30 +362,7 @@ export const NODES: Record<NodeId, CaseNode> = {
   },
 
   // ============= TRACK D — Marketing / demand =============
-  TRACK_D_1: {
-    id: "TRACK_D_1",
-    context: "دخلت في مسار «التسويق والطلب».",
-    correct: {
-      text: "ممكن أشوف تفاصيل الميزانية والحملات الأخيرة؟",
-      hishamReply: "اتفضل يا فندم، ده ملخص التسويق اللي عندي. هتلاقي فيه ميزانية الإعلانات والأرقام كلها.",
-      evidenceId: "ev_marketing",
-      note: {
-        id: "n_d1",
-        text: "تقرير التسويق في الدفتر — ميزانية الإعلانات نزلت عن السنة اللي فاتت.",
-      },
-    },
-    wrong: {
-      text: "الـ engagement على السوشيال أقل بكتير عن الأول؟",
-      hishamReply: "فرق بسيط يا فندم بصراحة. اتفضل ده التقرير، شوف بنفسك مش حاجة كبيرة تبرّر النزول كله.",
-      evidenceId: "ev_marketing",
-      note: {
-        id: "n_d1_alt",
-        text: "تقرير التسويق — التفاعل تقريبًا ثابت، مش مفسّر للنزول.",
-      },
-    },
-    nextOnCorrect: "TRACK_D_2",
-    nextOnWrong: "TRACK_D_2",
-  },
+  // Entry is via BRIDGE_D (from S2 wrong) or directly from S5 wrong → TRACK_D_2.
   TRACK_D_2: {
     id: "TRACK_D_2",
     correct: {

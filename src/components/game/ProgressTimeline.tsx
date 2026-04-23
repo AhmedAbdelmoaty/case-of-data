@@ -7,7 +7,6 @@ type Screen =
   | "inquiry"
   | "reflection"
   | "framing"
-  | "presentation"
   | "email-send"
   | "mansour-receives"
   | "incoming-call"
@@ -21,7 +20,6 @@ const STAGES: { key: Screen; icon: string; label: string }[] = [
   { key: "inquiry", icon: "❓", label: "الأسئلة" },
   { key: "reflection", icon: "🧠", label: "التأمل" },
   { key: "framing", icon: "📋", label: "التأطير" },
-  { key: "presentation", icon: "📊", label: "التقديم" },
   { key: "email-send", icon: "📧", label: "الإيميل" },
   { key: "mansour-receives", icon: "📩", label: "الاستلام" },
   { key: "incoming-call", icon: "📞", label: "المكالمة" },

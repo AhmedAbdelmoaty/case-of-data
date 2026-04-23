@@ -15,7 +15,6 @@ import { countCorrectFraming, type FramingSelection } from "@/lib/pf-case/framin
 export interface GameState {
   currentNodeId: NodeId;
   questionsUsed: number;
-  hasUsedRecovery: boolean;
   trackEntered: TrackId | null;
   /** History of choices: [{nodeId, choice}] */
   history: { nodeId: NodeId; choice: "correct" | "wrong" }[];
@@ -27,7 +26,6 @@ export interface GameState {
 export const initialGameState: GameState = {
   currentNodeId: "S1",
   questionsUsed: 0,
-  hasUsedRecovery: false,
   trackEntered: null,
   history: [],
   collectedEvidence: [],
@@ -76,12 +74,6 @@ export function applyChoice(
     trackEntered = node.wrongEntersTrack;
   }
 
-  // Recovery flag — used when leaving S1 wrong
-  let hasUsedRecovery = state.hasUsedRecovery;
-  if (state.currentNodeId === "S1" && choice === "wrong") {
-    hasUsedRecovery = true;
-  }
-
   const questionsUsed = state.questionsUsed + 1;
 
   // Determine completion: reached END or hit question cap
@@ -97,7 +89,6 @@ export function applyChoice(
     ...state,
     currentNodeId: isComplete ? "END" : nextNodeId,
     questionsUsed,
-    hasUsedRecovery,
     trackEntered,
     history: [...state.history, { nodeId: state.currentNodeId, choice }],
     collectedEvidence,
@@ -151,17 +142,11 @@ export function evaluate(
   // Check if player walked the full spine correctly
   const wentFullSpine =
     !state.trackEntered &&
-    !state.hasUsedRecovery &&
     state.history.length >= 5 &&
     state.history.every((h) => h.choice === "correct");
 
-  const wentSpineWithRecovery =
-    !state.trackEntered &&
-    state.hasUsedRecovery;
-
   let outcome: CaseOutcome;
   if (wentFullSpine && correctCount === 3) outcome = "strong";
-  else if (wentSpineWithRecovery && correctCount >= 2) outcome = "medium";
   else if (!state.trackEntered && correctCount >= 2) outcome = "medium";
   else outcome = "weak";
 
