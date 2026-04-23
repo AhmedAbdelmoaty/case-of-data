@@ -177,6 +177,16 @@ export const PFGameProvider = ({ children }: { children: ReactNode }) => {
 
   const isInquiryComplete = useCallback(() => state.isComplete, [state.isComplete]);
 
+  const framingSections = useMemo<FramingSection[]>(
+    () =>
+      buildFramingSections({
+        askedS1Correct: engineAskedS1Correct(state),
+        walkedFullSpine: engineWalkedFullSpine(state),
+        shuffleSeed: 7,
+      }),
+    [state]
+  );
+
   return (
     <PFGameContext.Provider
       value={{
@@ -187,6 +197,7 @@ export const PFGameProvider = ({ children }: { children: ReactNode }) => {
         removeNote,
         restartInquiry,
         canRestart: state.restartCount < 1,
+        framingSections,
         setFramingSelection,
         submitFraming,
         resetGame,
@@ -198,4 +209,3 @@ export const PFGameProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export { FRAMING_SECTIONS };
