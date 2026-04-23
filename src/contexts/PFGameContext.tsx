@@ -1,15 +1,18 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from "react";
 import {
   initialGameState,
   resetInquiryState,
   applyChoice as engineApply,
   getChoices as engineGetChoices,
   evaluate as engineEvaluate,
+  askedS1Correct as engineAskedS1Correct,
+  walkedFullSpine as engineWalkedFullSpine,
   type GameState,
   type ChoicePresentation,
 } from "@/lib/pf-case-engine/gameStateMachine";
 import {
-  FRAMING_SECTIONS,
+  buildFramingSections,
+  type FramingSection,
   type FramingSelection,
 } from "@/lib/pf-case/framing-board";
 import type { CaseOutcome } from "@/lib/pf-case/case-tree";
