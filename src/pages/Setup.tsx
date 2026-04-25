@@ -57,7 +57,7 @@ const Setup = () => {
             type="text"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
-            placeholder="مثلاً: أحمد أو Ahmed"
+            placeholder=""
             dir="auto"
             className="w-full px-4 py-3 rounded-lg bg-input border border-border text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
@@ -69,7 +69,7 @@ const Setup = () => {
             type="text"
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
-            placeholder="مثلاً: حسن أو Hassan"
+            placeholder=""
             dir="auto"
             className="w-full px-4 py-3 rounded-lg bg-input border border-border text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
