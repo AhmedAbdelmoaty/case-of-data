@@ -76,6 +76,7 @@ const GameContent = () => {
 
         if (options?.clearStorage) {
           localStorage.removeItem(storageKey);
+          localStorage.removeItem("pf-game-submitted");
         }
 
         setCurrentScreen(screen);
