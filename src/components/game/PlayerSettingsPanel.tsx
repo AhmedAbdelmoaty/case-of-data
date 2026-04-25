@@ -18,7 +18,8 @@ export const PlayerSettingsPanel = ({ onReplayBriefing, onResetProgress }: Playe
   const { isMusicEnabled, toggleMusic, volume, setVolume } = useMusic();
   const [isOpen, setIsOpen] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [editName, setEditName] = useState(profile?.display_name || "");
+  const [editFirstName, setEditFirstName] = useState(profile?.first_name || "");
+  const [editLastName, setEditLastName] = useState(profile?.last_name || "");
   const [editGender, setEditGender] = useState<"male" | "female">(profile?.gender as any || "male");
   const [saving, setSaving] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
@@ -30,10 +31,11 @@ export const PlayerSettingsPanel = ({ onReplayBriefing, onResetProgress }: Playe
   };
 
   const handleSaveProfile = async () => {
-    if (!editName.trim()) return;
+    if (!editFirstName.trim() || !editLastName.trim()) return;
     setSaving(true);
     await updateProfile({
-      display_name: editName.trim(),
+      first_name: editFirstName.trim(),
+      last_name: editLastName.trim(),
       gender: editGender,
       avatar_choice: editGender === "male" ? "analyst" : "sara",
     });
