@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { useAuth } from "@/contexts/AuthContext";
 import { CompanyBriefingScreen } from "@/components/game/screens/CompanyBriefingScreen";
 import { TravelScreen } from "@/components/game/screens/TravelScreen";
 import { VelaroStreetScreen } from "@/components/game/screens/VelaroStreetScreen";
@@ -36,11 +35,9 @@ type Screen =
   | "replay-briefing";
 
 const GameContent = () => {
-  const { user } = useAuth();
   const { resetGame, state: pfState, consumeRestartFlag } = usePFGame();
 
-  const userId = user?.id || "guest";
-  const storageKey = `pf-game-screen-${userId}`;
+  const storageKey = `pf-game-screen-guest`;
 
   const [currentScreen, setCurrentScreen] = useState<Screen>(() => {
     const saved = localStorage.getItem(storageKey) as Screen | null;
