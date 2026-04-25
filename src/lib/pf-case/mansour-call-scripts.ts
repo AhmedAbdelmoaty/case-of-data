@@ -14,15 +14,15 @@ export const MANSOUR_CALL_STRONG: DialogueLine[] = [
 export const MANSOUR_CALL_MEDIUM: DialogueLine[] = [
   { characterId: "mansour", text: "خلّينا نتكلم بصراحة في التقرير… شغلك كويس بس مش كويس بالشكل اللي كنت متوقعه منك. مسكت إن سنة 2025 كانت استثنائية، وده تمام، لكن ما حسمتش الموضوع لآخره.", mood: "neutral" },
   { characterId: "detective", text: "أيوه، حسيت إن لسه فيه جزء ناقص.", mood: "concerned" },
-  { characterId: "mansour", text: "بالظبط. كان لازم تربط بوضوح إن المقارنة الغلط كانت هتودي العميل لقرار خصومات ضايع. الـ Framing مش بس إنك تشوف الحقيقة، ده إنك توصّلها بحسم عشان العميل يغيّر اتجاهه.", mood: "serious" },
-  { characterId: "mansour", text: "هاحسبها لك تقييم متوسط، مش هاخصم منك كتير. بس خد بالك المرة الجاية: حسم أكتر، وضوح أكتر.", mood: "neutral" },
-  { characterId: "mansour", text: "نصيحة مني — راجع كورسات IMP في Problem Framing تاني، فيه شروحات هتساعدك توصل المعنى للعميل بشكل أقوى. سلام.", mood: "neutral" },
+  { characterId: "mansour", text: "بالظبط. كان لازم تربط بوضوح إن المقارنة الغلط كانت هتودي العميل لقرار غلط. الـ Framing مش بس إنك تشوف الحقيقة، ده إنك توصّلها بحسم عشان العميل يغيّر اتجاهه.", mood: "serious" },
+  { characterId: "mansour", text: "هديك تقييم متوسط، مش هخصم منك كتير. بس خد بالك المرة الجاية: حسم أكتر، وضوح أكتر.", mood: "neutral" },
+  { characterId: "mansour", text: "نصيحة مني ذاكر دبلومة تحليل البيانات من IMP، هتساعدك جدًا في تنمية مهاراتك التحليلية، وازاي تفهم المشكلة بشكل صحيح.", mood: "neutral" },
 ];
 
 export const MANSOUR_CALL_WEAK: DialogueLine[] = [
-  { characterId: "mansour", text: "خلّينا نتكلم بصراحة. التقرير ده مش اللي كنت متوقعه منك خالص. إنت دخلت على الحل قبل ما تتأكد إن في مشكلة بيع أصلًا — ده نفس الغلط اللي هشام نفسه داخل عليه!", mood: "disappointed" },
+  { characterId: "mansour", text: "خلّينا نتكلم بصراحة. التقرير ده مش اللي كنت متوقعه منك خالص. إنت دخلت على الحل قبل ما تتأكد إن في مشكلة بيع أصلًا !", mood: "disappointed" },
   { characterId: "detective", text: "حضرتك معاك حق… أنا استعجلت.", mood: "concerned" },
   { characterId: "mansour", text: "لو هشام نفّذ اللي في تقريرك ده هيروح في داهيه، وهييجي يقولنا «إنتو نصحتوني غلط». شغلنا إننا نفهم المشكلة صح الأول، مش نمشي ورا أول فكرة في دماغ العميل.", mood: "disappointed" },
-  { characterId: "mansour", text: "الـ Problem Framing مش رفاهية — ده الفرق بين استشاري حقيقي وحد بيكتب تقارير. إنت النهارده ما عملتش Framing، إنت محددتش المشكلة صح اصلا. هاخصم لك يومين والتقييم ضعيف.", mood: "serious" },
-  { characterId: "mansour", text: "روح ذاكر كورس IMP في Problem Framing من الأول، خصوصًا جزء «امسك المشكلة قبل ما تجري على الحل». لما تتقنه، كلمني. سلام.", mood: "disappointed" },
+  { characterId: "mansour", text: "الـ Problem Framing مش رفاهية — ده الفرق بين استشاري حقيقي وحد بيكتب تقارير. إنت النهارده ما عملتش Framing، إنت محددتش المشكلة صح اصلا. هاخصملك يومين والتقييم ضعيف.", mood: "serious" },
+  { characterId: "mansour", text: "روح ذاكر دبلومة تحليل البيانات من IMP، هتساعدك جدًا في تنمية مهاراتك التحليلية، وهتعرف إزاي تفهم المشكلة صح. لما تتقن ده، كلّمني. سلام.", mood: "disappointed" },
 ];
