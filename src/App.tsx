@@ -4,23 +4,26 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { SoundProvider } from "@/hooks/useSoundEffects";
 import { MusicProvider } from "@/hooks/useBackgroundMusic";
 import Index from "./pages/Index";
-import Auth from "./pages/Auth";
 import Setup from "./pages/Setup";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
+import AdminLogin from "./pages/AdminLogin";
+import AdminBoard from "./pages/AdminBoard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const AuthRedirect = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading, isProfileComplete } = useAuth();
-  if (loading) return <div className="min-h-screen bg-background flex items-center justify-center"><div className="text-primary animate-pulse">جاري التحميل...</div></div>;
-  if (user && isProfileComplete) return <Navigate to="/" replace />;
-  if (user && !isProfileComplete) return <Navigate to="/setup" replace />;
+const RequireProfile = ({ children }: { children: React.ReactNode }) => {
+  const { isProfileComplete, loading } = useAuth();
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-primary animate-pulse">جاري التحميل...</div>
+      </div>
+    );
+  }
+  if (!isProfileComplete) return <Navigate to="/setup" replace />;
   return <>{children}</>;
 };
 
@@ -34,19 +37,18 @@ const App = () => (
           <MusicProvider>
             <SoundProvider>
               <Routes>
-                <Route path="/auth" element={<AuthRedirect><Auth /></AuthRedirect>} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/setup" element={
-                  <ProtectedRoute>
-                    <Setup />
-                  </ProtectedRoute>
-                } />
+                {/* Player routes — no login required */}
+                <Route path="/setup" element={<Setup />} />
                 <Route path="/" element={
-                  <ProtectedRoute requireProfile>
+                  <RequireProfile>
                     <Index />
-                  </ProtectedRoute>
+                  </RequireProfile>
                 } />
+
+                {/* Hidden admin routes */}
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin/board-9k2x" element={<AdminBoard />} />
+
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </SoundProvider>

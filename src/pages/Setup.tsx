@@ -6,13 +6,13 @@ import analystImg from "@/assets/characters/analyst.png";
 import saraImg from "@/assets/characters/sara.png";
 
 const Setup = () => {
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [gender, setGender] = useState<"male" | "female" | null>(null);
   const [loading, setLoading] = useState(false);
-  const { updateProfile, isProfileComplete, loading: authLoading } = useAuth();
+  const { updateProfile, isProfileComplete } = useAuth();
   const navigate = useNavigate();
 
-  // If profile already complete, skip setup
   useEffect(() => {
     if (isProfileComplete) {
       navigate("/", { replace: true });
@@ -20,16 +20,15 @@ const Setup = () => {
   }, [isProfileComplete, navigate]);
 
   const handleSubmit = async () => {
-    if (!name.trim() || !gender) return;
+    if (!firstName.trim() || !lastName.trim() || !gender) return;
     setLoading(true);
-    const { error } = await updateProfile({
-      display_name: name.trim(),
+    await updateProfile({
+      first_name: firstName.trim(),
+      last_name: lastName.trim(),
       gender,
       avatar_choice: gender === "male" ? "analyst" : "sara",
     });
-    if (!error) {
-      navigate("/");
-    }
+    navigate("/");
     setLoading(false);
   };
 
@@ -38,28 +37,40 @@ const Setup = () => {
     { id: "female" as const, label: "محللة", image: saraImg },
   ];
 
-  if (authLoading || isProfileComplete) return null;
+  if (isProfileComplete) return null;
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8">
       <motion.div
-        className="w-full max-w-sm space-y-6"
+        className="w-full max-w-sm space-y-5"
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
       >
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-1">اختر شخصيتك</h1>
-          <p className="text-muted-foreground text-sm">عرّفنا بنفسك قبل ما نبدأ المهمة</p>
+          <h1 className="text-2xl font-bold text-foreground mb-1">عرّفنا بنفسك</h1>
+          <p className="text-muted-foreground text-sm">قبل ما نبدأ المهمة</p>
         </div>
 
         <div>
-          <label className="text-foreground text-sm font-bold mb-2 block">اسمك</label>
+          <label className="text-foreground text-sm font-bold mb-2 block">الاسم الأول</label>
           <input
             type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="اكتب اسمك هنا"
-            dir="rtl"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            placeholder="مثلاً: أحمد أو Ahmed"
+            dir="auto"
+            className="w-full px-4 py-3 rounded-lg bg-input border border-border text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
+
+        <div>
+          <label className="text-foreground text-sm font-bold mb-2 block">الاسم الأخير</label>
+          <input
+            type="text"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            placeholder="مثلاً: حسن أو Hassan"
+            dir="auto"
             className="w-full px-4 py-3 rounded-lg bg-input border border-border text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
@@ -96,7 +107,7 @@ const Setup = () => {
 
         <motion.button
           onClick={handleSubmit}
-          disabled={!name.trim() || !gender || loading}
+          disabled={!firstName.trim() || !lastName.trim() || !gender || loading}
           className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-bold text-sm disabled:opacity-30 flex items-center justify-center gap-2"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}

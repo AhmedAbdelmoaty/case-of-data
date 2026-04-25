@@ -1,8 +1,9 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
 import { Trophy, RotateCcw, AlertTriangle, Brain, Target, NotebookPen, CheckCircle } from "lucide-react";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import analystImg from "@/assets/characters/analyst.png";
 import saraImg from "@/assets/characters/sara.png";
@@ -47,9 +48,33 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
   const { state } = usePFGame();
   const { profile } = useAuth();
 
-  const playerName = profile?.display_name || "محلل";
+  const playerName = profile?.first_name || profile?.display_name || "محلل";
   const g = profile?.gender || "male";
   const avatarImg = g === "female" ? saraImg : analystImg;
+
+  // Record completion once per game session
+  const recordedRef = useRef(false);
+  useEffect(() => {
+    if (recordedRef.current) return;
+    if (!profile?.first_name || !profile?.last_name) return;
+    const key = "pf-game-submitted";
+    if (localStorage.getItem(key)) return;
+    recordedRef.current = true;
+    localStorage.setItem(key, "1");
+    supabase
+      .from("completed_players")
+      .insert({
+        first_name: profile.first_name,
+        last_name: profile.last_name,
+      })
+      .then(({ error }) => {
+        if (error) {
+          // Allow retry on next visit if it failed
+          localStorage.removeItem(key);
+          console.warn("Failed to record completion:", error.message);
+        }
+      });
+  }, [profile?.first_name, profile?.last_name]);
 
   const outcome = state.outcome || "medium";
   const config = outcomeConfig[outcome];
