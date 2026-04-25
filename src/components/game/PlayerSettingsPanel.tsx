@@ -119,10 +119,18 @@ export const PlayerSettingsPanel = ({ onReplayBriefing, onResetProgress }: Playe
                   >
                     <input
                       type="text"
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      placeholder="الاسم"
-                      dir="rtl"
+                      value={editFirstName}
+                      onChange={(e) => setEditFirstName(e.target.value)}
+                      placeholder="الاسم الأول"
+                      dir="auto"
+                      className="w-full px-3 py-2 rounded-lg bg-input border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                    <input
+                      type="text"
+                      value={editLastName}
+                      onChange={(e) => setEditLastName(e.target.value)}
+                      placeholder="الاسم الأخير"
+                      dir="auto"
                       className="w-full px-3 py-2 rounded-lg bg-input border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                     <div className="flex gap-2">
@@ -149,7 +157,7 @@ export const PlayerSettingsPanel = ({ onReplayBriefing, onResetProgress }: Playe
                     <div className="flex gap-2">
                       <button
                         onClick={handleSaveProfile}
-                        disabled={saving || !editName.trim()}
+                        disabled={saving || !editFirstName.trim() || !editLastName.trim()}
                         className="flex-1 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-bold disabled:opacity-50"
                       >
                         {saving ? "جاري الحفظ..." : "حفظ"}
@@ -165,7 +173,8 @@ export const PlayerSettingsPanel = ({ onReplayBriefing, onResetProgress }: Playe
                 ) : (
                   <button
                     onClick={() => {
-                      setEditName(profile?.display_name || "");
+                      setEditFirstName(profile?.first_name || "");
+                      setEditLastName(profile?.last_name || "");
                       setEditGender(profile?.gender as any || "male");
                       setIsEditingProfile(true);
                     }}
