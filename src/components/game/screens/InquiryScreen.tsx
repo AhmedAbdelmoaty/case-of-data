@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSound } from "@/hooks/useSoundEffects";
 import { useAmbientSound } from "@/hooks/useAmbientSound";
 import { EnhancedDialogue } from "../EnhancedDialogue";
+import { FanQuestionCards } from "../FanQuestionCards";
 import { PFNotebook } from "../PFNotebook";
 import { TOTAL_QUESTION_BUDGET } from "@/lib/pf-case/case-tree";
 import type { EvidenceData } from "@/lib/pf-case/evidence-catalog";
