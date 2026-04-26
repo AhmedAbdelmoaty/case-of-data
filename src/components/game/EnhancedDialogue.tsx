@@ -349,26 +349,6 @@ export const EnhancedDialogue = ({
             )}
           </AnimatePresence>
 
-
-          <AnimatePresence>
-            {showSaveButton && onSaveNote && currentDialogue.isSaveable && (
-              <motion.button
-                className={`mt-3 flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-                  isSaved
-                    ? "bg-neon-green/20 border border-neon-green/50 text-neon-green cursor-default"
-                    : "bg-primary/20 border border-primary/50 text-primary hover:bg-primary/30"
-                }`}
-                onClick={handleSave}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                disabled={isSaved}
-              >
-                {isSaved ? <Check className="w-4 h-4" /> : <BookmarkPlus className="w-4 h-4" />}
-                {isSaved ? "تم الحفظ في الدفتر" : "احفظ في الدفتر"}
-              </motion.button>
-            )}
-          </AnimatePresence>
-
           <AnimatePresence>
             {!isTyping && (
               <motion.div
