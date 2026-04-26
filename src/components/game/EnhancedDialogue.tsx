@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { BookmarkPlus, Check, X, ChevronRight, FileText } from "lucide-react";
 import { AnimatedCharacter, type CharacterId } from "./AnimatedCharacter";
 import { ReportDocument } from "./ReportDocument";
+import { flyToNotebook } from "./FlyingItemsLayer";
 import type { EvidenceData } from "@/lib/pf-case/evidence-catalog";
 import analystImg from "@/assets/characters/analyst.png";
 import saraImg from "@/assets/characters/sara.png";
@@ -74,6 +75,19 @@ export const EnhancedDialogue = ({
   const [isTyping, setIsTyping] = useState(true);
   const [showSaveButton, setShowSaveButton] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const reportWasOpenRef = useRef(false);
+  const closeReport = () => {
+    setReportOpen(false);
+    if (reportWasOpenRef.current) {
+      reportWasOpenRef.current = false;
+      // Fly the report from screen center toward the notebook
+      flyToNotebook({
+        fromX: window.innerWidth / 2,
+        fromY: window.innerHeight / 2,
+        kind: "report",
+      });
+    }
+  };
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const stopAudio = () => {
@@ -138,6 +152,15 @@ export const EnhancedDialogue = ({
         clearInterval(typingInterval);
         if (currentDialogue.isSaveable) {
           setShowSaveButton(true);
+          // Auto-fly the note icon to the notebook (notes are auto-saved upstream).
+          // Origin: lower-center of viewport (where dialogue box is).
+          window.setTimeout(() => {
+            flyToNotebook({
+              fromX: window.innerWidth / 2,
+              fromY: window.innerHeight - 180,
+              kind: "note",
+            });
+          }, 250);
         }
       }
     }, 30);
@@ -290,6 +313,7 @@ export const EnhancedDialogue = ({
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
+                reportWasOpenRef.current = true;
                 setReportOpen(true);
               }}
               className="mt-3 w-full rounded-xl border-2 border-primary/40 bg-primary/5 hover:bg-primary/15 hover:border-primary/70 hover:shadow-[0_0_24px_hsl(var(--primary)/0.25)] p-3 flex items-center justify-between gap-3 transition-all text-right group"
@@ -326,7 +350,7 @@ export const EnhancedDialogue = ({
                 exit={{ opacity: 0 }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  setReportOpen(false);
+                  closeReport();
                 }}
               >
                 <motion.div
@@ -337,7 +361,7 @@ export const EnhancedDialogue = ({
                   onClick={(e) => e.stopPropagation()}
                 >
                   <button
-                    onClick={() => setReportOpen(false)}
+                    onClick={() => closeReport()}
                     className="absolute -top-2 -left-2 z-10 w-9 h-9 rounded-full bg-card border border-border flex items-center justify-center text-foreground hover:bg-muted transition-colors shadow-lg"
                     aria-label="إغلاق"
                   >

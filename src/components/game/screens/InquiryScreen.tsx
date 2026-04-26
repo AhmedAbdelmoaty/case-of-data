@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSound } from "@/hooks/useSoundEffects";
 import { useAmbientSound } from "@/hooks/useAmbientSound";
 import { EnhancedDialogue } from "../EnhancedDialogue";
+import { FanQuestionCards } from "../FanQuestionCards";
 import { PFNotebook } from "../PFNotebook";
 import { TOTAL_QUESTION_BUDGET } from "@/lib/pf-case/case-tree";
 import type { EvidenceData } from "@/lib/pf-case/evidence-catalog";
@@ -259,26 +260,17 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
       </AnimatePresence>
       <AnimatePresence>
         {phase === "choosing" && choices.length > 0 && !state.isComplete && (
-          <motion.div key={`choices-${state.currentNodeId}-${state.questionsUsed}`} className="fixed inset-0 z-40 flex items-end justify-center pb-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <div className="max-w-lg w-full px-4 space-y-3">
-              {choices.map((option, i) => (
-                <motion.button
-                  key={option.id}
-                  onClick={() => handlePick(option)}
-                  onMouseEnter={() => { /* hover tick removed — too noisy */ }}
-                  className="w-full p-4 rounded-xl bg-card/85 border border-border hover:border-primary/60 hover:bg-card hover:shadow-[0_0_24px_hsl(var(--primary)/0.18)] transition-all text-right group"
-                  dir="rtl"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.08 }}
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
-                >
-                  <p className="text-foreground text-sm leading-relaxed group-hover:text-primary transition-colors">{option.text}</p>
-                </motion.button>
-              ))}
-            </div>
+          <motion.div
+            key={`choices-${state.currentNodeId}-${state.questionsUsed}`}
+            className="fixed inset-x-0 bottom-0 z-40 flex items-end justify-center pb-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <FanQuestionCards
+              choices={choices}
+              onPick={handlePick}
+            />
           </motion.div>
         )}
       </AnimatePresence>

@@ -56,6 +56,7 @@ export const PFNotebook = () => {
     <>
       {/* Floating button */}
       <motion.button
+        data-notebook-target
         onClick={() => { try { playSound("pageFlip"); } catch {} ; setIsOpen(true); }}
         className={`fixed top-16 right-4 z-[55] flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-card/90 backdrop-blur-md border text-foreground shadow-lg transition-all ${
           justAdded ? "border-primary shadow-primary/40 shadow-2xl animate-breathing-glow" : "border-border hover:border-primary/50"
