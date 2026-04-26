@@ -40,7 +40,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
   const { playSound } = useSound();
   useAmbientSound("storeRich");
 
-  const [phase, setPhase] = useState<"choosing" | "dialogue">("choosing");
+  const [phase, setPhase] = useState<"preQuestions" | "choosing" | "dialogue">("preQuestions");
   const [currentLines, setCurrentLines] = useState<DialogueLineUI[]>([]);
   const [dialogueIndex, setDialogueIndex] = useState(0);
   const [dialogueKey, setDialogueKey] = useState(0);
@@ -63,7 +63,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
     try { playSound("pageFlip"); } catch {}
     restartInquiry();
     setShowRestartConfirm(false);
-    setPhase("choosing");
+    setPhase("preQuestions");
     setCurrentLines([]);
     setDialogueIndex(0);
   };
@@ -218,17 +218,49 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
           </motion.div>
         )}
       </AnimatePresence>
-
+      <AnimatePresence>
+        {phase === "preQuestions" && state.questionsUsed === 0 && !state.isComplete && (
+          <motion.div
+            key="pre-questions"
+            className="fixed inset-0 z-40 flex items-end justify-center pb-8 px-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="max-w-md w-full rounded-3xl border border-primary/25 bg-card/90 backdrop-blur-md p-6 text-center shadow-[0_0_40px_hsl(var(--primary)/0.16)]"
+              dir="rtl"
+              initial={{ opacity: 0, y: 24, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 16, scale: 0.98 }}
+              transition={{ duration: 0.35 }}
+            >
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 border border-primary/25">
+                <Sparkles className="h-5 w-5 text-primary" />
+              </div>
+      
+              <h2 className="mb-4 text-xl font-bold text-foreground">
+                قبل ما تبدأ
+              </h2>
+      
+              <p className="mb-6 text-sm leading-7 text-muted-foreground">
+                اختار أسئلتك بعناية؛ كل إجابة هتضيف جزءًا من الصورة، وبعدها هتكتب تقريرك بناءً على اللي وصلت له.
+              </p>
+      
+              <button
+                onClick={() => setPhase("choosing")}
+                className="w-full rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] hover:shadow-primary/35 active:scale-[0.98]"
+              >
+                ابدأ الأسئلة
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <AnimatePresence>
         {phase === "choosing" && choices.length > 0 && !state.isComplete && (
           <motion.div key={`choices-${state.currentNodeId}-${state.questionsUsed}`} className="fixed inset-0 z-40 flex items-end justify-center pb-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <div className="max-w-lg w-full px-4 space-y-3">
-              <motion.div className="text-center mb-2" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-                <span className="text-xs text-muted-foreground bg-card/65 px-3 py-1 rounded-full">
-                  سؤال {Math.min(state.questionsUsed + 1, TOTAL_QUESTION_BUDGET)} من {TOTAL_QUESTION_BUDGET}
-                </span>
-              </motion.div>
-
               {choices.map((option, i) => (
                 <motion.button
                   key={option.id}
