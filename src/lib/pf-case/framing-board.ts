@@ -210,7 +210,7 @@ export function buildFramingSections(opts: BuildFramingOpts): FramingSection[] {
   return [
     {
       id: "client_view",
-      title: "1. هشام الشريف كان شايف المشكلة إزاي؟",
+      title: "1. هشام الشريف شايف المشكلة إزاي؟",
       options: seededShuffle(cvOptions, shuffleSeed + 11),
     },
     {
