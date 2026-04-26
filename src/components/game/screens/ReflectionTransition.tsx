@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, FileText, X } from "lucide-react";
+import { ArrowLeft, FileText, X, StickyNote } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { EVIDENCE } from "@/lib/pf-case/evidence-catalog";
@@ -16,6 +16,7 @@ export const ReflectionTransition = ({ onComplete }: ReflectionTransitionProps) 
   const { profile } = useAuth();
   const { state } = usePFGame();
   const [openReportId, setOpenReportId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"notes" | "reports">("notes");
 
   const bg =
     profile?.gender === "female"
@@ -23,191 +24,234 @@ export const ReflectionTransition = ({ onComplete }: ReflectionTransitionProps) 
       : analystReflectingMaleImg;
 
   const notes = state.notes || [];
-
   const reports = state.collectedReports
     .map((id) => EVIDENCE[id])
     .filter(Boolean);
 
+  // Background reveals first, then content builds in
+  const BG_REVEAL = 0.9;
+
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background">
-      {/* Background */}
+    <div className="fixed inset-0 overflow-hidden bg-background">
+      {/* Background — reveals first */}
       <motion.div
         className="absolute inset-0"
-        initial={{ opacity: 0, scale: 1.06, filter: "blur(8px)" }}
-        animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-        transition={{ duration: 1.1, ease: "easeOut" }}
+        initial={{ opacity: 0, scale: 1.1 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: BG_REVEAL, ease: "easeOut" }}
       >
         <img
           src={bg}
           alt="Analyst reviewing"
           className="h-full w-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/45 to-background/20" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/55 via-transparent to-background/35" />
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/60 to-background/30"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.7, delay: 0.2 }}
+        />
       </motion.div>
 
-      {/* Main content */}
-      <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-8">
+      {/* Floating ambient glow */}
+      <motion.div
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[60vh] w-[60vh] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-3xl"
+        initial={{ opacity: 0, scale: 0.6 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1.2, delay: BG_REVEAL }}
+      />
+
+      {/* Main panel */}
+      <div className="relative z-10 flex h-full items-center justify-center px-3 py-3">
         <motion.div
           dir="rtl"
-          className="w-full max-w-xl rounded-3xl border border-primary/25 bg-card/75 p-5 shadow-[0_0_35px_hsl(var(--primary)/0.14)] backdrop-blur-sm md:p-6"
-          initial={{ opacity: 0, y: 34, scale: 0.94 }}
+          className="flex w-full max-w-2xl flex-col rounded-2xl border border-primary/30 bg-card/80 p-4 shadow-[0_0_50px_hsl(var(--primary)/0.18)] backdrop-blur-md"
+          style={{ maxHeight: "calc(100vh - 1.5rem)" }}
+          initial={{ opacity: 0, y: 30, scale: 0.92 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{
-            duration: 0.55,
+            duration: 0.6,
+            delay: BG_REVEAL,
             ease: [0.16, 1, 0.3, 1],
           }}
         >
           {/* Header */}
           <motion.div
-            className="mb-5 border-b border-border/70 pb-4 text-right"
-            initial={{ opacity: 0, y: 14 }}
+            className="mb-3 text-right"
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15, duration: 0.35 }}
+            transition={{ delay: BG_REVEAL + 0.2, duration: 0.4 }}
           >
-            <div className="mb-2 h-1 w-16 rounded-full bg-primary shadow-[0_0_14px_hsl(var(--primary)/0.75)]" />
-
-            <h2 className="text-2xl font-bold text-foreground">
+            <motion.div
+              className="mb-2 h-1 w-14 rounded-full bg-primary shadow-[0_0_14px_hsl(var(--primary)/0.8)]"
+              initial={{ width: 0 }}
+              animate={{ width: 56 }}
+              transition={{ delay: BG_REVEAL + 0.3, duration: 0.5 }}
+            />
+            <h2 className="text-xl font-bold text-foreground md:text-2xl">
               راجع ما جمعته
             </h2>
-
-            <p className="mt-2 text-sm leading-7 text-muted-foreground">
-              قبل ما تكتب تقريرك، راجع الملاحظات والتقارير اللي ظهرت لك أثناء المقابلة.
+            <p className="mt-1 text-xs leading-6 text-muted-foreground md:text-sm">
+              راجع ملاحظاتك وتقاريرك قبل ما تكتب التقرير.
             </p>
           </motion.div>
 
-          {/* Notes */}
-          <motion.section
-            className="mb-4"
-            initial={{ opacity: 0, y: 14 }}
+          {/* Tabs */}
+          <motion.div
+            className="mb-3 flex gap-2 rounded-xl border border-border/60 bg-background/40 p-1"
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25, duration: 0.35 }}
+            transition={{ delay: BG_REVEAL + 0.35, duration: 0.4 }}
           >
-            <div className="mb-2 flex items-center gap-2">
-              <span className="text-lg">🧠</span>
-              <h3 className="text-sm font-bold text-foreground">
-                الملاحظات
-              </h3>
-              <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
+            <button
+              onClick={() => setActiveTab("notes")}
+              className={`relative flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-bold transition-colors md:text-sm ${
+                activeTab === "notes"
+                  ? "text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {activeTab === "notes" && (
+                <motion.div
+                  layoutId="active-tab"
+                  className="absolute inset-0 rounded-lg bg-primary shadow-[0_0_18px_hsl(var(--primary)/0.5)]"
+                  transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                />
+              )}
+              <StickyNote className="relative z-10 h-3.5 w-3.5" />
+              <span className="relative z-10">الملاحظات</span>
+              <span className="relative z-10 rounded-full bg-background/30 px-1.5 py-0.5 text-[10px]">
                 {notes.length}
               </span>
-            </div>
-
-            <div className="space-y-2">
-              {notes.length === 0 ? (
+            </button>
+            <button
+              onClick={() => setActiveTab("reports")}
+              className={`relative flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-bold transition-colors md:text-sm ${
+                activeTab === "reports"
+                  ? "text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {activeTab === "reports" && (
                 <motion.div
-                  className="rounded-2xl border border-border/70 bg-background/35 p-3 text-sm text-muted-foreground"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.35 }}
-                >
-                  مفيش ملاحظات محفوظة.
-                </motion.div>
-              ) : (
-                notes.map((note, index) => (
-                  <motion.div
-                    key={`${note.id}-${index}`}
-                    className="rounded-2xl border border-border/70 bg-background/40 p-3 text-right shadow-sm"
-                    initial={{ opacity: 0, x: 18, scale: 0.97 }}
-                    animate={{ opacity: 1, x: 0, scale: 1 }}
-                    transition={{
-                      delay: 0.34 + index * 0.08,
-                      duration: 0.32,
-                      ease: "easeOut",
-                    }}
-                    whileHover={{ scale: 1.015, x: -2 }}
-                  >
-                    <div className="flex items-start gap-2">
-                      <span className="mt-0.5 text-base">✍️</span>
-                      <p className="text-sm leading-7 text-foreground">
-                        {note.text}
-                      </p>
-                    </div>
-                  </motion.div>
-                ))
+                  layoutId="active-tab"
+                  className="absolute inset-0 rounded-lg bg-primary shadow-[0_0_18px_hsl(var(--primary)/0.5)]"
+                  transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                />
               )}
-            </div>
-          </motion.section>
-
-          {/* Reports */}
-          <motion.section
-            className="mb-5"
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.35 }}
-          >
-            <div className="mb-2 flex items-center gap-2">
-              <span className="text-lg">📊</span>
-              <h3 className="text-sm font-bold text-foreground">
-                التقارير
-              </h3>
-              <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
+              <FileText className="relative z-10 h-3.5 w-3.5" />
+              <span className="relative z-10">التقارير</span>
+              <span className="relative z-10 rounded-full bg-background/30 px-1.5 py-0.5 text-[10px]">
                 {reports.length}
               </span>
-            </div>
+            </button>
+          </motion.div>
 
-            <div className="space-y-2">
-              {reports.length === 0 ? (
+          {/* Content area — scrolls internally only if needed */}
+          <div className="min-h-0 flex-1 overflow-y-auto pr-1 [scrollbar-width:thin]">
+            <AnimatePresence mode="wait">
+              {activeTab === "notes" ? (
                 <motion.div
-                  className="rounded-2xl border border-border/70 bg-background/35 p-3 text-sm text-muted-foreground"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.45 }}
+                  key="notes"
+                  className="grid grid-cols-1 gap-2 sm:grid-cols-2"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
                 >
-                  مفيش تقارير ظهرت أثناء المقابلة.
+                  {notes.length === 0 ? (
+                    <div className="col-span-full rounded-xl border border-border/60 bg-background/30 p-3 text-center text-xs text-muted-foreground">
+                      مفيش ملاحظات محفوظة.
+                    </div>
+                  ) : (
+                    notes.map((note, index) => (
+                      <motion.div
+                        key={`${note.id}-${index}`}
+                        className="group rounded-xl border border-border/60 bg-background/45 p-2.5 text-right shadow-sm transition-colors hover:border-primary/40"
+                        initial={{ opacity: 0, y: 20, scale: 0.85, rotateX: -20 }}
+                        animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+                        transition={{
+                          delay: BG_REVEAL + 0.5 + index * 0.07,
+                          duration: 0.45,
+                          ease: [0.16, 1, 0.3, 1],
+                        }}
+                        whileHover={{ scale: 1.02, y: -2 }}
+                      >
+                        <div className="flex items-start gap-2">
+                          <span className="mt-0.5 text-sm transition-transform group-hover:scale-125">✍️</span>
+                          <p className="text-xs leading-6 text-foreground">{note.text}</p>
+                        </div>
+                      </motion.div>
+                    ))
+                  )}
                 </motion.div>
               ) : (
-                reports.map((report, index) => (
-                  <motion.button
-                    key={report.id}
-                    onClick={() => setOpenReportId(report.id)}
-                    className="group w-full rounded-2xl border border-border/70 bg-background/40 p-3 text-right shadow-sm transition-all hover:border-primary/45 hover:bg-background/60 hover:shadow-[0_0_22px_hsl(var(--primary)/0.12)]"
-                    initial={{ opacity: 0, x: -18, scale: 0.97 }}
-                    animate={{ opacity: 1, x: 0, scale: 1 }}
-                    transition={{
-                      delay: 0.5 + index * 0.08,
-                      duration: 0.32,
-                      ease: "easeOut",
-                    }}
-                    whileHover={{ scale: 1.015, y: -2 }}
-                    whileTap={{ scale: 0.985 }}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 transition-transform group-hover:scale-110">
-                        <FileText className="h-4 w-4 text-primary" />
-                      </div>
-
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-bold leading-6 text-foreground">
-                          {report.title}
-                        </p>
-
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {report.issuer || "تقرير"}
-                          {report.reportDate ? ` • ${report.reportDate}` : ""}
-                        </p>
-                      </div>
-
-                      <span className="mt-1 text-base opacity-70 transition-opacity group-hover:opacity-100">
-                        🧾
-                      </span>
+                <motion.div
+                  key="reports"
+                  className="grid grid-cols-1 gap-2 sm:grid-cols-2"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {reports.length === 0 ? (
+                    <div className="col-span-full rounded-xl border border-border/60 bg-background/30 p-3 text-center text-xs text-muted-foreground">
+                      مفيش تقارير ظهرت.
                     </div>
-                  </motion.button>
-                ))
+                  ) : (
+                    reports.map((report, index) => (
+                      <motion.button
+                        key={report.id}
+                        onClick={() => setOpenReportId(report.id)}
+                        className="group rounded-xl border border-border/60 bg-background/45 p-2.5 text-right shadow-sm transition-all hover:border-primary/50 hover:bg-background/65 hover:shadow-[0_0_20px_hsl(var(--primary)/0.15)]"
+                        initial={{ opacity: 0, y: 20, scale: 0.85, rotateX: -20 }}
+                        animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+                        transition={{
+                          delay: BG_REVEAL + 0.5 + index * 0.07,
+                          duration: 0.45,
+                          ease: [0.16, 1, 0.3, 1],
+                        }}
+                        whileHover={{ scale: 1.02, y: -2 }}
+                        whileTap={{ scale: 0.97 }}
+                      >
+                        <div className="flex items-start gap-2">
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-primary/25 bg-primary/10 transition-transform group-hover:scale-110 group-hover:rotate-6">
+                            <FileText className="h-3.5 w-3.5 text-primary" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs font-bold leading-5 text-foreground line-clamp-2">
+                              {report.title}
+                            </p>
+                            <p className="mt-0.5 text-[10px] text-muted-foreground line-clamp-1">
+                              {report.issuer || "تقرير"}
+                              {report.reportDate ? ` • ${report.reportDate}` : ""}
+                            </p>
+                          </div>
+                        </div>
+                      </motion.button>
+                    ))
+                  )}
+                </motion.div>
               )}
-            </div>
-          </motion.section>
+            </AnimatePresence>
+          </div>
 
           {/* CTA */}
           <motion.button
             onClick={onComplete}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-5 py-3.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:scale-[1.015] hover:shadow-primary/40 active:scale-[0.98]"
-            initial={{ opacity: 0, y: 18, scale: 0.96 }}
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:scale-[1.02] hover:shadow-primary/50 active:scale-[0.98]"
+            initial={{ opacity: 0, y: 18, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ delay: 0.72, duration: 0.35 }}
+            transition={{ delay: BG_REVEAL + 0.9, duration: 0.4 }}
+            whileHover={{ y: -2 }}
           >
             ابدأ التقرير
-            <ArrowLeft className="h-4 w-4" />
+            <motion.span
+              animate={{ x: [0, -4, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </motion.span>
           </motion.button>
         </motion.div>
       </div>
@@ -216,7 +260,7 @@ export const ReflectionTransition = ({ onComplete }: ReflectionTransitionProps) 
       <AnimatePresence>
         {openReportId && EVIDENCE[openReportId] && (
           <motion.div
-            className="fixed inset-0 z-[90] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+            className="fixed inset-0 z-[90] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -237,7 +281,6 @@ export const ReflectionTransition = ({ onComplete }: ReflectionTransitionProps) 
               >
                 <X className="h-4 w-4" />
               </button>
-
               <ReportDocument evidence={EVIDENCE[openReportId]} />
             </motion.div>
           </motion.div>
