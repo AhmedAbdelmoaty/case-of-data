@@ -121,10 +121,32 @@ export const PFGameProvider = ({ children }: { children: ReactNode }) => {
           result.evidenceId && !prev.collectedReports.includes(result.evidenceId)
             ? [...prev.collectedReports, result.evidenceId]
             : prev.collectedReports;
+      
+        const shouldSaveNote =
+          !!result.note &&
+          !prev.savedNoteIds.includes(result.note.id);
+      
+        const newSavedNoteIds = shouldSaveNote
+          ? [...prev.savedNoteIds, result.note.id]
+          : prev.savedNoteIds;
+      
+        const newNotes = shouldSaveNote
+          ? [
+              ...prev.notes,
+              {
+                id: result.note.id,
+                text: result.note.text,
+                roundId: prev.notes.length + 1,
+              },
+            ]
+          : prev.notes;
+      
         return {
           ...prev,
           ...result.nextState,
           collectedReports: newReports,
+          savedNoteIds: newSavedNoteIds,
+          notes: newNotes,
         };
       });
 
