@@ -139,6 +139,15 @@ export const EnhancedDialogue = ({
         clearInterval(typingInterval);
         if (currentDialogue.isSaveable) {
           setShowSaveButton(true);
+          // Auto-fly the note icon to the notebook (notes are auto-saved upstream).
+          // Origin: lower-center of viewport (where dialogue box is).
+          window.setTimeout(() => {
+            flyToNotebook({
+              fromX: window.innerWidth / 2,
+              fromY: window.innerHeight - 180,
+              kind: "note",
+            });
+          }, 250);
         }
       }
     }, 30);
