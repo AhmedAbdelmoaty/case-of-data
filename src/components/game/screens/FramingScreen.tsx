@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Target, BookOpen, CheckCircle2, Mail } from "lucide-react";
+import { Target, BookOpen, CheckCircle2 } from "lucide-react";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { useSound } from "@/hooks/useSoundEffects";
 import { PFNotebook } from "../PFNotebook";
@@ -22,7 +22,6 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
   const [confirmed, setConfirmed] = useState(false);
   const [showStamp, setShowStamp] = useState(false);
   const [flash, setFlash] = useState(false);
-  const [showEnvelope, setShowEnvelope] = useState(false);
 
   const allSelected = useMemo(
     () =>
@@ -67,17 +66,10 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
     setFlash(true);
     try { playSound("stamp"); } catch {}
     setTimeout(() => setFlash(false), 120);
-    // After the stamp settles, kick off the envelope flight
     setTimeout(() => {
       setShowStamp(false);
-      setShowEnvelope(true);
-      try { playSound("whoosh"); } catch {}
-    }, 900);
-    // Then complete after the envelope flies away
-    setTimeout(() => {
-      setShowEnvelope(false);
       onComplete();
-    }, 2100);
+    }, 1500);
   };
 
   const currentSection = framingSections[activeSectionIdx];
@@ -115,66 +107,6 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
 
       <PFNotebook />
       <StampEffect isVisible={showStamp} text="✓ تم التأكيد" />
-
-      {/* Envelope flight: report flying away after stamp */}
-      <AnimatePresence>
-        {showEnvelope && (
-          <motion.div
-            className="pointer-events-none fixed inset-0 z-[95] flex items-center justify-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            {/* Curved trail */}
-            <svg
-              className="absolute inset-0 h-full w-full"
-              viewBox={`0 0 ${typeof window !== "undefined" ? window.innerWidth : 1000} ${typeof window !== "undefined" ? window.innerHeight : 600}`}
-              preserveAspectRatio="none"
-            >
-              <motion.path
-                d={`M ${(typeof window !== "undefined" ? window.innerWidth : 1000) / 2} ${(typeof window !== "undefined" ? window.innerHeight : 600) / 2}
-                    Q ${(typeof window !== "undefined" ? window.innerWidth : 1000) / 2 - 200} ${(typeof window !== "undefined" ? window.innerHeight : 600) / 2 - 200}
-                      80 80`}
-                stroke="hsl(var(--primary))"
-                strokeWidth="2"
-                strokeDasharray="6 8"
-                fill="none"
-                initial={{ pathLength: 0, opacity: 0 }}
-                animate={{ pathLength: 1, opacity: [0, 0.7, 0] }}
-                transition={{ duration: 1.1, ease: "easeOut" }}
-              />
-            </svg>
-
-            {/* Flying envelope */}
-            <motion.div
-              className="relative"
-              initial={{ x: 0, y: 0, scale: 0.4, rotate: -10, opacity: 0 }}
-              animate={{
-                x: [0, -120, -((typeof window !== "undefined" ? window.innerWidth : 1000) / 2 - 80)],
-                y: [0, -120, -((typeof window !== "undefined" ? window.innerHeight : 600) / 2 - 80)],
-                scale: [0.6, 1.4, 0.5],
-                rotate: [-10, 8, -25],
-                opacity: [0, 1, 0.9, 0],
-              }}
-              transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1], times: [0, 0.05, 0.55, 1] }}
-            >
-              <div className="flex h-16 w-20 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-cyan-400 shadow-[0_0_40px_hsl(var(--primary)/0.8)]">
-                <Mail className="h-8 w-8 text-white" />
-              </div>
-              {/* sparkle trail */}
-              {[0, 1, 2, 3].map((i) => (
-                <motion.span
-                  key={i}
-                  className="absolute right-0 top-1/2 h-2 w-2 rounded-full bg-white"
-                  initial={{ opacity: 1, scale: 1 }}
-                  animate={{ opacity: 0, scale: 0, x: 10 + i * 8, y: 4 + i * 4 }}
-                  transition={{ duration: 0.8, delay: i * 0.06, repeat: Infinity, repeatDelay: 0.05 }}
-                />
-              ))}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Stage 1: Background only — small caption fade */}
       <AnimatePresence>

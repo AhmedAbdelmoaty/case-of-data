@@ -6,7 +6,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { SoundProvider } from "@/hooks/useSoundEffects";
 import { MusicProvider } from "@/hooks/useBackgroundMusic";
-import { FlyingItemsLayer } from "@/components/game/FlyingItemsLayer";
 import Index from "./pages/Index";
 import Setup from "./pages/Setup";
 import AdminLogin from "./pages/AdminLogin";
@@ -52,7 +51,6 @@ const App = () => (
 
                 <Route path="*" element={<NotFound />} />
               </Routes>
-              <FlyingItemsLayer />
             </SoundProvider>
           </MusicProvider>
         </AuthProvider>
