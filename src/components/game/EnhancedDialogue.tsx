@@ -75,6 +75,19 @@ export const EnhancedDialogue = ({
   const [isTyping, setIsTyping] = useState(true);
   const [showSaveButton, setShowSaveButton] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const reportWasOpenRef = useRef(false);
+  const closeReport = () => {
+    setReportOpen(false);
+    if (reportWasOpenRef.current) {
+      reportWasOpenRef.current = false;
+      // Fly the report from screen center toward the notebook
+      flyToNotebook({
+        fromX: window.innerWidth / 2,
+        fromY: window.innerHeight / 2,
+        kind: "report",
+      });
+    }
+  };
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const stopAudio = () => {
