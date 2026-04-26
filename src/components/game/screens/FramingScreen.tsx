@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Target, BookOpen, CheckCircle2 } from "lucide-react";
+import { Target, BookOpen, CheckCircle2, Mail } from "lucide-react";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { useSound } from "@/hooks/useSoundEffects";
 import { PFNotebook } from "../PFNotebook";
@@ -22,6 +22,7 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
   const [confirmed, setConfirmed] = useState(false);
   const [showStamp, setShowStamp] = useState(false);
   const [flash, setFlash] = useState(false);
+  const [showEnvelope, setShowEnvelope] = useState(false);
 
   const allSelected = useMemo(
     () =>
@@ -66,10 +67,17 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
     setFlash(true);
     try { playSound("stamp"); } catch {}
     setTimeout(() => setFlash(false), 120);
+    // After the stamp settles, kick off the envelope flight
     setTimeout(() => {
       setShowStamp(false);
+      setShowEnvelope(true);
+      try { playSound("whoosh"); } catch {}
+    }, 900);
+    // Then complete after the envelope flies away
+    setTimeout(() => {
+      setShowEnvelope(false);
       onComplete();
-    }, 1500);
+    }, 2100);
   };
 
   const currentSection = framingSections[activeSectionIdx];
