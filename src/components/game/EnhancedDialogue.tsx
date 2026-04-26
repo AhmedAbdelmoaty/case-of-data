@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { BookmarkPlus, Check, X, ChevronRight, FileText } from "lucide-react";
 import { AnimatedCharacter, type CharacterId } from "./AnimatedCharacter";
 import { ReportDocument } from "./ReportDocument";
+import { flyToNotebook } from "./FlyingItemsLayer";
 import type { EvidenceData } from "@/lib/pf-case/evidence-catalog";
 import analystImg from "@/assets/characters/analyst.png";
 import saraImg from "@/assets/characters/sara.png";
