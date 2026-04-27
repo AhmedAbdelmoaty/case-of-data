@@ -35,7 +35,7 @@ interface DialogueLineUI {
 }
 
 export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
-  const { state, getChoices, pickChoice, restartInquiry, canRestart } = usePFGame();
+  const { state, getChoices, pickChoice, collectInquiryFindings, restartInquiry, canRestart } = usePFGame();
   const { profile } = useAuth();
   const { playSound } = useSound();
   useAmbientSound("storeRich");
@@ -358,6 +358,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
           savedNoteIds={state.savedNoteIds}
           playerName={playerName}
           playerGender={g}
+          onCollectFindings={collectInquiryFindings}
         />
       )}
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookmarkPlus, Check, X, ChevronRight, FileText, StickyNote } from "lucide-react";
 import { AnimatedCharacter, type CharacterId } from "./AnimatedCharacter";
@@ -27,6 +27,7 @@ interface EnhancedDialogueProps {
   currentIndex?: number;
   onIndexChange?: (index: number) => void;
   onSaveNote?: (saveId: string, saveText: string) => void;
+  onCollectFindings?: (payload: { noteId?: string; noteText?: string; evidenceId?: string }) => void;
   savedNoteIds?: string[];
   playerName?: string;
   playerGender?: "male" | "female";
@@ -35,6 +36,9 @@ interface EnhancedDialogueProps {
 type FlyingCollectible = {
   id: number;
   kind: "note" | "report";
+  noteId?: string;
+  noteText?: string;
+  evidenceId?: string;
 };
 
 const characterColors: Record<string, { bg: string; border: string; name: string }> = {
@@ -70,6 +74,7 @@ export const EnhancedDialogue = ({
   currentIndex: externalIndex,
   onIndexChange,
   onSaveNote,
+  onCollectFindings,
   savedNoteIds = [],
   playerName,
   playerGender,
@@ -80,8 +85,13 @@ export const EnhancedDialogue = ({
   const [showSaveButton, setShowSaveButton] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [collectibles, setCollectibles] = useState<FlyingCollectible[]>([]);
+  const [isCollecting, setIsCollecting] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const collectibleIdRef = useRef(0);
+  const collectionStartedRef = useRef(false);
+  const collectionTimersRef = useRef<number[]>([]);
+  const remainingCollectiblesRef = useRef(0);
+  const committedCollectiblesRef = useRef<Set<number>>(new Set());
 
   const stopAudio = () => {
     if (audioRef.current) {
@@ -104,26 +114,89 @@ export const EnhancedDialogue = ({
     ? (playerGender === "female" ? saraImg : analystImg)
     : undefined;
 
+  const clearCollectionTimers = useCallback(() => {
+    collectionTimersRef.current.forEach((timer) => window.clearTimeout(timer));
+    collectionTimersRef.current = [];
+  }, []);
+
+  const beginCollection = useCallback(() => {
+    if (!currentDialogue || collectionStartedRef.current) return;
+    collectionStartedRef.current = true;
+
+    if (currentDialogue.isSaveable) {
+      setShowSaveButton(true);
+    }
+
+    const drops: FlyingCollectible[] = [];
+    if (currentDialogue.isSaveable && currentDialogue.saveId && currentDialogue.saveText) {
+      drops.push({
+        id: 0,
+        kind: "note",
+        noteId: currentDialogue.saveId,
+        noteText: currentDialogue.saveText,
+      });
+    }
+    if (currentDialogue.inlineEvidence) {
+      drops.push({
+        id: 0,
+        kind: "report",
+        evidenceId: currentDialogue.inlineEvidence.id,
+      });
+    }
+
+    if (drops.length === 0) {
+      setIsCollecting(false);
+      return;
+    }
+
+    setIsCollecting(true);
+    remainingCollectiblesRef.current = drops.length;
+
+    drops.forEach((drop, index) => {
+      const timer = window.setTimeout(() => {
+        const id = collectibleIdRef.current + 1;
+        collectibleIdRef.current = id;
+        setCollectibles((prev) => [...prev, { ...drop, id }]);
+      }, 240 + index * 620);
+      collectionTimersRef.current.push(timer);
+    });
+  }, [currentDialogue]);
+
+  const finishTyping = useCallback(() => {
+    if (!currentDialogue) return;
+    setDisplayedText(currentDialogue.text);
+    setIsTyping(false);
+    beginCollection();
+  }, [beginCollection, currentDialogue]);
+
   // Reset state when deactivated
   useEffect(() => {
     if (!isActive) {
       stopAudio();
+      clearCollectionTimers();
       setInternalIndex(0);
       setDisplayedText("");
       setIsTyping(false);
       setShowSaveButton(false);
+      setCollectibles([]);
+      setIsCollecting(false);
     }
-  }, [isActive]);
+  }, [clearCollectionTimers, isActive]);
 
   // Typing effect
   useEffect(() => {
     if (!isActive || !currentDialogue) return;
 
     stopAudio();
+    clearCollectionTimers();
+    collectionStartedRef.current = false;
+    remainingCollectiblesRef.current = 0;
+    committedCollectiblesRef.current.clear();
     setDisplayedText("");
     setIsTyping(true);
     setShowSaveButton(false);
     setCollectibles([]);
+    setIsCollecting(false);
 
     // Play voice over if available
     if (currentDialogue.audioSrc) {
@@ -142,31 +215,19 @@ export const EnhancedDialogue = ({
         setDisplayedText(text.slice(0, charIndex + 1));
         charIndex++;
       } else {
-        setIsTyping(false);
         clearInterval(typingInterval);
-        if (currentDialogue.isSaveable) {
-          setShowSaveButton(true);
-        }
-        if (currentDialogue.isSaveable || currentDialogue.inlineEvidence) {
-          const drops: Array<"note" | "report"> = [];
-          if (currentDialogue.isSaveable) drops.push("note");
-          if (currentDialogue.inlineEvidence) drops.push("report");
-
-          drops.forEach((kind, index) => {
-            window.setTimeout(() => {
-              const id = collectibleIdRef.current + 1;
-              collectibleIdRef.current = id;
-              setCollectibles((prev) => [...prev, { id, kind }]);
-            }, 180 + index * 260);
-          });
-        }
+        finishTyping();
       }
     }, 30);
 
-    return () => clearInterval(typingInterval);
-  }, [currentIndex, isActive, currentDialogue]);
+    return () => {
+      clearInterval(typingInterval);
+      clearCollectionTimers();
+    };
+  }, [clearCollectionTimers, currentIndex, isActive, currentDialogue, finishTyping]);
 
   const handleClose = () => {
+    if (isCollecting) return;
     stopAudio();
     if (onClose) {
       onClose();
@@ -177,11 +238,11 @@ export const EnhancedDialogue = ({
 
   const handleNext = () => {
     if (isTyping) {
-      setDisplayedText(currentDialogue.text);
-      setIsTyping(false);
-      if (currentDialogue.isSaveable) {
-        setShowSaveButton(true);
-      }
+      finishTyping();
+      return;
+    }
+
+    if (isCollecting) {
       return;
     }
 
@@ -201,6 +262,7 @@ export const EnhancedDialogue = ({
 
   const handlePrevious = (e?: React.MouseEvent) => {
     e?.stopPropagation();
+    if (isCollecting) return;
     if (currentIndex > 0) {
       stopAudio();
       setCurrentIndex(currentIndex - 1);
@@ -376,30 +438,44 @@ export const EnhancedDialogue = ({
               const label = item.kind === "report" ? "تقرير جديد" : "ملاحظة جديدة";
               const tone =
                 item.kind === "report"
-                  ? "border-sky-300/70 bg-sky-400 text-sky-950 shadow-sky-300/40"
-                  : "border-amber-300/70 bg-amber-300 text-amber-950 shadow-amber-300/40";
+                  ? "border-[#d9bf78]/55 bg-[#191714]/95 text-[#f7edd4] shadow-[#d9bf78]/25"
+                  : "border-[#dec890]/70 bg-[#f3e8c7] text-[#332714] shadow-[#e8d39b]/30";
 
               return (
                 <motion.div
                   key={item.id}
-                  className={`fixed z-[95] flex items-center gap-2 rounded-2xl border-2 px-3 py-2 text-xs font-black shadow-2xl ${tone}`}
-                  style={{ left: "50%", top: "68%" }}
+                  className={`fixed z-[95] flex min-w-[132px] items-center gap-2 overflow-hidden rounded-[14px] border px-3.5 py-2.5 text-xs font-black shadow-2xl backdrop-blur-md ${tone}`}
+                  style={{ left: "50%", top: "72%" }}
                   dir="rtl"
-                  initial={{ opacity: 0, scale: 0.45, x: "-50%", y: 0, rotate: -10 }}
+                  initial={{ opacity: 0, scale: 0.62, x: "-50%", y: 18, rotate: item.kind === "report" ? 5 : -5 }}
                   animate={{
-                    opacity: [0, 1, 1, 0],
-                    scale: [0.45, 1.15, 0.9, 0.3],
-                    left: ["50%", "55%", "72%", "calc(100% - 5.5rem)"],
-                    top: ["68%", "54%", "24%", "4.25rem"],
-                    rotate: [-10, 8, -4, 0],
+                    opacity: [0, 1, 1, 1, 0],
+                    scale: [0.62, 1.08, 1, 0.74, 0.22],
+                    left: ["50%", "50%", "62%", "82%", "calc(100% - 4.8rem)"],
+                    top: ["72%", "66%", "46%", "20%", "5.25rem"],
+                    rotate: item.kind === "report" ? [5, -2, 4, -3, 0] : [-5, 2, -4, 3, 0],
                   }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1] }}
-                  onAnimationComplete={() =>
-                    setCollectibles((prev) => prev.filter((drop) => drop.id !== item.id))
-                  }
+                  transition={{ duration: 1.48, ease: [0.16, 1, 0.3, 1] }}
+                  onAnimationComplete={() => {
+                    if (!committedCollectiblesRef.current.has(item.id)) {
+                      committedCollectiblesRef.current.add(item.id);
+                      onCollectFindings?.({
+                        noteId: item.noteId,
+                        noteText: item.noteText,
+                        evidenceId: item.evidenceId,
+                      });
+                      remainingCollectiblesRef.current = Math.max(remainingCollectiblesRef.current - 1, 0);
+                      if (remainingCollectiblesRef.current === 0) {
+                        setIsCollecting(false);
+                      }
+                    }
+                    setCollectibles((prev) => prev.filter((drop) => drop.id !== item.id));
+                  }}
                 >
-                  <Icon className="h-4 w-4" />
+                  <span className="absolute inset-x-3 top-0 h-px bg-gradient-to-l from-transparent via-white/60 to-transparent" />
+                  <span className="absolute -left-5 top-1/2 h-12 w-12 -translate-y-1/2 rounded-full bg-white/15 blur-xl" />
+                  <Icon className={`h-4 w-4 ${item.kind === "report" ? "text-[#d9bf78]" : "text-[#7b5c1d]"}`} />
                   <span>{label}</span>
                 </motion.div>
               );
@@ -437,12 +513,12 @@ export const EnhancedDialogue = ({
                   </span>
                 </div>
                 <motion.span
-                  className="text-sm text-primary flex items-center gap-2"
-                  animate={{ x: [0, 5, 0] }}
-                  transition={{ duration: 1, repeat: Infinity }}
+                  className={`text-sm flex items-center gap-2 ${isCollecting ? "text-[#e8d39b]" : "text-primary"}`}
+                  animate={isCollecting ? { opacity: [0.65, 1, 0.65] } : { x: [0, 5, 0] }}
+                  transition={{ duration: isCollecting ? 1.2 : 1, repeat: Infinity }}
                 >
-                  اضغط للاستمرار
-                  <span>▶</span>
+                  {isCollecting ? "جاري حفظ المعلومة..." : "اضغط للاستمرار"}
+                  {!isCollecting && <span>▶</span>}
                 </motion.span>
               </motion.div>
             )}

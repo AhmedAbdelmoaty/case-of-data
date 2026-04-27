@@ -46,11 +46,18 @@ interface ChoiceResult {
   noteText?: string;
 }
 
+interface InquiryFindingPayload {
+  evidenceId?: string;
+  noteId?: string;
+  noteText?: string;
+}
+
 interface PFGameContextValue {
   state: PFGameState;
   // Inquiry
   getChoices: () => ChoicePresentation[];
   pickChoice: (choice: ChoicePresentation) => ChoiceResult | null;
+  collectInquiryFindings: (payload: InquiryFindingPayload) => void;
   saveNote: (id: string, text: string) => void;
   removeNote: (roundId: number) => void;
   // Restart inquiry (limited to 2 uses)
@@ -117,36 +124,12 @@ export const PFGameProvider = ({ children }: { children: ReactNode }) => {
     (choice: ChoicePresentation): ChoiceResult | null => {
       const result = engineApply(state, choice);
       setState((prev) => {
-        const newReports =
-          result.evidenceId && !prev.collectedReports.includes(result.evidenceId)
-            ? [...prev.collectedReports, result.evidenceId]
-            : prev.collectedReports;
-      
-        const shouldSaveNote =
-          !!result.note &&
-          !prev.savedNoteIds.includes(result.note.id);
-      
-        const newSavedNoteIds = shouldSaveNote
-          ? [...prev.savedNoteIds, result.note.id]
-          : prev.savedNoteIds;
-      
-        const newNotes = shouldSaveNote
-          ? [
-              ...prev.notes,
-              {
-                id: result.note.id,
-                text: result.note.text,
-                roundId: prev.notes.length + 1,
-              },
-            ]
-          : prev.notes;
-      
         return {
           ...prev,
           ...result.nextState,
-          collectedReports: newReports,
-          savedNoteIds: newSavedNoteIds,
-          notes: newNotes,
+          collectedReports: prev.collectedReports,
+          savedNoteIds: prev.savedNoteIds,
+          notes: prev.notes,
         };
       });
 
@@ -160,6 +143,39 @@ export const PFGameProvider = ({ children }: { children: ReactNode }) => {
     },
     [state]
   );
+
+  const collectInquiryFindings = useCallback((payload: InquiryFindingPayload) => {
+    setState((prev) => {
+      const shouldAddReport =
+        !!payload.evidenceId && !prev.collectedReports.includes(payload.evidenceId);
+      const shouldSaveNote =
+        !!payload.noteId &&
+        !!payload.noteText &&
+        !prev.savedNoteIds.includes(payload.noteId);
+
+      if (!shouldAddReport && !shouldSaveNote) return prev;
+
+      return {
+        ...prev,
+        collectedReports: shouldAddReport
+          ? [...prev.collectedReports, payload.evidenceId!]
+          : prev.collectedReports,
+        savedNoteIds: shouldSaveNote
+          ? [...prev.savedNoteIds, payload.noteId!]
+          : prev.savedNoteIds,
+        notes: shouldSaveNote
+          ? [
+              ...prev.notes,
+              {
+                id: payload.noteId!,
+                text: payload.noteText!,
+                roundId: prev.notes.length + 1,
+              },
+            ]
+          : prev.notes,
+      };
+    });
+  }, []);
 
   const saveNote = useCallback((id: string, text: string) => {
     setState((prev) => {
@@ -224,6 +240,7 @@ export const PFGameProvider = ({ children }: { children: ReactNode }) => {
         state,
         getChoices,
         pickChoice,
+        collectInquiryFindings,
         saveNote,
         removeNote,
         restartInquiry,
