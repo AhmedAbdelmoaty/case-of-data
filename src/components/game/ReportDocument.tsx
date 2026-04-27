@@ -43,9 +43,9 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
   return (
     <motion.div
       className="relative rounded-lg overflow-hidden border-2 border-border/70 shadow-lg"
-      initial={{ opacity: 0, scale: 0.95, y: 12, rotate: -0.6 }}
+      initial={{ opacity: 0, scale: 0.9, y: 36, rotate: -2.5 }}
       animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
-      transition={{ duration: 0.45, ease: "easeOut" }}
+      transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
       dir="rtl"
       style={{
         background:
@@ -61,6 +61,13 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
           backgroundImage:
             "repeating-linear-gradient(0deg, transparent 0, transparent 23px, hsl(20 14% 18%) 23px, hsl(20 14% 18%) 24px)",
         }}
+      />
+
+      <motion.div
+        className="pointer-events-none absolute inset-y-0 -left-1/2 z-10 w-1/2 rotate-12 bg-gradient-to-r from-transparent via-white/45 to-transparent"
+        initial={{ x: "-40%" }}
+        animate={{ x: "320%" }}
+        transition={{ duration: 1.1, delay: 0.15, ease: "easeOut" }}
       />
 
       {/* Header */}
@@ -111,7 +118,7 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
                     color: "hsl(20 14% 18%)",
                   }}
                 />
-                <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                <Bar dataKey="value" radius={[6, 6, 0, 0]} isAnimationActive animationBegin={180} animationDuration={900} animationEasing="ease-out">
                   {evidence.rows.map((_, i) => (
                     <Cell key={i} fill={COLORS.primary} />
                   ))}
@@ -138,8 +145,8 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
                   }}
                 />
                 <Legend wrapperStyle={{ fontSize: 11, color: "hsl(20 14% 18%)" }} />
-                <Bar dataKey="individuals" name="أفراد" stackId="a" fill={COLORS.primary} />
-                <Bar dataKey="corporate" name="شركات" stackId="a" fill={COLORS.accent} radius={[6, 6, 0, 0]} />
+                <Bar dataKey="individuals" name="أفراد" stackId="a" fill={COLORS.primary} isAnimationActive animationBegin={180} animationDuration={900} animationEasing="ease-out" />
+                <Bar dataKey="corporate" name="شركات" stackId="a" fill={COLORS.accent} radius={[6, 6, 0, 0]} isAnimationActive animationBegin={280} animationDuration={900} animationEasing="ease-out" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -161,10 +168,10 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
                   }}
                 />
                 <Legend wrapperStyle={{ fontSize: 11, color: "hsl(20 14% 18%)" }} />
-                <Bar dataKey="individuals" name="أفراد" fill={COLORS.primary} radius={[6, 6, 0, 0]}>
+                <Bar dataKey="individuals" name="أفراد" fill={COLORS.primary} radius={[6, 6, 0, 0]} isAnimationActive animationBegin={180} animationDuration={900} animationEasing="ease-out">
                   <LabelList dataKey="individuals" position="top" style={{ fontSize: 10, fontWeight: 700, fill: "hsl(20 14% 18%)" }} />
                 </Bar>
-                <Bar dataKey="corporate" name="شركات" fill={COLORS.accent} radius={[6, 6, 0, 0]}>
+                <Bar dataKey="corporate" name="شركات" fill={COLORS.accent} radius={[6, 6, 0, 0]} isAnimationActive animationBegin={280} animationDuration={900} animationEasing="ease-out">
                   <LabelList dataKey="corporate" position="top" style={{ fontSize: 10, fontWeight: 700, fill: "hsl(20 14% 18%)" }} />
                 </Bar>
               </BarChart>
@@ -187,7 +194,7 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
                     color: "hsl(20 14% 18%)",
                   }}
                 />
-                <Line type="monotone" dataKey="value" stroke={COLORS.primary} strokeWidth={2} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="value" stroke={COLORS.primary} strokeWidth={2} dot={{ r: 3 }} isAnimationActive animationBegin={180} animationDuration={1000} animationEasing="ease-out" />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -223,10 +230,16 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
         {evidence.type === "list" && (
           <ul className="space-y-1.5 py-1">
             {evidence.rows.map((row, i) => (
-              <li key={i} className="text-xs flex items-start gap-2">
+              <motion.li
+                key={i}
+                className="text-xs flex items-start gap-2"
+                initial={{ opacity: 0, x: 12 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.18 + i * 0.08 }}
+              >
                 <span className="opacity-60 mt-0.5">•</span>
                 <span>{row.label}</span>
-              </li>
+              </motion.li>
             ))}
           </ul>
         )}
@@ -238,8 +251,11 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
           {evidence.footnote || "ملاحظة: التقرير للاستخدام الداخلي فقط."}
         </p>
         {/* Faux ink stamp */}
-        <div
+        <motion.div
           className="shrink-0 flex flex-col items-center justify-center rounded-md border-2 px-2 py-1 -rotate-6 select-none"
+          initial={{ opacity: 0, scale: 1.8, rotate: -18 }}
+          animate={{ opacity: 1, scale: 1, rotate: -6 }}
+          transition={{ delay: 0.38, type: "spring", damping: 10, stiffness: 220 }}
           style={{
             borderColor: "hsl(0 60% 40% / 0.7)",
             color: "hsl(0 60% 40% / 0.85)",
@@ -247,7 +263,7 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
         >
           <Stamp className="w-3 h-3 mb-0.5" />
           <span className="text-[9px] font-bold tracking-widest">معتمد</span>
-        </div>
+        </motion.div>
       </div>
     </motion.div>
   );

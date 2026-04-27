@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookmarkPlus, Check, X, ChevronRight, FileText } from "lucide-react";
+import { BookmarkPlus, Check, X, ChevronRight, FileText, StickyNote } from "lucide-react";
 import { AnimatedCharacter, type CharacterId } from "./AnimatedCharacter";
 import { ReportDocument } from "./ReportDocument";
 import type { EvidenceData } from "@/lib/pf-case/evidence-catalog";
@@ -31,6 +31,11 @@ interface EnhancedDialogueProps {
   playerName?: string;
   playerGender?: "male" | "female";
 }
+
+type FlyingCollectible = {
+  id: number;
+  kind: "note" | "report";
+};
 
 const characterColors: Record<string, { bg: string; border: string; name: string }> = {
   ahmed: { bg: "from-cyan-900/90 to-cyan-950/90", border: "border-cyan-500/50", name: "text-cyan-400" },
@@ -74,7 +79,9 @@ export const EnhancedDialogue = ({
   const [isTyping, setIsTyping] = useState(true);
   const [showSaveButton, setShowSaveButton] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const [collectibles, setCollectibles] = useState<FlyingCollectible[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const collectibleIdRef = useRef(0);
 
   const stopAudio = () => {
     if (audioRef.current) {
@@ -116,6 +123,7 @@ export const EnhancedDialogue = ({
     setDisplayedText("");
     setIsTyping(true);
     setShowSaveButton(false);
+    setCollectibles([]);
 
     // Play voice over if available
     if (currentDialogue.audioSrc) {
@@ -138,6 +146,19 @@ export const EnhancedDialogue = ({
         clearInterval(typingInterval);
         if (currentDialogue.isSaveable) {
           setShowSaveButton(true);
+        }
+        if (currentDialogue.isSaveable || currentDialogue.inlineEvidence) {
+          const drops: Array<"note" | "report"> = [];
+          if (currentDialogue.isSaveable) drops.push("note");
+          if (currentDialogue.inlineEvidence) drops.push("report");
+
+          drops.forEach((kind, index) => {
+            window.setTimeout(() => {
+              const id = collectibleIdRef.current + 1;
+              collectibleIdRef.current = id;
+              setCollectibles((prev) => [...prev, { id, kind }]);
+            }, 180 + index * 260);
+          });
         }
       }
     }, 30);
@@ -347,6 +368,42 @@ export const EnhancedDialogue = ({
                 </motion.div>
               </motion.div>
             )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {collectibles.map((item) => {
+              const Icon = item.kind === "report" ? FileText : StickyNote;
+              const label = item.kind === "report" ? "تقرير جديد" : "ملاحظة جديدة";
+              const tone =
+                item.kind === "report"
+                  ? "border-sky-300/70 bg-sky-400 text-sky-950 shadow-sky-300/40"
+                  : "border-amber-300/70 bg-amber-300 text-amber-950 shadow-amber-300/40";
+
+              return (
+                <motion.div
+                  key={item.id}
+                  className={`fixed z-[95] flex items-center gap-2 rounded-2xl border-2 px-3 py-2 text-xs font-black shadow-2xl ${tone}`}
+                  style={{ left: "50%", top: "68%" }}
+                  dir="rtl"
+                  initial={{ opacity: 0, scale: 0.45, x: "-50%", y: 0, rotate: -10 }}
+                  animate={{
+                    opacity: [0, 1, 1, 0],
+                    scale: [0.45, 1.15, 0.9, 0.3],
+                    left: ["50%", "55%", "72%", "calc(100% - 5.5rem)"],
+                    top: ["68%", "54%", "24%", "4.25rem"],
+                    rotate: [-10, 8, -4, 0],
+                  }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1] }}
+                  onAnimationComplete={() =>
+                    setCollectibles((prev) => prev.filter((drop) => drop.id !== item.id))
+                  }
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{label}</span>
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
 
           <AnimatePresence>

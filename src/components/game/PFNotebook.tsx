@@ -27,8 +27,8 @@ export const PFNotebook = () => {
 
     if (noteAdded || reportAdded) {
       setJustAdded(true);
-      try { playSound("penWrite"); } catch {}
-      setTimeout(() => { try { playSound("sparkle"); } catch {} }, 180);
+      try { playSound("penWrite"); } catch { /* noop */ }
+      setTimeout(() => { try { playSound("sparkle"); } catch { /* noop */ } }, 180);
 
       if (noteAdded) {
         const newId = notes[notes.length - 1]?.roundId;
@@ -56,7 +56,7 @@ export const PFNotebook = () => {
     <>
       {/* Floating button */}
       <motion.button
-        onClick={() => { try { playSound("pageFlip"); } catch {} ; setIsOpen(true); }}
+        onClick={() => { try { playSound("pageFlip"); } catch { /* noop */ } ; setIsOpen(true); }}
         className={`fixed top-16 right-4 z-[55] flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-card/90 backdrop-blur-md border text-foreground shadow-lg transition-all ${
           justAdded ? "border-primary shadow-primary/40 shadow-2xl animate-breathing-glow" : "border-border hover:border-primary/50"
         }`}
@@ -70,6 +70,17 @@ export const PFNotebook = () => {
         }}
         transition={{ delay: 0.5, duration: justAdded ? 0.8 : 0.3 }}
       >
+        <AnimatePresence>
+          {justAdded && (
+            <motion.span
+              className="absolute inset-0 rounded-xl border-2 border-primary/70"
+              initial={{ opacity: 0.9, scale: 0.82 }}
+              animate={{ opacity: 0, scale: 1.75 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.9, ease: "easeOut" }}
+            />
+          )}
+        </AnimatePresence>
         <BookOpen className={`w-5 h-5 ${justAdded ? "text-primary animate-pulse" : "text-primary"}`} />
         <span className="text-sm font-bold">الدفتر</span>
         {totalCount > 0 && (
