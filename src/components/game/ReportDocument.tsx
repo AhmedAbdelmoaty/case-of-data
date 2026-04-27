@@ -151,6 +151,7 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
                     fontSize: 12,
                     color: "hsl(20 14% 18%)",
                   }}
+                  formatter={tooltipFormatter}
                 />
                 <Legend wrapperStyle={{ fontSize: 11, color: "hsl(20 14% 18%)" }} />
                 <Bar dataKey="individuals" name="أفراد" stackId="a" fill={COLORS.primary} isAnimationActive animationBegin={180} animationDuration={900} animationEasing="ease-out" />
