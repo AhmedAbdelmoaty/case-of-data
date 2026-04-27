@@ -31,13 +31,16 @@ export interface EvidenceData {
   /** Document metadata — gives the report-document feel */
   issuer?: string;          // "الإدارة المالية — VELARO"
   reportDate?: string;      // "مارس 2026"
-  footnote?: string;        // small note printed on the paper
+  footnote?: string;        // small note printed on the paper (legacy single line)
+  footnotes?: string[];     // multiple notes, each rendered on its own line
   rows: EvidenceDataRow[];
   series?: { key: "value" | "individuals" | "corporate"; label: string; color?: string }[];
   headers?: string[];
   /** Optional fixed Y axis bounds + ticks — used to exaggerate visual differences on key reports */
   yMax?: number;
   yTicks?: number[];
+  /** Optional suffix to append to numeric values in labels, tooltips, and Y axis (e.g. "K"). */
+  valueSuffix?: string;
 }
 
 export const EVIDENCE: Record<string, EvidenceData> = {
@@ -50,6 +53,7 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     reportDate: "مارس 2026",
     caption: "مقارنة إجمالي المبيعات بين شهر فبراير 2026 وشهر فبراير 2025",
     footnote: "الأرقام بالألف جنيه مصري، صافي مبيعات بعد المرتجعات.",
+    valueSuffix: "K",
     rows: [
       { label: "فبراير 2025", value: 720 },
       { label: "فبراير 2026", value: 500 },
@@ -66,6 +70,7 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     reportDate: "مارس 2026",
     caption: "مبيعات شهر فبراير في السنوات الثلاث الأخيرة.",
     footnote: "الأرقام بالألف جنيه مصري، صافي مبيعات بعد المرتجعات.",
+    valueSuffix: "K",
     rows: [
       { label: "فبراير 2024", value: 480 },
       { label: "فبراير 2025", value: 720 },
@@ -82,8 +87,11 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     issuer: "الإدارة المالية — VELARO",
     reportDate: "مارس 2026",
     caption: "مبيعات شهر فبراير أخر 3 سنوات مقسمة حسب نوعية المبيعات.",
-    footnote:
-      "الأرقام بالألف جنيه مصري، صافي مبيعات بعد المرتجعات. ملاحظة المحاسبة: في فبراير 2025 جالنا أوردر شركات استثنائي (حوالي 290 ألف).",
+    footnotes: [
+      "الأرقام بالألف جنيه مصري، صافي مبيعات بعد المرتجعات.",
+      "ملاحظة المحاسبة: في فبراير 2025 جالنا أوردر شركات استثنائي (حوالي 290 ألف).",
+    ],
+    valueSuffix: "K",
     rows: [
       { label: "فبراير 2024", individuals: 390, corporate: 90 },
       { label: "فبراير 2025", individuals: 430, corporate: 290 },
@@ -106,11 +114,12 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     reportDate: "مارس 2026",
     caption: "إجمالي مبيعات كل بائع للشهر الحالي.",
     footnote: "الأرقام بالألف جنيه. الفريق مكوّن من 4 بائعين بدوام كامل.",
+    valueSuffix: "K",
     rows: [
-      { label: "كريم", value: 110 },
-      { label: "سامح", value: 75 },
-      { label: "وليد", value: 60 },
-      { label: "هاني", value: 55 },
+      { label: "كريم", value: 145 },
+      { label: "سامح", value: 105 },
+      { label: "وليد", value: 95 },
+      { label: "هاني", value: 85 },
     ],
     series: [{ key: "value", label: "ألف جنيه" }],
   },
@@ -137,20 +146,24 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     type: "line",
     issuer: "الإدارة المالية — VELARO",
     reportDate: "مارس 2026",
-    caption: "حركة البيع اليومية على مدار الشهر.",
+    caption: "حركة البيع اليومية على مدار الشهر (عينة كل 3 أيام).",
     footnote: "الأرقام بالألف جنيه/يوم. الإجمالي الشهري حوالي 500 ألف جنيه.",
+    valueSuffix: "K",
     rows: [
-      { label: "ي1", value: 15 },
-      { label: "ي5", value: 18 },
-      { label: "ي10", value: 14 },
-      { label: "ي15", value: 20 },
-      { label: "ي20", value: 16 },
-      { label: "ي25", value: 17 },
-      { label: "ي30", value: 12 },
+      { label: "1/2", value: 35 },
+      { label: "4/2", value: 45 },
+      { label: "7/2", value: 50 },
+      { label: "10/2", value: 55 },
+      { label: "13/2", value: 60 },
+      { label: "16/2", value: 55 },
+      { label: "19/2", value: 50 },
+      { label: "22/2", value: 55 },
+      { label: "25/2", value: 50 },
+      { label: "28/2", value: 45 },
     ],
     series: [{ key: "value", label: "ألف جنيه/يوم" }],
-    yMax: 25,
-    yTicks: [0, 5, 10, 15, 20, 25],
+    yMax: 80,
+    yTicks: [0, 20, 40, 60, 80],
   },
   ev_weekly_sales: {
     id: "ev_weekly_sales",
@@ -160,6 +173,7 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     reportDate: "مارس 2026",
     caption: "إجمالي البيع لكل أسبوع في الشهر.",
     footnote: "الأرقام بالألف جنيه. الأسبوع الرابع هو الأقل بشكل واضح.",
+    valueSuffix: "K",
     rows: [
       { label: "أسبوع 1", value: 130 },
       { label: "أسبوع 2", value: 155 },
@@ -180,10 +194,10 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     reportDate: "فبراير 2026",
     footnote: "ملاحظات مجمّعة من زيارات للمحلات المجاورة.",
     rows: [
-      { label: "محل 1: خصم 10% على المجموعات الكاملة" },
-      { label: "محل 2: عرض اشتري قطعتين واحصل على الثالثة مجانا على موديلات مختارة" },
-      { label: "محل 3: حملة سوشيال ميديا + توصيل مجاني" },
-      { label: "محل 4: كوبونات لعملاء الـ Loyalty" },
+      { label: "أزياء النخبة: خصم 10% على المجموعات الكاملة" },
+      { label: "بوتيك ليالي: عرض اشتري قطعتين واحصل على الثالثة مجانًا على موديلات مختارة" },
+      { label: "ستايل هاوس: حملة سوشيال ميديا + توصيل مجاني" },
+      { label: "موضة ميلانو: كوبونات لعملاء الـ Loyalty" },
     ],
   },
   ev_customer_feedback: {
@@ -207,7 +221,10 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     type: "table",
     issuer: "إدارة التسويق — VELARO",
     reportDate: "مارس 2026",
-    footnote: "بيانات مجمّعة من حسابات السوشيال ميديا والإعلانات الممولة.",
+    footnotes: [
+      "بيانات مجمّعة من حسابات السوشيال ميديا والإعلانات الممولة.",
+      "الأرقام تشمل الإعلانات المستمرة، حتى في غياب حملات موسمية.",
+    ],
     headers: ["المؤشر", "فبراير 2025", "فبراير 2026"],
     rows: [
       { label: "ميزانية", cells: ["ميزانية شهرية", "18 ألف", "12 ألف"] },
