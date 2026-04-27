@@ -36,9 +36,16 @@ const COLORS = {
  */
 export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProps) => {
   const chartHeight = compact ? "h-52" : "h-72";
+  const suffix = evidence.valueSuffix ?? "";
+  const fmt = (v: number | string) => `${v}${suffix}`;
+  const tooltipFormatter = (v: number | string, name: string) => [fmt(v), name];
   const yAxisProps = evidence.yMax
-    ? { domain: [0, evidence.yMax] as [number, number], ticks: evidence.yTicks }
-    : {};
+    ? {
+        domain: [0, evidence.yMax] as [number, number],
+        ticks: evidence.yTicks,
+        tickFormatter: (v: number) => fmt(v),
+      }
+    : { tickFormatter: (v: number) => fmt(v) };
 
   return (
     <motion.div
