@@ -124,12 +124,13 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
                     fontSize: 12,
                     color: "hsl(20 14% 18%)",
                   }}
+                  formatter={tooltipFormatter}
                 />
                 <Bar dataKey="value" radius={[6, 6, 0, 0]} isAnimationActive animationBegin={180} animationDuration={900} animationEasing="ease-out">
                   {evidence.rows.map((_, i) => (
                     <Cell key={i} fill={COLORS.primary} />
                   ))}
-                  <LabelList dataKey="value" position="top" style={{ fontSize: 11, fontWeight: 700, fill: "hsl(20 14% 18%)" }} />
+                  <LabelList dataKey="value" position="top" formatter={fmt} style={{ fontSize: 11, fontWeight: 700, fill: "hsl(20 14% 18%)" }} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
