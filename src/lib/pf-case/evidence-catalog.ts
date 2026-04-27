@@ -116,7 +116,7 @@ export const EVIDENCE: Record<string, EvidenceData> = {
   },
   ev_team_conversion: {
     id: "ev_team_conversion",
-    title: "تقرير نسبة الإقفال (التحويل) لكل بائع",
+    title: "تقرير نسبة التحويل (الإغلاق) لكل بائع",
     type: "table",
     issuer: "الإدارة المالية — VELARO",
     reportDate: "مارس 2026",
@@ -178,10 +178,10 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     type: "list",
     issuer: "متابعة أ. هشام الشخصية",
     reportDate: "فبراير 2026",
-    footnote: "ملاحظات مجمّعة من زيارات شخصية للمحلات المجاورة.",
+    footnote: "ملاحظات مجمّعة من زيارات للمحلات المجاورة.",
     rows: [
       { label: "محل 1: خصم 10% على المجموعات الكاملة" },
-      { label: "محل 2: عرض 2+1 على موديلات مختارة" },
+      { label: "محل 2: عرض اشتري قطعتين واحصل على الثالثة مجانا على موديلات مختارة" },
       { label: "محل 3: حملة سوشيال ميديا + توصيل مجاني" },
       { label: "محل 4: كوبونات لعملاء الـ Loyalty" },
     ],
@@ -190,7 +190,7 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     id: "ev_customer_feedback",
     title: "ملاحظات العملاء الأخيرة",
     type: "list",
-    issuer: "دفتر ملاحظات أ. هشام",
+    issuer: "مدير الصالة",
     reportDate: "فبراير 2026",
     footnote: "تعليقات شفوية مسجّلة من زباين الفترة الأخيرة.",
     rows: [
@@ -205,7 +205,7 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     id: "ev_marketing",
     title: "ملخص أداء التسويق — فبراير 2025 vs فبراير 2026",
     type: "table",
-    issuer: "متابعة VELARO للحملات",
+    issuer: "إدارة التسويق — VELARO",
     reportDate: "مارس 2026",
     footnote: "بيانات مجمّعة من حسابات السوشيال ميديا والإعلانات الممولة.",
     headers: ["المؤشر", "فبراير 2025", "فبراير 2026"],
@@ -213,7 +213,7 @@ export const EVIDENCE: Record<string, EvidenceData> = {
       { label: "ميزانية", cells: ["ميزانية شهرية", "18 ألف", "12 ألف"] },
       { label: "reach", cells: ["وصول الإعلانات", "420 ألف", "380 ألف"] },
       { label: "engagement", cells: ["نسبة التفاعل", "3.1%", "2.9%"] },
-      { label: "campaigns", cells: ["حملات نشطة", "2", "0"] },
+      { label: "campaigns", cells: ["حملات موسمية", "2", "0"] },
     ],
   },
 };
