@@ -203,6 +203,7 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
                     fontSize: 12,
                     color: "hsl(20 14% 18%)",
                   }}
+                  formatter={tooltipFormatter}
                 />
                 <Line type="monotone" dataKey="value" stroke={COLORS.primary} strokeWidth={2} dot={{ r: 3 }} isAnimationActive animationBegin={180} animationDuration={1000} animationEasing="ease-out" />
               </LineChart>
