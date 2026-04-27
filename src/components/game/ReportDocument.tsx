@@ -256,11 +256,15 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
         )}
       </div>
 
-      {/* Footer with stamp + footnote */}
+      {/* Footer with stamp + footnote(s) */}
       <div className="relative px-4 pt-2 pb-3 border-t-2 border-dashed border-border/60 flex items-end justify-between gap-3">
-        <p className="text-[10px] opacity-70 leading-snug flex-1">
-          {evidence.footnote || "ملاحظة: التقرير للاستخدام الداخلي فقط."}
-        </p>
+        <div className="text-[10px] opacity-70 leading-snug flex-1 space-y-1">
+          {evidence.footnotes && evidence.footnotes.length > 0 ? (
+            evidence.footnotes.map((line, i) => <p key={i}>{line}</p>)
+          ) : (
+            <p>{evidence.footnote || "ملاحظة: التقرير للاستخدام الداخلي فقط."}</p>
+          )}
+        </div>
         {/* Faux ink stamp */}
         <motion.div
           className="shrink-0 flex flex-col items-center justify-center rounded-md border-2 px-2 py-1 -rotate-6 select-none"
