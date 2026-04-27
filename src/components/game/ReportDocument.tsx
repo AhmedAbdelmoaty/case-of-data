@@ -36,9 +36,16 @@ const COLORS = {
  */
 export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProps) => {
   const chartHeight = compact ? "h-52" : "h-72";
+  const suffix = evidence.valueSuffix ?? "";
+  const fmt = (v: number | string) => `${v}${suffix}`;
+  const tooltipFormatter = (v: number | string, name: string) => [fmt(v), name];
   const yAxisProps = evidence.yMax
-    ? { domain: [0, evidence.yMax] as [number, number], ticks: evidence.yTicks }
-    : {};
+    ? {
+        domain: [0, evidence.yMax] as [number, number],
+        ticks: evidence.yTicks,
+        tickFormatter: (v: number) => fmt(v),
+      }
+    : { tickFormatter: (v: number) => fmt(v) };
 
   return (
     <motion.div
@@ -117,12 +124,13 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
                     fontSize: 12,
                     color: "hsl(20 14% 18%)",
                   }}
+                  formatter={tooltipFormatter}
                 />
                 <Bar dataKey="value" radius={[6, 6, 0, 0]} isAnimationActive animationBegin={180} animationDuration={900} animationEasing="ease-out">
                   {evidence.rows.map((_, i) => (
                     <Cell key={i} fill={COLORS.primary} />
                   ))}
-                  <LabelList dataKey="value" position="top" style={{ fontSize: 11, fontWeight: 700, fill: "hsl(20 14% 18%)" }} />
+                  <LabelList dataKey="value" position="top" formatter={fmt} style={{ fontSize: 11, fontWeight: 700, fill: "hsl(20 14% 18%)" }} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -143,6 +151,7 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
                     fontSize: 12,
                     color: "hsl(20 14% 18%)",
                   }}
+                  formatter={tooltipFormatter}
                 />
                 <Legend wrapperStyle={{ fontSize: 11, color: "hsl(20 14% 18%)" }} />
                 <Bar dataKey="individuals" name="أفراد" stackId="a" fill={COLORS.primary} isAnimationActive animationBegin={180} animationDuration={900} animationEasing="ease-out" />
@@ -166,13 +175,14 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
                     fontSize: 12,
                     color: "hsl(20 14% 18%)",
                   }}
+                  formatter={tooltipFormatter}
                 />
                 <Legend wrapperStyle={{ fontSize: 11, color: "hsl(20 14% 18%)" }} />
                 <Bar dataKey="individuals" name="أفراد" fill={COLORS.primary} radius={[6, 6, 0, 0]} isAnimationActive animationBegin={180} animationDuration={900} animationEasing="ease-out">
-                  <LabelList dataKey="individuals" position="top" style={{ fontSize: 10, fontWeight: 700, fill: "hsl(20 14% 18%)" }} />
+                  <LabelList dataKey="individuals" position="top" formatter={fmt} style={{ fontSize: 10, fontWeight: 700, fill: "hsl(20 14% 18%)" }} />
                 </Bar>
                 <Bar dataKey="corporate" name="شركات" fill={COLORS.accent} radius={[6, 6, 0, 0]} isAnimationActive animationBegin={280} animationDuration={900} animationEasing="ease-out">
-                  <LabelList dataKey="corporate" position="top" style={{ fontSize: 10, fontWeight: 700, fill: "hsl(20 14% 18%)" }} />
+                  <LabelList dataKey="corporate" position="top" formatter={fmt} style={{ fontSize: 10, fontWeight: 700, fill: "hsl(20 14% 18%)" }} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -193,6 +203,7 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
                     fontSize: 12,
                     color: "hsl(20 14% 18%)",
                   }}
+                  formatter={tooltipFormatter}
                 />
                 <Line type="monotone" dataKey="value" stroke={COLORS.primary} strokeWidth={2} dot={{ r: 3 }} isAnimationActive animationBegin={180} animationDuration={1000} animationEasing="ease-out" />
               </LineChart>
@@ -245,11 +256,15 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
         )}
       </div>
 
-      {/* Footer with stamp + footnote */}
+      {/* Footer with stamp + footnote(s) */}
       <div className="relative px-4 pt-2 pb-3 border-t-2 border-dashed border-border/60 flex items-end justify-between gap-3">
-        <p className="text-[10px] opacity-70 leading-snug flex-1">
-          {evidence.footnote || "ملاحظة: التقرير للاستخدام الداخلي فقط."}
-        </p>
+        <div className="text-[10px] opacity-70 leading-snug flex-1 space-y-1">
+          {evidence.footnotes && evidence.footnotes.length > 0 ? (
+            evidence.footnotes.map((line, i) => <p key={i}>{line}</p>)
+          ) : (
+            <p>{evidence.footnote || "ملاحظة: التقرير للاستخدام الداخلي فقط."}</p>
+          )}
+        </div>
         {/* Faux ink stamp */}
         <motion.div
           className="shrink-0 flex flex-col items-center justify-center rounded-md border-2 px-2 py-1 -rotate-6 select-none"

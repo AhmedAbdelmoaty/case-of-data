@@ -268,28 +268,30 @@ export const PFNotebook = () => {
       <AnimatePresence>
         {openReportId && EVIDENCE[openReportId] && (
           <motion.div
-            className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] overflow-y-auto bg-black/80 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setOpenReportId(null)}
           >
-            <motion.div
-              className="relative max-w-xl w-full max-h-[90vh] overflow-y-auto"
-              initial={{ scale: 0.92, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.92, y: 20 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                onClick={() => setOpenReportId(null)}
-                className="absolute -top-2 -left-2 z-10 w-9 h-9 rounded-full bg-card border border-border flex items-center justify-center text-foreground hover:bg-muted transition-colors shadow-lg"
-                aria-label="إغلاق"
+            <div className="min-h-full flex items-center justify-center p-4">
+              <motion.div
+                className="relative max-w-xl w-full my-auto"
+                initial={{ scale: 0.92, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.92, y: 20 }}
+                onClick={(e) => e.stopPropagation()}
               >
-                <X className="w-4 h-4" />
-              </button>
-              <ReportDocument evidence={EVIDENCE[openReportId]} />
-            </motion.div>
+                <button
+                  onClick={() => setOpenReportId(null)}
+                  className="absolute -top-2 -left-2 z-10 w-9 h-9 rounded-full bg-card border border-border flex items-center justify-center text-foreground hover:bg-muted transition-colors shadow-lg"
+                  aria-label="إغلاق"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                <ReportDocument evidence={EVIDENCE[openReportId]} />
+              </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
