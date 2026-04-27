@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookmarkPlus, Check, X, ChevronRight, FileText, StickyNote } from "lucide-react";
 import { AnimatedCharacter, type CharacterId } from "./AnimatedCharacter";
@@ -169,6 +170,25 @@ export const EnhancedDialogue = ({
     beginCollection();
   }, [beginCollection, currentDialogue]);
 
+  const collectCurrentFindingsNow = useCallback(() => {
+    if (!currentDialogue) return;
+
+    const payload = {
+      noteId: currentDialogue.saveId,
+      noteText: currentDialogue.saveText,
+      evidenceId: currentDialogue.inlineEvidence?.id,
+    };
+
+    if (payload.noteId || payload.evidenceId) {
+      onCollectFindings?.(payload);
+    }
+
+    clearCollectionTimers();
+    setCollectibles([]);
+    setIsCollecting(false);
+    remainingCollectiblesRef.current = 0;
+  }, [clearCollectionTimers, currentDialogue, onCollectFindings]);
+
   // Reset state when deactivated
   useEffect(() => {
     if (!isActive) {
@@ -227,7 +247,9 @@ export const EnhancedDialogue = ({
   }, [clearCollectionTimers, currentIndex, isActive, currentDialogue, finishTyping]);
 
   const handleClose = () => {
-    if (isCollecting) return;
+    if (isCollecting) {
+      collectCurrentFindingsNow();
+    }
     stopAudio();
     if (onClose) {
       onClose();
@@ -243,7 +265,7 @@ export const EnhancedDialogue = ({
     }
 
     if (isCollecting) {
-      return;
+      collectCurrentFindingsNow();
     }
 
     if (currentIndex < dialogues.length - 1) {
@@ -262,7 +284,9 @@ export const EnhancedDialogue = ({
 
   const handlePrevious = (e?: React.MouseEvent) => {
     e?.stopPropagation();
-    if (isCollecting) return;
+    if (isCollecting) {
+      collectCurrentFindingsNow();
+    }
     if (currentIndex > 0) {
       stopAudio();
       setCurrentIndex(currentIndex - 1);
@@ -300,7 +324,61 @@ export const EnhancedDialogue = ({
     ? (currentDialogue.characterId as CharacterId)
     : "detective";
 
+  const collectibleLayer = (
+    <AnimatePresence>
+      {collectibles.map((item) => {
+        const Icon = item.kind === "report" ? FileText : StickyNote;
+        const label = item.kind === "report" ? "تقرير جديد" : "ملاحظة جديدة";
+        const tone =
+          item.kind === "report"
+            ? "border-[#d9bf78]/55 bg-[#191714]/95 text-[#f7edd4] shadow-[#d9bf78]/25"
+            : "border-[#dec890]/70 bg-[#f3e8c7] text-[#332714] shadow-[#e8d39b]/30";
+
+        return (
+          <motion.div
+            key={item.id}
+            className={`fixed z-[95] flex min-w-[132px] items-center gap-2 overflow-hidden rounded-[14px] border px-3.5 py-2.5 text-xs font-black shadow-2xl backdrop-blur-md ${tone}`}
+            style={{ left: "50vw", top: "72vh" }}
+            dir="rtl"
+            initial={{ opacity: 0, scale: 0.62, x: "-50%", y: 18, rotate: item.kind === "report" ? 5 : -5 }}
+            animate={{
+              opacity: [0, 1, 1, 1, 0],
+              scale: [0.62, 1.1, 1, 0.78, 0.24],
+              left: ["50vw", "50vw", "62vw", "82vw", "calc(100vw - 76px)"],
+              top: ["72vh", "64vh", "42vh", "18vh", "86px"],
+              rotate: item.kind === "report" ? [5, -2, 4, -3, 0] : [-5, 2, -4, 3, 0],
+            }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.62, ease: [0.16, 1, 0.3, 1] }}
+            onAnimationComplete={() => {
+              if (!committedCollectiblesRef.current.has(item.id)) {
+                committedCollectiblesRef.current.add(item.id);
+                onCollectFindings?.({
+                  noteId: item.noteId,
+                  noteText: item.noteText,
+                  evidenceId: item.evidenceId,
+                });
+                remainingCollectiblesRef.current = Math.max(remainingCollectiblesRef.current - 1, 0);
+                if (remainingCollectiblesRef.current === 0) {
+                  setIsCollecting(false);
+                }
+              }
+              setCollectibles((prev) => prev.filter((drop) => drop.id !== item.id));
+            }}
+          >
+            <span className="absolute inset-x-3 top-0 h-px bg-gradient-to-l from-transparent via-white/60 to-transparent" />
+            <span className="absolute -left-5 top-1/2 h-12 w-12 -translate-y-1/2 rounded-full bg-white/15 blur-xl" />
+            <Icon className={`h-4 w-4 ${item.kind === "report" ? "text-[#d9bf78]" : "text-[#7b5c1d]"}`} />
+            <span>{label}</span>
+          </motion.div>
+        );
+      })}
+    </AnimatePresence>
+  );
+
   return (
+    <>
+    {typeof document !== "undefined" ? createPortal(collectibleLayer, document.body) : collectibleLayer}
     <AnimatePresence>
       <motion.div
         className="fixed bottom-0 left-0 right-0 z-50"
@@ -433,56 +511,6 @@ export const EnhancedDialogue = ({
           </AnimatePresence>
 
           <AnimatePresence>
-            {collectibles.map((item) => {
-              const Icon = item.kind === "report" ? FileText : StickyNote;
-              const label = item.kind === "report" ? "تقرير جديد" : "ملاحظة جديدة";
-              const tone =
-                item.kind === "report"
-                  ? "border-[#d9bf78]/55 bg-[#191714]/95 text-[#f7edd4] shadow-[#d9bf78]/25"
-                  : "border-[#dec890]/70 bg-[#f3e8c7] text-[#332714] shadow-[#e8d39b]/30";
-
-              return (
-                <motion.div
-                  key={item.id}
-                  className={`fixed z-[95] flex min-w-[132px] items-center gap-2 overflow-hidden rounded-[14px] border px-3.5 py-2.5 text-xs font-black shadow-2xl backdrop-blur-md ${tone}`}
-                  style={{ left: "50%", top: "72%" }}
-                  dir="rtl"
-                  initial={{ opacity: 0, scale: 0.62, x: "-50%", y: 18, rotate: item.kind === "report" ? 5 : -5 }}
-                  animate={{
-                    opacity: [0, 1, 1, 1, 0],
-                    scale: [0.62, 1.08, 1, 0.74, 0.22],
-                    left: ["50%", "50%", "62%", "82%", "calc(100% - 4.8rem)"],
-                    top: ["72%", "66%", "46%", "20%", "5.25rem"],
-                    rotate: item.kind === "report" ? [5, -2, 4, -3, 0] : [-5, 2, -4, 3, 0],
-                  }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 1.48, ease: [0.16, 1, 0.3, 1] }}
-                  onAnimationComplete={() => {
-                    if (!committedCollectiblesRef.current.has(item.id)) {
-                      committedCollectiblesRef.current.add(item.id);
-                      onCollectFindings?.({
-                        noteId: item.noteId,
-                        noteText: item.noteText,
-                        evidenceId: item.evidenceId,
-                      });
-                      remainingCollectiblesRef.current = Math.max(remainingCollectiblesRef.current - 1, 0);
-                      if (remainingCollectiblesRef.current === 0) {
-                        setIsCollecting(false);
-                      }
-                    }
-                    setCollectibles((prev) => prev.filter((drop) => drop.id !== item.id));
-                  }}
-                >
-                  <span className="absolute inset-x-3 top-0 h-px bg-gradient-to-l from-transparent via-white/60 to-transparent" />
-                  <span className="absolute -left-5 top-1/2 h-12 w-12 -translate-y-1/2 rounded-full bg-white/15 blur-xl" />
-                  <Icon className={`h-4 w-4 ${item.kind === "report" ? "text-[#d9bf78]" : "text-[#7b5c1d]"}`} />
-                  <span>{label}</span>
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
-
-          <AnimatePresence>
             {!isTyping && (
               <motion.div
                 className="flex items-center justify-between mt-4 pt-3 border-t border-border/30 gap-3"
@@ -513,12 +541,12 @@ export const EnhancedDialogue = ({
                   </span>
                 </div>
                 <motion.span
-                  className={`text-sm flex items-center gap-2 ${isCollecting ? "text-[#e8d39b]" : "text-primary"}`}
-                  animate={isCollecting ? { opacity: [0.65, 1, 0.65] } : { x: [0, 5, 0] }}
-                  transition={{ duration: isCollecting ? 1.2 : 1, repeat: Infinity }}
+                  className="text-sm text-primary flex items-center gap-2"
+                  animate={{ x: [0, 5, 0] }}
+                  transition={{ duration: 1, repeat: Infinity }}
                 >
-                  {isCollecting ? "جاري حفظ المعلومة..." : "اضغط للاستمرار"}
-                  {!isCollecting && <span>▶</span>}
+                  اضغط للاستمرار
+                  <span>▶</span>
                 </motion.span>
               </motion.div>
             )}
@@ -526,5 +554,6 @@ export const EnhancedDialogue = ({
         </motion.div>
       </motion.div>
     </AnimatePresence>
+    </>
   );
 };
