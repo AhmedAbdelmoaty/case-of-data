@@ -210,7 +210,7 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
               transition={{ delay: 0.5 }}
             >
               <BookOpen className="w-3 h-3" />
-              راجع الدفتر قبل ما تعتمد التأطير
+              راجع الدفتر قبل ما تقرر
             </motion.p>
           </motion.div>
         )}
@@ -279,7 +279,7 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
                   disabled={confirmed}
                 >
                   <Target className="w-4 h-4" />
-                  أكّد التأطير وقدّم التقرير
+                  قدّم التقرير
                 </motion.button>
               </div>
             </motion.div>
