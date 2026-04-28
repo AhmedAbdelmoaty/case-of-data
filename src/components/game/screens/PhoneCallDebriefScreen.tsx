@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Phone } from "lucide-react";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { useAmbientSound } from "@/hooks/useAmbientSound";
+import { useSceneAmbience } from "@/hooks/useSceneAudio";
 import { useMusic } from "@/hooks/useBackgroundMusic";
 import { EnhancedDialogue } from "../EnhancedDialogue";
 import {
@@ -46,8 +46,8 @@ export const PhoneCallDebriefScreen = ({ onComplete }: PhoneCallDebriefScreenPro
   const [dialogueIndex, setDialogueIndex] = useState(0);
   const [seconds, setSeconds] = useState(0);
 
-  // Ambient phone-line static was removed — it was unpleasant.
-  useAmbientSound("none");
+  // No ambience during the live call — silence keeps focus on Mansour's voice.
+  useSceneAmbience(null);
 
   // Pause background music for the duration of the phone call (it clashes with the call vibe)
   useEffect(() => {
