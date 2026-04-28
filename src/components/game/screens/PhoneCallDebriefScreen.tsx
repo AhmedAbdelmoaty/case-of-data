@@ -83,7 +83,7 @@ export const PhoneCallDebriefScreen = ({ onComplete }: PhoneCallDebriefScreenPro
   }, []);
 
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="fixed inset-0 bg-background overflow-hidden">
       <motion.div
         className="absolute inset-0"
         initial={{ scale: 1.04, opacity: 0 }}
