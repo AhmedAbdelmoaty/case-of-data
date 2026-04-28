@@ -192,12 +192,10 @@ const GameContent = () => {
   );
 };
 
-const Index = () => {
-  return (
-    <PFGameProvider>
-      <GameContent />
-    </PFGameProvider>
-  );
-};
+const Index = () => (
+  <PFGameProvider>
+    <GameContent />
+  </PFGameProvider>
+);
 
 export default Index;
