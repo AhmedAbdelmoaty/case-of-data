@@ -215,7 +215,7 @@ export function buildFramingSections(opts: BuildFramingOpts): FramingSection[] {
     },
     {
       id: "true_frame",
-      title: "2. التأطير الأدق للمشكلة",
+      title: "2. التفسير الأدق للمشكلة",
       options: seededShuffle(tfOptions, shuffleSeed + 22),
     },
     {
