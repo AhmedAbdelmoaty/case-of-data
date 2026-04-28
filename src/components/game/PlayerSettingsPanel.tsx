@@ -256,36 +256,6 @@ export const PlayerSettingsPanel = ({ onReplayBriefing, onResetProgress }: Playe
                   </div>
                 </button>
 
-                {/* Reset progress */}
-                <button
-                  onClick={handleReset}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors text-right ${
-                    confirmReset
-                      ? "bg-destructive/10 border border-destructive/30"
-                      : "hover:bg-muted"
-                  }`}
-                >
-                  <RotateCcw className={`w-5 h-5 ${confirmReset ? "text-destructive" : "text-muted-foreground"}`} />
-                  <div>
-                    <p className={`text-sm font-bold ${confirmReset ? "text-destructive" : "text-foreground"}`}>
-                      {confirmReset ? "اضغط تاني للتأكيد" : "إعادة من البداية"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {confirmReset ? "هيتم مسح كل التقدم!" : "ابدأ اللعبة من الأول"}
-                    </p>
-                  </div>
-                </button>
-
-                {/* Logout */}
-                <button
-                  onClick={signOut}
-                  className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-destructive/10 text-foreground transition-colors text-right"
-                >
-                  <LogOut className="w-5 h-5 text-destructive" />
-                  <div>
-                    <p className="text-sm font-bold">تسجيل الخروج</p>
-                  </div>
-                </button>
               </div>
             </motion.div>
           </>
