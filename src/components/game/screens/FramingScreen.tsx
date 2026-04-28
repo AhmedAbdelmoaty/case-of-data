@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Target, BookOpen, CheckCircle2 } from "lucide-react";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { useSound } from "@/hooks/useSoundEffects";
+import { useSceneAmbience } from "@/hooks/useSceneAudio";
 import { PFNotebook } from "../PFNotebook";
 import { StampEffect } from "../StampEffect";
 import framingBoardDeskImg from "@/assets/scenes/framing-board-desk.webp";
@@ -16,6 +17,7 @@ type Stage = "background" | "sections" | "summary";
 export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
   const { state, framingSections, setFramingSelection, submitFraming } = usePFGame();
   const { playSound } = useSound();
+  useSceneAmbience("report_writing");
 
   const [stage, setStage] = useState<Stage>("background");
   const [activeSectionIdx, setActiveSectionIdx] = useState(0);
