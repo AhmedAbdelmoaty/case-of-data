@@ -81,7 +81,21 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
     const ownerOffice = g === "female" ? hishamOfficeSeatedFemaleImg : hishamOfficeSeatedMaleImg;
     const reportScene = g === "female" ? hishamHandingReportFemaleImg : hishamHandingReportMaleImg;
 
-    if (currentLines.some((line) => line.inlineEvidence)) return reportScene;
+    // Only show the "handing sales report" scene when the evidence is an actual sales report
+    // (monthly/yearly/daily/weekly sales charts). Team performance, competitor offers,
+    // customer feedback, and marketing summaries should NOT trigger this image.
+    const SALES_REPORT_IDS = new Set([
+      "ev_year_vs_year",
+      "ev_three_year",
+      "ev_breakdown",
+      "ev_daily_sales",
+      "ev_weekly_sales",
+    ]);
+    const hasSalesReport = currentLines.some(
+      (line) => line.inlineEvidence && SALES_REPORT_IDS.has(line.inlineEvidence.id)
+    );
+
+    if (hasSalesReport) return reportScene;
     if (state.trackEntered === "A") return velaroMensSectionImg;
     if (state.trackEntered === "C") return velaroWomensSectionImg;
     if (state.trackEntered === "D") return velaroCheckoutBusyImg;
