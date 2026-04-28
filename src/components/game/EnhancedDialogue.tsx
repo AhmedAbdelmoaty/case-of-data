@@ -477,41 +477,6 @@ export const EnhancedDialogue = ({
             </motion.button>
           )}
 
-          {/* Report modal */}
-          <AnimatePresence>
-            {reportOpen && currentDialogue.inlineEvidence && (
-              <motion.div
-                className="fixed inset-0 z-[100] overflow-y-auto bg-black/80 backdrop-blur-sm"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setReportOpen(false);
-                }}
-              >
-                <div className="min-h-full flex items-center justify-center p-4">
-                  <motion.div
-                    className="relative max-w-xl w-full my-auto"
-                    initial={{ scale: 0.92, y: 20 }}
-                    animate={{ scale: 1, y: 0 }}
-                    exit={{ scale: 0.92, y: 20 }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <button
-                      onClick={() => setReportOpen(false)}
-                      className="absolute -top-2 -left-2 z-10 w-9 h-9 rounded-full bg-card border border-border flex items-center justify-center text-foreground hover:bg-muted transition-colors shadow-lg"
-                      aria-label="إغلاق"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                    <ReportDocument evidence={currentDialogue.inlineEvidence} />
-                  </motion.div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
           <AnimatePresence>
             {!isTyping && (
               <motion.div
