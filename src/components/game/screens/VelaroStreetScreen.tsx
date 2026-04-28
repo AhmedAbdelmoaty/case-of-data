@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
+import { useSceneAmbience } from "@/hooks/useSceneAudio";
 import velaroStreetImg from "@/assets/scenes/velaro-street.webp";
 
 interface VelaroStreetScreenProps {
@@ -9,6 +10,7 @@ interface VelaroStreetScreenProps {
 const TOTAL_DURATION = 4500;
 
 export const VelaroStreetScreen = ({ onComplete }: VelaroStreetScreenProps) => {
+  useSceneAmbience("storefront_street");
   useEffect(() => {
     const done = setTimeout(onComplete, TOTAL_DURATION);
     return () => clearTimeout(done);
