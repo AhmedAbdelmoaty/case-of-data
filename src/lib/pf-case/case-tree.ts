@@ -107,7 +107,7 @@ export const SPINE: Record<SpineNodeId, SpineNode> = {
       evidenceId: "ev_daily_sales",
       note: {
         id: "n_s2_jumped_to_data",
-        text: "طلب البيانات قبل ما يفهم المرجع — التقرير اليومي مش بيرد على سؤال «أقل مقارنةً بإيه؟».",
+        text: " يوجد تذبذب في ارقام المبيعات خلال ايام الشهر بعض الأيام حركة كويسة وبعضها ضعيف.",
       },
     },
     nextOnCorrect: "S3",
@@ -136,7 +136,7 @@ export const SPINE: Record<SpineNodeId, SpineNode> = {
       evidenceId: "ev_competitor_offers",
       note: {
         id: "n_s3_jumped_external",
-        text: "اللاعب قفز للمنافسين قبل ما يتأكد من أصل المقارنة.",
+        text: "المنافسين عاملين عروض مختلفة وخصومات كتير والمنافسة قوية.",
       },
     },
     nextOnCorrect: "S4",
@@ -166,7 +166,7 @@ export const SPINE: Record<SpineNodeId, SpineNode> = {
       evidenceId: "ev_competitor_offers",
       note: {
         id: "n_s4_jumped_external",
-        text: "قفز لفرضية خارجية (المنافسين) قبل ما يتأكد إن المرجع نفسه صحيح.",
+        text: "المنافسين عاملين عروض مختلفة وخصومات كتير والمنافسة قوية.",
       },
     },
     nextOnCorrect: "S5",
@@ -195,7 +195,7 @@ export const SPINE: Record<SpineNodeId, SpineNode> = {
       evidenceId: "ev_marketing",
       note: {
         id: "n_s5_jumped_marketing",
-        text: "قفز لفرضية تسويقية بدل ما يفكك الرقم نفسه — ضاع المفتاح اللي كان هيكشف الحقيقة.",
+        text: "تقرير التسويق في الدفتر — ميزانية وحملات أقل عن السنة اللي فاتت.",
       },
     },
     nextOnCorrect: "END",
@@ -252,7 +252,7 @@ export const TRACKS: Record<TrackId, TrackPool> = {
           "بصراحة يا فندم… آخر تدريب عملته للفريق بقاله سنة. والمتابعة اليومية أنا اللي بعملها بإيدي، بس مش منتظمة أوي.",
         note: {
           id: "n_a_train",
-          text: "أستاذ هشام بيعترف إن التدريب والمتابعة اليومية مش منتظمين.",
+          text: "أستاذ هشام بيقول ان أخر تدريب كان من سنة، والمتابعة مش منتظمة.",
         },
       },
     ],
@@ -263,7 +263,7 @@ export const TRACKS: Record<TrackId, TrackPool> = {
         "تمام يا فندم… انا كده فهمت وشوفت الصورة بالكامل، شكرا جدا.",
       note: {
         id: "n_a_conclude",
-        text: "اللاعب حسم الفرضية على الفريق — أستاذ هشام لسه عنده شك خفيف.",
+        text: "السبب هو ضعف فريق المبيعات، استاذ هشام مقتنع وهياخد خطوات.",
       },
     },
   },
@@ -278,7 +278,7 @@ export const TRACKS: Record<TrackId, TrackPool> = {
         hishamReply:
           "اتفضل يا فندم، ده اللي جمعته من حوالينا. أكتر حاجة شايفها خصومات وعروض 2+1 على بعض الموديلات.",
         evidenceId: "ev_competitor_offers",
-        note: { id: "n_c_offers", text: "تقرير عروض المنافسين في الدفتر." },
+        note: { id: "n_c_offers", text: "المنافسين عاملين عروض مختلفة وخصومات كتير والمنافسة قوية." },
       },
       {
         id: "c_customer_price_feedback",
@@ -288,7 +288,7 @@ export const TRACKS: Record<TrackId, TrackPool> = {
         evidenceId: "ev_customer_feedback",
         note: {
           id: "n_c_feedback",
-          text: "ملاحظات العملاء — شكاوى متفرقة من السعر.",
+          text: "ملاحظات العملاء — بعض الزباين بيشتكوا من أسعار بعض الموديلات.",
         },
       },
       {
@@ -298,18 +298,18 @@ export const TRACKS: Record<TrackId, TrackPool> = {
           "ممكن يا فندم، عرض محدود على خط معين يبقى أفضل من خصم عام.",
         note: {
           id: "n_c_response",
-          text: "اقتراح رد سعري محدود — أستاذ هشام متردد.",
+          text: "اقتراح عرض محدود على خط معين — أستاذ هشام موافق.",
         },
       },
     ],
     conclusion: {
       id: "c_conclude",
-      text: "يبقى الصورة بقت أوضح: السوق بيضغط على السعر ومحتاجين تحرك سعري.",
+      text: "يبقى الصورة بقت أوضح، السوق بيضغط على السعر ومحتاجين تحرك سعري.",
       hishamReply:
-        "كلام منطقي يا فندم. بس صدّقني، لسه عندي حاجة جوايا مش مرتاح لها 100%.",
+        "تمام يا فندم… كلام منطقي وهنبدأ ناخد خطوة الخصومات والعروض. شكرا جدا .",
       note: {
         id: "n_c_conclude",
-        text: "اللاعب حسم على فرضية المنافسين/السعر. أستاذ هشام لسه متردد.",
+        text: "السبب هو المنافسة الشديدة وضغط السوق، استاذ هشام مقتنع وهياخد خطوات",
       },
     },
   },
@@ -335,7 +335,7 @@ export const TRACKS: Record<TrackId, TrackPool> = {
           "العملاء الجدد أقل شوية الفترة دي، والاعتماد أكبر على الزباين اللي يعرفونا.",
         note: {
           id: "n_d_new_customers",
-          text: "تراجع واضح في العملاء الجدد — الاعتماد على القاعدة الحالية.",
+          text: "تراجع واضح في العملاء الجدد — الاعتماد على الزباين القديمة.",
         },
       },
       {
@@ -357,7 +357,7 @@ export const TRACKS: Record<TrackId, TrackPool> = {
         "كلام منطقي يا فندم. الصورة دلوقتي بقت أوضح... التسويق أكيد له تأثير كبير.",
       note: {
         id: "n_d_conclude",
-        text: "اللاعب حسم على فرضية التسويق. أستاذ هشام لسه متردد.",
+        text: "السبب هو ضعف التسويق والحملات الموسمية، استاذ هشام مقتنع.",
       },
     },
   },
