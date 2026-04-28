@@ -116,10 +116,10 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     footnote: "الأرقام بالألف جنيه. الفريق مكوّن من 4 بائعين بدوام كامل.",
     valueSuffix: "K",
     rows: [
-      { label: "كريم", value: 145 },
+      { label: "كريم", value: 160 },
       { label: "سامح", value: 105 },
-      { label: "وليد", value: 95 },
-      { label: "هاني", value: 85 },
+      { label: "وليد", value: 85 },
+      { label: "هاني", value: 70 },
     ],
     series: [{ key: "value", label: "ألف جنيه" }],
   },
@@ -132,10 +132,10 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     footnote: "نسبة التحويل = عدد البيعات ÷ عدد الزباين اللي تعامل معاهم البائع.",
     headers: ["البائع", "نسبة الإقفال"],
     rows: [
-      { label: "كريم", cells: ["كريم", "28%"] },
+      { label: "كريم", cells: ["كريم", "29%"] },
       { label: "سامح", cells: ["سامح", "21%"] },
-      { label: "وليد", cells: ["وليد", "17%"] },
-      { label: "هاني", cells: ["هاني", "16%"] },
+      { label: "وليد", cells: ["وليد", "15%"] },
+      { label: "هاني", cells: ["هاني", "13%"] },
     ],
   },
 
