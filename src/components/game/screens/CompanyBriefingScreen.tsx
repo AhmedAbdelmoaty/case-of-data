@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSound } from "@/hooks/useSoundEffects";
-import { useAmbientSound, type AmbientScene } from "@/hooks/useAmbientSound";
+import { useSceneOneShot, playSceneOneShot } from "@/hooks/useSceneAudio";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { EnhancedDialogue } from "../EnhancedDialogue";
@@ -54,20 +54,12 @@ export const CompanyBriefingScreen = ({
   const { profile } = useAuth();
   const name = profile?.display_name || "محلل";
   const g = (profile?.gender || "male") as "male" | "female";
-  const { playSound, playDoorKnock, playLoopingSound } = useSound();
+  const { playSound } = useSound();
 
   const [phase, setPhase] = useState<BriefingPhase>(isReviewMode ? "dialogue" : "exterior");
 
-  // Ambient changes per phase: hallway echo while walking, office once seated
-  const ambient: AmbientScene = phase === "hallway" || phase === "door-knock" ? "hallway" : "office";
-  useAmbientSound(ambient);
-
-  // Walking footsteps loop during hallway phase
-  useEffect(() => {
-    if (phase !== "hallway") return;
-    const cancel = playLoopingSound("footstepHard", 600, 4000);
-    return () => cancel();
-  }, [phase, playLoopingSound]);
+  // Hallway footsteps — one-shot, plays once on entering hallway, stops on leave.
+  useSceneOneShot("hallway_footsteps", phase === "hallway");
 
   const avatarImgEarly = g === "female" ? saraImg : analystImg;
   const knockImgEarly = g === "female" ? prismKnockFemaleImg : prismKnockMaleImg;
@@ -147,7 +139,7 @@ export const CompanyBriefingScreen = ({
           <motion.button
             onClick={() => {
               setPhase("door-knock");
-              setTimeout(() => { try { playDoorKnock(); } catch {} }, 150);
+              setTimeout(() => { try { playSceneOneShot("door_knock"); } catch {} }, 150);
             }}
             className="mt-10 px-8 py-3 rounded-xl bg-card/65 border border-border text-foreground font-bold hover:bg-card/80 transition-all flex items-center gap-2"
             initial={{ opacity: 0 }}

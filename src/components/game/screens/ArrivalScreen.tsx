@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, DoorOpen } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSound } from "@/hooks/useSoundEffects";
-import { useAmbientSound, type AmbientScene } from "@/hooks/useAmbientSound";
+import { useSceneAmbience, type SceneAudioKey } from "@/hooks/useSceneAudio";
 import { EnhancedDialogue } from "../EnhancedDialogue";
 import velaroStorefrontImg from "@/assets/scenes/velaro-storefront.webp";
 import velaroEnteringMaleImg from "@/assets/scenes/velaro-entering-male.webp";
@@ -42,8 +42,8 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
   const [phase, setPhase] = useState<Phase>("storefront");
   const [dialogueIndex, setDialogueIndex] = useState(0);
 
-  const ambientScene: AmbientScene = phase === "storefront" ? "street" : "storeRich";
-  useAmbientSound(ambientScene);
+  const ambientScene: SceneAudioKey = phase === "storefront" ? "storefront_street" : "store_interior";
+  useSceneAmbience(ambientScene);
 
   const enteringImg = g === "female" ? velaroEnteringFemaleImg : velaroEnteringMaleImg;
   const greetingImg = g === "female" ? hishamGreetingFemaleImg : hishamGreetingMaleImg;

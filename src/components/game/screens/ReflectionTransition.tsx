@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, FileText, X, StickyNote } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePFGame } from "@/contexts/PFGameContext";
+import { useSceneAmbience } from "@/hooks/useSceneAudio";
 import { EVIDENCE } from "@/lib/pf-case/evidence-catalog";
 import { ReportDocument } from "../ReportDocument";
 import analystReflectingMaleImg from "@/assets/scenes/analyst-reflecting-male.webp";
@@ -15,6 +16,7 @@ interface ReflectionTransitionProps {
 export const ReflectionTransition = ({ onComplete }: ReflectionTransitionProps) => {
   const { profile } = useAuth();
   const { state } = usePFGame();
+  useSceneAmbience("report_writing");
   const [openReportId, setOpenReportId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"notes" | "reports">("notes");
 

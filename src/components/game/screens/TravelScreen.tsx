@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSound } from "@/hooks/useSoundEffects";
-import { useAmbientSound } from "@/hooks/useAmbientSound";
+import { useSceneAmbience } from "@/hooks/useSceneAudio";
 import cityDriveLuxuryMaleImg from "@/assets/scenes/city-drive-luxury-male.webp";
 import cityDriveLuxuryFemaleImg from "@/assets/scenes/city-drive-luxury-female.webp";
 
@@ -26,7 +26,7 @@ export const TravelScreen = ({ onComplete }: TravelScreenProps) => {
   const { playSound } = useSound();
   const [currentMonologue, setCurrentMonologue] = useState<string | null>(null);
 
-  useAmbientSound("street");
+  useSceneAmbience("car_traffic");
 
   const driveImg = profile?.gender === "female" ? cityDriveLuxuryFemaleImg : cityDriveLuxuryMaleImg;
 
@@ -56,13 +56,6 @@ export const TravelScreen = ({ onComplete }: TravelScreenProps) => {
       timers.push(setTimeout(() => setCurrentMonologue(m.text), m.at));
       timers.push(setTimeout(() => setCurrentMonologue(null), m.at + m.dur));
     });
-    // Multiple distant horns + a passing whoosh — sells the busy street feel
-    timers.push(setTimeout(() => { try { playSound("carHornDistant"); } catch {/* noop */} }, 800));
-    timers.push(setTimeout(() => { try { playSound("whoosh"); } catch {/* noop */} }, 1900));
-    timers.push(setTimeout(() => { try { playSound("carHornDistant"); } catch {/* noop */} }, 2600));
-    timers.push(setTimeout(() => { try { playSound("carHorn"); } catch {/* noop */} }, 4100));
-    timers.push(setTimeout(() => { try { playSound("whoosh"); } catch {/* noop */} }, 4900));
-    timers.push(setTimeout(() => { try { playSound("carHornDistant"); } catch {/* noop */} }, 6100));
     return () => timers.forEach(clearTimeout);
   }, [playSound]);
 

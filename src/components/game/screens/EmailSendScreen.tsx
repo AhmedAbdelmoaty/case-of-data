@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Send } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSound } from "@/hooks/useSoundEffects";
+import { useSceneAmbience } from "@/hooks/useSceneAudio";
 import analystMaleImg from "@/assets/photos/analyst-laptop-evening-male.webp";
 import analystFemaleImg from "@/assets/photos/analyst-laptop-evening-female.webp";
 
@@ -12,7 +13,7 @@ interface EmailSendScreenProps {
 
 export const EmailSendScreen = ({ onComplete }: EmailSendScreenProps) => {
   const { profile } = useAuth();
-  const { playSound, playLoopingSound } = useSound();
+  const { playSound } = useSound();
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -20,12 +21,8 @@ export const EmailSendScreen = ({ onComplete }: EmailSendScreenProps) => {
   const playerName = profile?.display_name || "محلل";
   const bg = g === "female" ? analystFemaleImg : analystMaleImg;
 
-  // Light keyboard typing ambience while composing (until sent)
-  useEffect(() => {
-    if (sent || sending) return;
-    const cancel = playLoopingSound("keyboardKey", 180, 6000);
-    return () => cancel();
-  }, [sent, sending, playLoopingSound]);
+  // Keyboard typing ambience while composing — stops when sent/sending or screen leaves.
+  useSceneAmbience(!sent && !sending ? "keyboard_typing" : null);
 
   const handleSend = () => {
     if (sending || sent) return;

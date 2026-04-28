@@ -1,8 +1,8 @@
-import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Phone, PhoneOff } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSound } from "@/hooks/useSoundEffects";
+import { useSceneAmbience } from "@/hooks/useSceneAudio";
 import analystMaleImg from "@/assets/photos/analyst-relaxing-male.webp";
 import analystFemaleImg from "@/assets/photos/analyst-relaxing-female.webp";
 import mansourAvatar from "@/assets/photos/mansour-avatar-circle.webp";
@@ -14,29 +14,18 @@ interface IncomingCallScreenProps {
 export const IncomingCallScreen = ({ onAnswer }: IncomingCallScreenProps) => {
   const { profile } = useAuth();
   const { playSound } = useSound();
-  const ringIntervalRef = useRef<number | null>(null);
 
   const g = (profile?.gender || "male") as "male" | "female";
   const bg = g === "female" ? analystFemaleImg : analystMaleImg;
 
-  // Modern iPhone-like ringtone — 2s ring + 1s pause pattern
-  useEffect(() => {
-    const ring = () => { try { playSound("phoneRingModern"); } catch { /* noop */ } };
-    ring();
-    ringIntervalRef.current = window.setInterval(ring, 3000);
-    return () => {
-      if (ringIntervalRef.current !== null) window.clearInterval(ringIntervalRef.current);
-    };
-  }, [playSound]);
+  // Phone ringtone loops while this screen is shown; stops on unmount automatically.
+  useSceneAmbience("phone_ringtone");
 
   const handleAnswer = () => {
-    if (ringIntervalRef.current !== null) {
-      window.clearInterval(ringIntervalRef.current);
-      ringIntervalRef.current = null;
-    }
     try { playSound("click"); } catch { /* noop */ }
     onAnswer();
   };
+
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
