@@ -26,7 +26,7 @@ export const HISHAM_GREETING: DialogueLine[] = [
 export const MANSOUR_INTRO_DIALOGUES: DialogueLine[] = [
   {
     characterId: "mansour",
-    text: "أهلاً، اتفضل اقعد. عندنا شغلانة جديدة محتاجة تركيز.",
+    text: "أهلاً، اتفضل اقعد. عندنا استشارة جديدة محتاجة تركيز.",
     mood: "neutral",
   },
   {
