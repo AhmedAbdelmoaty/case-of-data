@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Phone } from "lucide-react";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,8 +11,11 @@ import {
   MANSOUR_CALL_MEDIUM,
   MANSOUR_CALL_WEAK,
 } from "@/lib/pf-case/mansour-call-scripts";
-import analystMaleImg from "@/assets/photos/analyst-on-phone-male.webp";
-import analystFemaleImg from "@/assets/photos/analyst-on-phone-female.webp";
+import {
+  pickMansourImage,
+  pickAnalystImage,
+  type CallTier,
+} from "@/lib/pf-case/mansour-call-images";
 
 interface PhoneCallDebriefScreenProps {
   onComplete: () => void;
@@ -46,10 +49,8 @@ export const PhoneCallDebriefScreen = ({ onComplete }: PhoneCallDebriefScreenPro
   const [dialogueIndex, setDialogueIndex] = useState(0);
   const [seconds, setSeconds] = useState(0);
 
-  // No ambience during the live call — silence keeps focus on Mansour's voice.
   useSceneAmbience(null);
 
-  // Pause background music for the duration of the phone call (it clashes with the call vibe)
   useEffect(() => {
     const wasEnabled = isMusicEnabled;
     if (wasEnabled) toggleMusic();
@@ -61,21 +62,53 @@ export const PhoneCallDebriefScreen = ({ onComplete }: PhoneCallDebriefScreenPro
 
   const g = (profile?.gender || "male") as "male" | "female";
   const playerName = profile?.display_name || "محلل";
-  const bg = g === "female" ? analystFemaleImg : analystMaleImg;
-  const tier = state.outcome || "medium";
+  const tier: CallTier = (state.outcome || "medium") as CallTier;
 
-  const dialogues = useMemo(() => {
-    const source = tier === "strong"
+  const sourceLines = useMemo(() => {
+    return tier === "strong"
       ? MANSOUR_CALL_STRONG
       : tier === "weak"
       ? MANSOUR_CALL_WEAK
       : MANSOUR_CALL_MEDIUM;
-    return source.map((line) => ({
-      characterId: line.characterId,
-      text: line.text,
-      mood: mapMood(line.mood),
-    }));
   }, [tier]);
+
+  const dialogues = useMemo(
+    () =>
+      sourceLines.map((line) => ({
+        characterId: line.characterId,
+        text: line.text,
+        mood: mapMood(line.mood),
+      })),
+    [sourceLines]
+  );
+
+  // Pre-compute, for each dialogue index, who speaks and which "mansour line index"
+  // it corresponds to (so we can pick image A vs B based on Mansour-only progression).
+  const speakerMap = useMemo(() => {
+    let mansourCounter = 0;
+    return sourceLines.map((line) => {
+      const isMansour = line.characterId === "mansour";
+      const entry = {
+        isMansour,
+        mansourIdx: isMansour ? mansourCounter : -1,
+      };
+      if (isMansour) mansourCounter += 1;
+      return entry;
+    });
+  }, [sourceLines]);
+
+  const totalMansourLines = useMemo(
+    () => sourceLines.filter((l) => l.characterId === "mansour").length,
+    [sourceLines]
+  );
+
+  const analystImg = useMemo(() => pickAnalystImage(g, tier), [g, tier]);
+
+  // Determine which background to show based on the CURRENT speaker.
+  const currentSpeaker = speakerMap[dialogueIndex] ?? speakerMap[0];
+  const currentBg = currentSpeaker?.isMansour
+    ? pickMansourImage(tier, currentSpeaker.mansourIdx, totalMansourLines)
+    : analystImg;
 
   useEffect(() => {
     const i = window.setInterval(() => setSeconds((s) => s + 1), 1000);
@@ -84,15 +117,24 @@ export const PhoneCallDebriefScreen = ({ onComplete }: PhoneCallDebriefScreenPro
 
   return (
     <div className="fixed inset-0 bg-background overflow-hidden">
-      <motion.div
-        className="absolute inset-0"
-        initial={{ scale: 1.04, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 1.2 }}
-      >
-        <img src={bg} alt="Analyst on the phone" className="w-full h-full object-cover animate-ken-burns" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/30 to-background/50" />
-      </motion.div>
+      {/* Crossfading background — Mansour when he speaks, analyst when player speaks */}
+      <AnimatePresence mode="sync">
+        <motion.div
+          key={currentBg}
+          className="absolute inset-0"
+          initial={{ opacity: 0, scale: 1.04 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ opacity: { duration: 0.8 }, scale: { duration: 1.4 } }}
+        >
+          <img
+            src={currentBg}
+            alt="Phone call scene"
+            className="w-full h-full object-cover animate-ken-burns"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/30 to-background/50" />
+        </motion.div>
+      </AnimatePresence>
 
       {/* Call indicator */}
       <motion.div
