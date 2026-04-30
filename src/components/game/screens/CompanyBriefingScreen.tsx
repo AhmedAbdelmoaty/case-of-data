@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSound } from "@/hooks/useSoundEffects";
-import { useSceneOneShot, playSceneOneShot } from "@/hooks/useSceneAudio";
+import { useSceneOneShot, playSceneOneShot, preloadSceneAudio } from "@/hooks/useSceneAudio";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { EnhancedDialogue } from "../EnhancedDialogue";
@@ -16,6 +16,7 @@ import mansourWelcomeFemaleImg from "@/assets/scenes/mansour-office-welcome-fema
 import mansourSeatedMaleImg from "@/assets/scenes/mansour-office-seated-male.webp";
 import mansourSeatedFemaleImg from "@/assets/scenes/mansour-office-seated-female.webp";
 import { MANSOUR_INTRO_DIALOGUES } from "@/data/pf-case";
+import { preloadFileAudioList } from "@/lib/audio-file-cache";
 
 interface CompanyBriefingScreenProps {
   onComplete: () => void;
@@ -73,6 +74,15 @@ export const CompanyBriefingScreen = ({
     if (phase === "hallway") preload(knockImgEarly);
     if (phase === "door-knock") preload(welcomeImgEarly);
     if (phase === "transition") preload(seatedImgEarly);
+
+    if (phase === "exterior" || phase === "hallway") {
+      preloadSceneAudio("hallway_footsteps");
+      preloadSceneAudio("door_knock");
+    }
+
+    if (phase === "hallway" || phase === "door-knock" || phase === "dialogue") {
+      preloadFileAudioList(MANSOUR_INTRO_DIALOGUES.map((line) => line.audioSrc));
+    }
   }, [phase, knockImgEarly, welcomeImgEarly, seatedImgEarly]);
 
   useEffect(() => {
@@ -139,7 +149,7 @@ export const CompanyBriefingScreen = ({
           <motion.button
             onClick={() => {
               setPhase("door-knock");
-              setTimeout(() => { try { playSceneOneShot("door_knock"); } catch {} }, 150);
+              try { playSceneOneShot("door_knock"); } catch { /* noop */ }
             }}
             className="mt-10 px-8 py-3 rounded-xl bg-card/65 border border-border text-foreground font-bold hover:bg-card/80 transition-all flex items-center gap-2"
             initial={{ opacity: 0 }}
@@ -177,7 +187,7 @@ export const CompanyBriefingScreen = ({
               onClick={() => {
                 try {
                   playSound("door");
-                } catch {}
+                } catch { /* noop */ }
                 setPhase("dialogue");
               }}
               className="mt-4 px-8 py-3 rounded-xl bg-card/65 border border-border text-foreground font-bold hover:bg-card/80 transition-all"

@@ -4,7 +4,7 @@ import { Sparkles } from "lucide-react";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSound } from "@/hooks/useSoundEffects";
-import { useSceneAmbience } from "@/hooks/useSceneAudio";
+import { useSceneAmbience, preloadSceneAudio } from "@/hooks/useSceneAudio";
 import { EnhancedDialogue } from "../EnhancedDialogue";
 import { PFNotebook } from "../PFNotebook";
 import { TOTAL_QUESTION_BUDGET } from "@/lib/pf-case/case-tree";
@@ -38,6 +38,11 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
   const { state, getChoices, pickChoice, collectInquiryFindings, restartInquiry, canRestart } = usePFGame();
   const { profile } = useAuth();
   const { playSound } = useSound();
+
+  useEffect(() => {
+    preloadSceneAudio("store_interior");
+  }, []);
+
   useSceneAmbience("store_interior");
 
   const [phase, setPhase] = useState<"preQuestions" | "choosing" | "dialogue">("preQuestions");

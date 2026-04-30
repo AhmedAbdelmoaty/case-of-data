@@ -1,5 +1,12 @@
 import { useEffect, useRef } from "react";
 import { useSound } from "./useSoundEffects";
+import {
+  getCachedFileAudio,
+  playFileAudio,
+  preloadFileAudio,
+  preloadFileAudioList,
+  stopFileAudio,
+} from "@/lib/audio-file-cache";
 
 /**
  * File-based scene audio manager.
@@ -58,11 +65,19 @@ class AudioManager {
 
   private make(key: SceneAudioKey): HTMLAudioElement {
     const spec = SCENE_MAP[key];
-    const el = new Audio(spec.src);
+    const el = getCachedFileAudio(spec.src) ?? new Audio(spec.src);
+    el.preload = "auto";
     el.loop = spec.loop;
     el.volume = spec.volume;
-    el.preload = "auto";
     return el;
+  }
+
+  preload(key: SceneAudioKey) {
+    preloadFileAudio(SCENE_MAP[key].src);
+  }
+
+  preloadMany(keys: SceneAudioKey[]) {
+    preloadFileAudioList(keys.map((key) => SCENE_MAP[key].src));
   }
 
   playAmbience(key: SceneAudioKey) {
@@ -73,16 +88,13 @@ class AudioManager {
     this.stopAmbience();
     const el = this.make(key);
     this.currentAmbience = { key, el };
-    const p = el.play();
-    if (p && typeof (p as Promise<void>).then === "function") {
-      (p as Promise<void>).catch(() => { /* autoplay blocked — ignore */ });
-    }
+    playFileAudio(el, { loop: true, volume: SCENE_MAP[key].volume });
   }
 
   stopAmbience() {
     if (!this.currentAmbience) return;
     const { el } = this.currentAmbience;
-    try { el.pause(); el.currentTime = 0; } catch { /* noop */ }
+    stopFileAudio(el);
     this.currentAmbience = null;
   }
 
@@ -98,7 +110,7 @@ class AudioManager {
     // Replace any existing instance to enforce "no rapid double-trigger"
     const existing = this.oneShots.get(key);
     if (existing) {
-      try { existing.pause(); existing.currentTime = 0; } catch { /* noop */ }
+      stopFileAudio(existing);
     }
     const el = this.make(key);
     el.loop = false;
@@ -106,16 +118,13 @@ class AudioManager {
     el.addEventListener("ended", () => {
       if (this.oneShots.get(key) === el) this.oneShots.delete(key);
     }, { once: true });
-    const p = el.play();
-    if (p && typeof (p as Promise<void>).then === "function") {
-      (p as Promise<void>).catch(() => { /* autoplay blocked — ignore */ });
-    }
+    playFileAudio(el, { loop: false, volume: SCENE_MAP[key].volume });
   }
 
   stopOneShot(key: SceneAudioKey) {
     const el = this.oneShots.get(key);
     if (!el) return;
-    try { el.pause(); el.currentTime = 0; } catch { /* noop */ }
+    stopFileAudio(el);
     this.oneShots.delete(key);
   }
 }
@@ -148,6 +157,12 @@ export const useSceneAmbience = (key: SceneAudioKey | null) => {
   }, [key, isSoundEnabled]);
 };
 
+export const usePreloadSceneAudio = (keys: SceneAudioKey[]) => {
+  useEffect(() => {
+    audioManager.preloadMany(keys);
+  }, [keys]);
+};
+
 /**
  * Plays a one-shot exactly once on mount (never loops, never repeats while mounted).
  * Stops the sound on unmount and resets currentTime to 0.
@@ -164,13 +179,20 @@ export const useSceneOneShot = (key: SceneAudioKey | null, enabled: boolean = tr
     return () => {
       audioManager.stopOneShot(key);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, enabled, isSoundEnabled]);
 };
 
 /** Imperative trigger for click handlers (e.g. door-knock button). */
 export const playSceneOneShot = (key: SceneAudioKey) => {
   audioManager.playOneShot(key);
+};
+
+export const preloadSceneAudio = (key: SceneAudioKey) => {
+  audioManager.preload(key);
+};
+
+export const preloadSceneAudioList = (keys: SceneAudioKey[]) => {
+  audioManager.preloadMany(keys);
 };
 
 export const stopSceneAmbience = () => audioManager.stopAmbience();
