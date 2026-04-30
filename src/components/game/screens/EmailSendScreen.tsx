@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Send } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSound } from "@/hooks/useSoundEffects";
-import { useSceneAmbience } from "@/hooks/useSceneAudio";
+import { useSceneAmbience, preloadSceneAudio } from "@/hooks/useSceneAudio";
 import analystMaleImg from "@/assets/photos/analyst-laptop-evening-male.webp";
 import analystFemaleImg from "@/assets/photos/analyst-laptop-evening-female.webp";
 
@@ -20,6 +20,11 @@ export const EmailSendScreen = ({ onComplete }: EmailSendScreenProps) => {
   const g = (profile?.gender || "male") as "male" | "female";
   const playerName = profile?.display_name || "محلل";
   const bg = g === "female" ? analystFemaleImg : analystMaleImg;
+
+  useState(() => {
+    preloadSceneAudio("keyboard_typing");
+    return null;
+  });
 
   // Keyboard typing ambience while composing — stops when sent/sending or screen leaves.
   useSceneAmbience(!sent && !sending ? "keyboard_typing" : null);
