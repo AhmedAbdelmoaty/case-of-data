@@ -233,13 +233,21 @@ export const EnhancedDialogue = ({
     setCollectibles([]);
     setIsCollecting(false);
 
-    // Play voice over if available
+    // Play voice over if available — use cached/preloaded audio for instant start
     if (currentDialogue.audioSrc) {
       try {
-        const audio = new Audio(currentDialogue.audioSrc);
+        const audio = getCachedAudio(currentDialogue.audioSrc);
+        try { audio.currentTime = 0; } catch {/* noop */}
         audioRef.current = audio;
-        audio.play().catch(() => {/* silent fallback */});
+        const p = audio.play();
+        if (p && typeof p.catch === "function") p.catch(() => {/* silent */});
       } catch {/* silent fallback */}
+    }
+
+    // Preload next dialogue's audio so it's ready instantly
+    const next = dialogues[currentIndex + 1];
+    if (next?.audioSrc) {
+      getCachedAudio(next.audioSrc);
     }
 
     let charIndex = 0;
