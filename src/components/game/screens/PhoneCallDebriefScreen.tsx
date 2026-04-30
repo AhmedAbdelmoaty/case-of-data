@@ -124,7 +124,7 @@ export const PhoneCallDebriefScreen = ({ onComplete }: PhoneCallDebriefScreenPro
   return (
     <div className="fixed inset-0 bg-background overflow-hidden">
       {/* Crossfading background — Mansour when he speaks, analyst when player speaks */}
-      <AnimatePresence mode="sync">
+      <AnimatePresence initial={false} mode="sync">
         <motion.div
           key={currentBg}
           className="absolute inset-0"
