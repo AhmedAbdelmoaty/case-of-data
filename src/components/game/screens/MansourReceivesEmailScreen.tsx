@@ -1,36 +1,15 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Phone } from "lucide-react";
-import { usePFGame } from "@/contexts/PFGameContext";
 import mansourReadingImg from "@/assets/photos/mansour-reading-email.webp";
 import mansourPhoneImg from "@/assets/photos/mansour-picking-phone.webp";
-import {
-  MANSOUR_CALL_MEDIUM,
-  MANSOUR_CALL_STRONG,
-  MANSOUR_CALL_WEAK,
-} from "@/lib/pf-case/mansour-call-scripts";
-import { preloadFileAudioList } from "@/lib/audio-file-cache";
-import { preloadSceneAudio } from "@/hooks/useSceneAudio";
 
 interface MansourReceivesEmailScreenProps {
   onComplete: () => void;
 }
 
 export const MansourReceivesEmailScreen = ({ onComplete }: MansourReceivesEmailScreenProps) => {
-  const { state } = usePFGame();
   const [phase, setPhase] = useState<"reading" | "phoning">("reading");
-
-  useEffect(() => {
-    const tier = state.outcome || "medium";
-    const callLines = tier === "strong"
-      ? MANSOUR_CALL_STRONG
-      : tier === "weak"
-      ? MANSOUR_CALL_WEAK
-      : MANSOUR_CALL_MEDIUM;
-
-    preloadSceneAudio("phone_ringtone");
-    preloadFileAudioList(callLines.map((line) => line.audioSrc));
-  }, [state.outcome]);
 
   useEffect(() => {
     const t1 = setTimeout(() => setPhase("phoning"), 3500);

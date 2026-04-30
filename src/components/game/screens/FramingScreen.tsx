@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Target, BookOpen, CheckCircle2 } from "lucide-react";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { useSound } from "@/hooks/useSoundEffects";
-import { useSceneAmbience, preloadSceneAudio } from "@/hooks/useSceneAudio";
+import { useSceneAmbience } from "@/hooks/useSceneAudio";
 import { PFNotebook } from "../PFNotebook";
 import { StampEffect } from "../StampEffect";
 import framingBoardDeskImg from "@/assets/scenes/framing-board-desk.webp";
@@ -17,11 +17,6 @@ type Stage = "background" | "sections" | "summary";
 export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
   const { state, framingSections, setFramingSelection, submitFraming } = usePFGame();
   const { playSound } = useSound();
-
-  useEffect(() => {
-    preloadSceneAudio("report_writing");
-  }, []);
-
   useSceneAmbience("report_writing");
 
   const [stage, setStage] = useState<Stage>("background");
@@ -42,7 +37,7 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
   useEffect(() => {
     const t = setTimeout(() => {
       setStage("sections");
-      try { playSound("reveal"); } catch { /* noop */ }
+      try { playSound("reveal"); } catch {}
     }, 1800);
     return () => clearTimeout(t);
   }, [playSound]);
@@ -71,7 +66,7 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
     setConfirmed(true);
     setShowStamp(true);
     setFlash(true);
-    try { playSound("stamp"); } catch { /* noop */ }
+    try { playSound("stamp"); } catch {}
     setTimeout(() => setFlash(false), 120);
     setTimeout(() => {
       setShowStamp(false);

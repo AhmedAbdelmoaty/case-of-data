@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSound } from "@/hooks/useSoundEffects";
-import { useSceneAmbience, preloadSceneAudio } from "@/hooks/useSceneAudio";
+import { useSceneAmbience } from "@/hooks/useSceneAudio";
 import cityDriveLuxuryMaleImg from "@/assets/scenes/city-drive-luxury-male.webp";
 import cityDriveLuxuryFemaleImg from "@/assets/scenes/city-drive-luxury-female.webp";
 
@@ -25,10 +25,6 @@ export const TravelScreen = ({ onComplete }: TravelScreenProps) => {
   const { profile } = useAuth();
   const { playSound } = useSound();
   const [currentMonologue, setCurrentMonologue] = useState<string | null>(null);
-
-  useEffect(() => {
-    preloadSceneAudio("car_traffic");
-  }, []);
 
   useSceneAmbience("car_traffic");
 

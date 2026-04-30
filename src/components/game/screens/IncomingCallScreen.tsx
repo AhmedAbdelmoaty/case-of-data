@@ -2,11 +2,10 @@ import { motion } from "framer-motion";
 import { Phone, PhoneOff } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSound } from "@/hooks/useSoundEffects";
-import { useSceneAmbience, preloadSceneAudio } from "@/hooks/useSceneAudio";
+import { useSceneAmbience } from "@/hooks/useSceneAudio";
 import analystMaleImg from "@/assets/photos/analyst-relaxing-male.webp";
 import analystFemaleImg from "@/assets/photos/analyst-relaxing-female.webp";
 import mansourAvatar from "@/assets/photos/mansour-avatar-circle.webp";
-import { useEffect } from "react";
 
 interface IncomingCallScreenProps {
   onAnswer: () => void;
@@ -18,10 +17,6 @@ export const IncomingCallScreen = ({ onAnswer }: IncomingCallScreenProps) => {
 
   const g = (profile?.gender || "male") as "male" | "female";
   const bg = g === "female" ? analystFemaleImg : analystMaleImg;
-
-  useEffect(() => {
-    preloadSceneAudio("phone_ringtone");
-  }, []);
 
   // Phone ringtone loops while this screen is shown; stops on unmount automatically.
   useSceneAmbience("phone_ringtone");

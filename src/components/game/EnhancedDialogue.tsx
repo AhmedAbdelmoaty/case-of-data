@@ -5,13 +5,6 @@ import { BookmarkPlus, Check, X, ChevronRight, FileText, StickyNote } from "luci
 import { AnimatedCharacter, type CharacterId } from "./AnimatedCharacter";
 import { ReportDocument } from "./ReportDocument";
 import type { EvidenceData } from "@/lib/pf-case/evidence-catalog";
-import {
-  getCachedFileAudio,
-  playFileAudio,
-  preloadFileAudio,
-  preloadFileAudioList,
-  stopFileAudio,
-} from "@/lib/audio-file-cache";
 import analystImg from "@/assets/characters/analyst.png";
 import saraImg from "@/assets/characters/sara.png";
 
@@ -95,7 +88,7 @@ export const EnhancedDialogue = ({
   const [collectibles, setCollectibles] = useState<FlyingCollectible[]>([]);
   const [isCollecting, setIsCollecting] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const preplayedAudioSrcRef = useRef<string | null>(null);
+  const audioCacheRef = useRef<Map<string, HTMLAudioElement>>(new Map());
   const collectibleIdRef = useRef(0);
   const collectionStartedRef = useRef(false);
   const collectionTimersRef = useRef<number[]>([]);
@@ -103,31 +96,26 @@ export const EnhancedDialogue = ({
   const committedCollectiblesRef = useRef<Set<number>>(new Set());
 
   const stopAudio = () => {
-    stopFileAudio(audioRef.current);
-    audioRef.current = null;
-    preplayedAudioSrcRef.current = null;
+    if (audioRef.current) {
+      try {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      } catch {/* noop */}
+      audioRef.current = null;
+    }
   };
 
   const getCachedAudio = (src: string): HTMLAudioElement => {
-    return getCachedFileAudio(src) ?? new Audio(src);
+    let a = audioCacheRef.current.get(src);
+    if (!a) {
+      a = new Audio();
+      a.preload = "auto";
+      a.src = src;
+      try { a.load(); } catch {/* noop */}
+      audioCacheRef.current.set(src, a);
+    }
+    return a;
   };
-
-  const startDialogueAudio = useCallback((audioSrc?: string) => {
-    if (!audioSrc) {
-      stopAudio();
-      return null;
-    }
-
-    const audio = getCachedAudio(audioSrc);
-    if (audioRef.current && audioRef.current !== audio) {
-      stopFileAudio(audioRef.current);
-    }
-
-    audioRef.current = audio;
-    preplayedAudioSrcRef.current = audioSrc;
-    playFileAudio(audio, { restart: true });
-    return audio;
-  }, []);
 
   const currentIndex = externalIndex ?? internalIndex;
   const setCurrentIndex = onIndexChange ?? setInternalIndex;
@@ -233,7 +221,9 @@ export const EnhancedDialogue = ({
   // Preload all voice-over audio for the current dialogue list so playback is instant
   useEffect(() => {
     if (!isActive) return;
-    preloadFileAudioList(dialogues.map((d) => d.audioSrc));
+    dialogues.forEach((d) => {
+      if (d.audioSrc) getCachedAudio(d.audioSrc);
+    });
   }, [dialogues, isActive]);
 
   // Typing effect
@@ -253,17 +243,19 @@ export const EnhancedDialogue = ({
 
     // Play voice over if available — use cached/preloaded audio for instant start
     if (currentDialogue.audioSrc) {
-      if (preplayedAudioSrcRef.current !== currentDialogue.audioSrc) {
-        startDialogueAudio(currentDialogue.audioSrc);
-      }
-    } else {
-      stopAudio();
+      try {
+        const audio = getCachedAudio(currentDialogue.audioSrc);
+        try { audio.currentTime = 0; } catch {/* noop */}
+        audioRef.current = audio;
+        const p = audio.play();
+        if (p && typeof p.catch === "function") p.catch(() => {/* silent */});
+      } catch {/* silent fallback */}
     }
 
     // Preload next dialogue's audio so it's ready instantly
     const next = dialogues[currentIndex + 1];
     if (next?.audioSrc) {
-      preloadFileAudio(next.audioSrc);
+      getCachedAudio(next.audioSrc);
     }
 
     let charIndex = 0;
@@ -283,7 +275,7 @@ export const EnhancedDialogue = ({
       clearInterval(typingInterval);
       clearCollectionTimers();
     };
-  }, [clearCollectionTimers, currentIndex, isActive, currentDialogue, finishTyping, dialogues, startDialogueAudio]);
+  }, [clearCollectionTimers, currentIndex, isActive, currentDialogue, finishTyping]);
 
   const handleClose = () => {
     if (isCollecting) {
@@ -308,15 +300,8 @@ export const EnhancedDialogue = ({
     }
 
     if (currentIndex < dialogues.length - 1) {
-      const nextDialogue = dialogues[currentIndex + 1];
-      if (nextDialogue?.audioSrc) {
-        startDialogueAudio(nextDialogue.audioSrc);
-      } else {
-        stopAudio();
-      }
       setCurrentIndex(currentIndex + 1);
     } else {
-      stopAudio();
       onComplete?.();
     }
   };
@@ -334,12 +319,7 @@ export const EnhancedDialogue = ({
       collectCurrentFindingsNow();
     }
     if (currentIndex > 0) {
-      const previousDialogue = dialogues[currentIndex - 1];
-      if (previousDialogue?.audioSrc) {
-        startDialogueAudio(previousDialogue.audioSrc);
-      } else {
-        stopAudio();
-      }
+      stopAudio();
       setCurrentIndex(currentIndex - 1);
     }
   };
