@@ -78,6 +78,7 @@ export const PhoneCallDebriefScreen = ({ onComplete }: PhoneCallDebriefScreenPro
         characterId: line.characterId,
         text: line.text,
         mood: mapMood(line.mood),
+        audioSrc: line.audioSrc,
       })),
     [sourceLines]
   );
