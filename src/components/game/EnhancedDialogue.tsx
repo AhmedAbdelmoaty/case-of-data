@@ -218,6 +218,14 @@ export const EnhancedDialogue = ({
     }
   }, [clearCollectionTimers, isActive]);
 
+  // Preload all voice-over audio for the current dialogue list so playback is instant
+  useEffect(() => {
+    if (!isActive) return;
+    dialogues.forEach((d) => {
+      if (d.audioSrc) getCachedAudio(d.audioSrc);
+    });
+  }, [dialogues, isActive]);
+
   // Typing effect
   useEffect(() => {
     if (!isActive || !currentDialogue) return;
