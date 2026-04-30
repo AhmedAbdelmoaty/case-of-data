@@ -179,7 +179,6 @@ export const useSceneOneShot = (key: SceneAudioKey | null, enabled: boolean = tr
     return () => {
       audioManager.stopOneShot(key);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, enabled, isSoundEnabled]);
 };
 
