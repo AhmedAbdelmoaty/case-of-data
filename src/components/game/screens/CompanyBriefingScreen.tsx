@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSound } from "@/hooks/useSoundEffects";
 import { useSceneOneShot, playSceneOneShot } from "@/hooks/useSceneAudio";
-import { useMansourVoice } from "@/hooks/useMansourVoice";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { EnhancedDialogue } from "../EnhancedDialogue";
@@ -58,10 +57,6 @@ export const CompanyBriefingScreen = ({
   const { playSound } = useSound();
 
   const [phase, setPhase] = useState<BriefingPhase>(isReviewMode ? "dialogue" : "exterior");
-  const [dialogueIndex, setDialogueIndex] = useState(0);
-
-  // Mansour voice-over follows the displayed dialogue line; only active during dialogue phase.
-  useMansourVoice("intro", dialogueIndex, phase === "dialogue");
 
   // Hallway footsteps — one-shot, plays once on entering hallway, stops on leave.
   useSceneOneShot("hallway_footsteps", phase === "hallway");
@@ -260,8 +255,6 @@ export const CompanyBriefingScreen = ({
         dialogues={dialogues}
         isActive={phase === "dialogue"}
         onComplete={handleDialogueComplete}
-        currentIndex={dialogueIndex}
-        onIndexChange={setDialogueIndex}
         playerName={name}
         playerGender={g}
       />
