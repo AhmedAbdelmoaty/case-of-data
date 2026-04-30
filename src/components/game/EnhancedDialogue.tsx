@@ -88,6 +88,7 @@ export const EnhancedDialogue = ({
   const [collectibles, setCollectibles] = useState<FlyingCollectible[]>([]);
   const [isCollecting, setIsCollecting] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const typingIntervalRef = useRef<number | null>(null);
   const collectibleIdRef = useRef(0);
   const collectionStartedRef = useRef(false);
   const collectionTimersRef = useRef<number[]>([]);
@@ -101,6 +102,13 @@ export const EnhancedDialogue = ({
       audioRef.current = null;
     }
   };
+
+  const stopTyping = useCallback(() => {
+    if (typingIntervalRef.current !== null) {
+      window.clearInterval(typingIntervalRef.current);
+      typingIntervalRef.current = null;
+    }
+  }, []);
 
   const currentIndex = externalIndex ?? internalIndex;
   const setCurrentIndex = onIndexChange ?? setInternalIndex;
@@ -193,6 +201,7 @@ export const EnhancedDialogue = ({
   useEffect(() => {
     if (!isActive) {
       stopAudio();
+      stopTyping();
       clearCollectionTimers();
       setInternalIndex(0);
       setDisplayedText("");
@@ -201,13 +210,14 @@ export const EnhancedDialogue = ({
       setCollectibles([]);
       setIsCollecting(false);
     }
-  }, [clearCollectionTimers, isActive]);
+  }, [clearCollectionTimers, isActive, stopTyping]);
 
   // Typing effect
   useEffect(() => {
     if (!isActive || !currentDialogue) return;
 
     stopAudio();
+    stopTyping();
     clearCollectionTimers();
     collectionStartedRef.current = false;
     remainingCollectiblesRef.current = 0;
@@ -230,21 +240,21 @@ export const EnhancedDialogue = ({
     let charIndex = 0;
     const text = currentDialogue.text;
 
-    const typingInterval = setInterval(() => {
+    typingIntervalRef.current = window.setInterval(() => {
       if (charIndex < text.length) {
         setDisplayedText(text.slice(0, charIndex + 1));
         charIndex++;
       } else {
-        clearInterval(typingInterval);
+        stopTyping();
         finishTyping();
       }
     }, 30);
 
     return () => {
-      clearInterval(typingInterval);
+      stopTyping();
       clearCollectionTimers();
     };
-  }, [clearCollectionTimers, currentIndex, isActive, currentDialogue, finishTyping]);
+  }, [clearCollectionTimers, currentIndex, isActive, currentDialogue, finishTyping, stopTyping]);
 
   const handleClose = () => {
     if (isCollecting) {
@@ -260,6 +270,8 @@ export const EnhancedDialogue = ({
 
   const handleNext = () => {
     if (isTyping) {
+      stopAudio();
+      stopTyping();
       finishTyping();
       return;
     }
@@ -289,6 +301,7 @@ export const EnhancedDialogue = ({
     }
     if (currentIndex > 0) {
       stopAudio();
+      stopTyping();
       setCurrentIndex(currentIndex - 1);
     }
   };

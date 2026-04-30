@@ -24,11 +24,11 @@ export const MANSOUR_VOICE: Record<MansourVoiceKey, VoiceScript> = {
   intro: {
     audioSrc: "/voice/mansour_intro_office_full.wav",
     segments: [
-      { start: 0.0, end: 4.42 },
-      { start: 5.11, end: 9.49 },
-      { start: 10.18, end: 15.36 },
+      { start: 0.0, end: 4.98 },
+      { start: 5.0, end: 10.02 },
+      { start: 10.02, end: 18.01 },
       null, // detective
-      { start: 15.88, end: 22.65 },
+      { start: 18.01, end: 22.65 },
     ],
   },
 
@@ -36,11 +36,11 @@ export const MANSOUR_VOICE: Record<MansourVoiceKey, VoiceScript> = {
   callStrong: {
     audioSrc: "/voice/mansour_call_strong_full.wav",
     segments: [
-      { start: 0.0, end: 4.97 },
-      { start: 5.92, end: 17.01 },
+      { start: 0.0, end: 5.26 },
+      { start: 5.76, end: 17.24 },
       null, // detective
-      { start: 17.46, end: 21.29 },
-      { start: 21.86, end: 27.17 },
+      { start: 17.24, end: 21.6 },
+      { start: 21.6, end: 27.17 },
     ],
   },
 
@@ -48,11 +48,11 @@ export const MANSOUR_VOICE: Record<MansourVoiceKey, VoiceScript> = {
   callMedium: {
     audioSrc: "/voice/mansour_call_medium_full.wav",
     segments: [
-      { start: 0.0, end: 8.85 },
+      { start: 0.0, end: 11.76 },
       null, // detective
-      { start: 9.22, end: 24.29 },
-      { start: 25.23, end: 32.87 },
-      { start: 33.31, end: 37.97 },
+      { start: 11.76, end: 24.52 },
+      { start: 24.52, end: 29.16 },
+      { start: 29.56, end: 37.97 },
     ],
   },
 
@@ -60,11 +60,11 @@ export const MANSOUR_VOICE: Record<MansourVoiceKey, VoiceScript> = {
   callWeak: {
     audioSrc: "/voice/mansour_call_weak_full.wav",
     segments: [
-      { start: 0.0, end: 5.95 },
+      { start: 0.0, end: 6.2 },
       null, // detective
-      { start: 6.35, end: 20.91 },
-      { start: 21.4, end: 26.67 },
-      { start: 27.06, end: 32.28 },
+      { start: 6.2, end: 15.42 },
+      { start: 15.42, end: 23.94 },
+      { start: 23.94, end: 32.28 },
     ],
   },
 };

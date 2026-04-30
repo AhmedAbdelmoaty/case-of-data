@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useSound } from "@/hooks/useSoundEffects";
 import {
   MANSOUR_VOICE,
@@ -24,27 +24,40 @@ export const useMansourVoice = (
   const { isSoundEnabled } = useSound();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const rafRef = useRef<number | null>(null);
+  const playbackTokenRef = useRef(0);
+
+  const stop = useCallback(() => {
+    playbackTokenRef.current += 1;
+
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    try {
+      audio.pause();
+      audio.currentTime = 0;
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   // Lazy-create the audio element for this scene.
   useEffect(() => {
     const script = MANSOUR_VOICE[scriptKey];
     const el = new Audio(script.audioSrc);
     el.preload = "auto";
+    el.muted = !isSoundEnabled;
     audioRef.current = el;
 
     return () => {
-      try {
-        el.pause();
-      } catch {
-        /* ignore */
-      }
+      stop();
       audioRef.current = null;
-      if (rafRef.current !== null) {
-        cancelAnimationFrame(rafRef.current);
-        rafRef.current = null;
-      }
     };
-  }, [scriptKey]);
+  }, [isSoundEnabled, scriptKey, stop]);
 
   // Mirror sound-toggle changes onto the live element.
   useEffect(() => {
@@ -55,17 +68,12 @@ export const useMansourVoice = (
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
+    const playbackToken = playbackTokenRef.current + 1;
+    playbackTokenRef.current = playbackToken;
 
     // Always stop any in-flight playback first — never overlap.
-    if (rafRef.current !== null) {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-    }
-    try {
-      audio.pause();
-    } catch {
-      /* ignore */
-    }
+    stop();
+    playbackTokenRef.current = playbackToken;
 
     if (!isActive) return;
 
@@ -76,11 +84,14 @@ export const useMansourVoice = (
     audio.muted = !isSoundEnabled;
 
     const startPlayback = () => {
+      if (playbackTokenRef.current !== playbackToken) return;
+
       try {
         audio.currentTime = segment.start;
       } catch {
         /* seeking before metadata loaded — will be retried via canplay */
       }
+
       const playPromise = audio.play();
       if (playPromise && typeof playPromise.then === "function") {
         playPromise.catch(() => {
@@ -91,6 +102,8 @@ export const useMansourVoice = (
       // Stop precisely at segment.end via rAF (more accurate than setTimeout).
       const tick = () => {
         if (!audioRef.current) return;
+        if (playbackTokenRef.current !== playbackToken) return;
+
         if (audioRef.current.currentTime >= segment.end || audioRef.current.paused) {
           try {
             audioRef.current.pause();
@@ -113,18 +126,14 @@ export const useMansourVoice = (
         startPlayback();
       };
       audio.addEventListener("loadedmetadata", onReady);
+
+      return () => {
+        audio.removeEventListener("loadedmetadata", onReady);
+      };
     }
 
-    return () => {
-      if (rafRef.current !== null) {
-        cancelAnimationFrame(rafRef.current);
-        rafRef.current = null;
-      }
-      try {
-        audio.pause();
-      } catch {
-        /* ignore */
-      }
-    };
-  }, [scriptKey, lineIndex, isActive, isSoundEnabled]);
+    return undefined;
+  }, [scriptKey, lineIndex, isActive, isSoundEnabled, stop]);
+
+  return { stop };
 };
