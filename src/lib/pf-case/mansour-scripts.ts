@@ -28,16 +28,19 @@ export const MANSOUR_INTRO_DIALOGUES: DialogueLine[] = [
     characterId: "mansour",
     text: "أهلاً، اتفضل اقعد. عندنا استشارة جديدة محتاجة تركيز.",
     mood: "neutral",
+    audioSrc: "/voiceover/mansour/mansour_intro_office_01.wav",
   },
   {
     characterId: "mansour",
     text: "عميل قديم لشركتنا، اسمه هشام الشريف، صاحب براند ملابس كبير. كلمنا وبيقول إن عنده مشكلة في الشغل الفترة دي.",
     mood: "neutral",
+    audioSrc: "/voiceover/mansour/mansour_intro_office_02.wav",
   },
   {
     characterId: "mansour",
     text: "عايزك تروح تقعد معاه، وتسأل صح وتفهم المشكلة بشكل كامل.",
     mood: "serious",
+    audioSrc: "/voiceover/mansour/mansour_intro_office_03.wav",
   },
   {
     characterId: "detective",
@@ -48,6 +51,7 @@ export const MANSOUR_INTRO_DIALOGUES: DialogueLine[] = [
     characterId: "mansour",
     text: "تمام، يلا بالتوفيق. خلّص وابعتلي تقرير كامل باللي وصلتله.",
     mood: "neutral",
+    audioSrc: "/voiceover/mansour/mansour_intro_office_04.wav",
   },
 ];
 
