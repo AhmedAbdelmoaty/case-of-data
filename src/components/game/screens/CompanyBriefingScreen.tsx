@@ -149,7 +149,7 @@ export const CompanyBriefingScreen = ({
           <motion.button
             onClick={() => {
               setPhase("door-knock");
-              try { playSceneOneShot("door_knock"); } catch {}
+              try { playSceneOneShot("door_knock"); } catch { /* noop */ }
             }}
             className="mt-10 px-8 py-3 rounded-xl bg-card/65 border border-border text-foreground font-bold hover:bg-card/80 transition-all flex items-center gap-2"
             initial={{ opacity: 0 }}
@@ -187,7 +187,7 @@ export const CompanyBriefingScreen = ({
               onClick={() => {
                 try {
                   playSound("door");
-                } catch {}
+                } catch { /* noop */ }
                 setPhase("dialogue");
               }}
               className="mt-4 px-8 py-3 rounded-xl bg-card/65 border border-border text-foreground font-bold hover:bg-card/80 transition-all"
