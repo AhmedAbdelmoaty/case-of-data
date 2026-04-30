@@ -42,7 +42,7 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
   useEffect(() => {
     const t = setTimeout(() => {
       setStage("sections");
-      try { playSound("reveal"); } catch {}
+      try { playSound("reveal"); } catch { /* noop */ }
     }, 1800);
     return () => clearTimeout(t);
   }, [playSound]);
@@ -71,7 +71,7 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
     setConfirmed(true);
     setShowStamp(true);
     setFlash(true);
-    try { playSound("stamp"); } catch {}
+    try { playSound("stamp"); } catch { /* noop */ }
     setTimeout(() => setFlash(false), 120);
     setTimeout(() => {
       setShowStamp(false);
