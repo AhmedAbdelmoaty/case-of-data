@@ -88,6 +88,7 @@ export const EnhancedDialogue = ({
   const [collectibles, setCollectibles] = useState<FlyingCollectible[]>([]);
   const [isCollecting, setIsCollecting] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioCacheRef = useRef<Map<string, HTMLAudioElement>>(new Map());
   const collectibleIdRef = useRef(0);
   const collectionStartedRef = useRef(false);
   const collectionTimersRef = useRef<number[]>([]);
@@ -96,10 +97,24 @@ export const EnhancedDialogue = ({
 
   const stopAudio = () => {
     if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
+      try {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      } catch {/* noop */}
       audioRef.current = null;
     }
+  };
+
+  const getCachedAudio = (src: string): HTMLAudioElement => {
+    let a = audioCacheRef.current.get(src);
+    if (!a) {
+      a = new Audio();
+      a.preload = "auto";
+      a.src = src;
+      try { a.load(); } catch {/* noop */}
+      audioCacheRef.current.set(src, a);
+    }
+    return a;
   };
 
   const currentIndex = externalIndex ?? internalIndex;
@@ -203,6 +218,14 @@ export const EnhancedDialogue = ({
     }
   }, [clearCollectionTimers, isActive]);
 
+  // Preload all voice-over audio for the current dialogue list so playback is instant
+  useEffect(() => {
+    if (!isActive) return;
+    dialogues.forEach((d) => {
+      if (d.audioSrc) getCachedAudio(d.audioSrc);
+    });
+  }, [dialogues, isActive]);
+
   // Typing effect
   useEffect(() => {
     if (!isActive || !currentDialogue) return;
@@ -218,13 +241,21 @@ export const EnhancedDialogue = ({
     setCollectibles([]);
     setIsCollecting(false);
 
-    // Play voice over if available
+    // Play voice over if available — use cached/preloaded audio for instant start
     if (currentDialogue.audioSrc) {
       try {
-        const audio = new Audio(currentDialogue.audioSrc);
+        const audio = getCachedAudio(currentDialogue.audioSrc);
+        try { audio.currentTime = 0; } catch {/* noop */}
         audioRef.current = audio;
-        audio.play().catch(() => {/* silent fallback */});
+        const p = audio.play();
+        if (p && typeof p.catch === "function") p.catch(() => {/* silent */});
       } catch {/* silent fallback */}
+    }
+
+    // Preload next dialogue's audio so it's ready instantly
+    const next = dialogues[currentIndex + 1];
+    if (next?.audioSrc) {
+      getCachedAudio(next.audioSrc);
     }
 
     let charIndex = 0;
