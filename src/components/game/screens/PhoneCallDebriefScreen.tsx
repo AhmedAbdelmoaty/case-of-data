@@ -5,6 +5,7 @@ import { usePFGame } from "@/contexts/PFGameContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSceneAmbience } from "@/hooks/useSceneAudio";
 import { useMusic } from "@/hooks/useBackgroundMusic";
+import { useMansourVoice } from "@/hooks/useMansourVoice";
 import { EnhancedDialogue } from "../EnhancedDialogue";
 import {
   MANSOUR_CALL_STRONG,
@@ -103,6 +104,11 @@ export const PhoneCallDebriefScreen = ({ onComplete }: PhoneCallDebriefScreenPro
   );
 
   const analystImg = useMemo(() => pickAnalystImage(g, tier), [g, tier]);
+
+  // Mansour voice-over: play matching segment for current dialogue line.
+  const voiceKey =
+    tier === "strong" ? "callStrong" : tier === "weak" ? "callWeak" : "callMedium";
+  useMansourVoice(voiceKey, dialogueIndex, true);
 
   // Determine which background to show based on the CURRENT speaker.
   const currentSpeaker = speakerMap[dialogueIndex] ?? speakerMap[0];
