@@ -97,10 +97,24 @@ export const EnhancedDialogue = ({
 
   const stopAudio = () => {
     if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
+      try {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      } catch {/* noop */}
       audioRef.current = null;
     }
+  };
+
+  const getCachedAudio = (src: string): HTMLAudioElement => {
+    let a = audioCacheRef.current.get(src);
+    if (!a) {
+      a = new Audio();
+      a.preload = "auto";
+      a.src = src;
+      try { a.load(); } catch {/* noop */}
+      audioCacheRef.current.set(src, a);
+    }
+    return a;
   };
 
   const currentIndex = externalIndex ?? internalIndex;
