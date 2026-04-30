@@ -27,11 +27,23 @@ export const EmailSendScreen = ({ onComplete }: EmailSendScreenProps) => {
   const handleSend = () => {
     if (sending || sent) return;
     setSending(true);
-    try { playSound("whoosh"); } catch { /* noop */ }
-    try { playSound("collect"); } catch { /* noop */ }
+    try {
+      playSound("whoosh");
+    } catch {
+      /* noop */
+    }
+    try {
+      playSound("collect");
+    } catch {
+      /* noop */
+    }
     setTimeout(() => {
       setSent(true);
-      try { playSound("notification"); } catch { /* noop */ }
+      try {
+        playSound("notification");
+      } catch {
+        /* noop */
+      }
       setTimeout(onComplete, 1800);
     }, 900);
   };
@@ -86,12 +98,12 @@ export const EmailSendScreen = ({ onComplete }: EmailSendScreenProps) => {
             </div>
             <div className="flex gap-2 border-b border-border/40 pb-2">
               <span className="text-muted-foreground w-14 shrink-0">الموضوع:</span>
-              <span className="text-foreground font-bold text-xs">تقرير قضية VELARO — تأطير المشكلة</span>
+              <span className="text-foreground font-bold text-xs">تقرير قضية VELARO</span>
             </div>
             <div className="pt-2 text-foreground/80 text-xs leading-relaxed">
               <p>أستاذ منصور،</p>
               <p className="mt-2">
-                مرفق تقرير قضية VELARO مع تأطير المشكلة كاملاً، نتائج المقابلة مع أستاذ هشام الشريف، والتوصية النهائية.
+                مرفق تقرير قضية VELARO مع تفسير المشكلة كاملاً، نتائج المقابلة مع أستاذ هشام الشريف، والتوصية النهائية.
               </p>
               <p className="mt-2">في انتظار ملاحظاتك.</p>
               <p className="mt-2 text-muted-foreground">📎 VELARO_Framing_Report.pdf</p>
