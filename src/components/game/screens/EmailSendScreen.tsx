@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Send } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -21,10 +21,9 @@ export const EmailSendScreen = ({ onComplete }: EmailSendScreenProps) => {
   const playerName = profile?.display_name || "محلل";
   const bg = g === "female" ? analystFemaleImg : analystMaleImg;
 
-  useState(() => {
+  useEffect(() => {
     preloadSceneAudio("keyboard_typing");
-    return null;
-  });
+  }, []);
 
   // Keyboard typing ambience while composing — stops when sent/sending or screen leaves.
   useSceneAmbience(!sent && !sending ? "keyboard_typing" : null);
