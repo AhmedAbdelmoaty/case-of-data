@@ -469,6 +469,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
         )}
       </AnimatePresence>
 
+      {phase === "dialogue" && currentLines.length > 0 && (
         <EnhancedDialogue
           key={dialogueKey}
           dialogues={currentLines}
