@@ -6,7 +6,7 @@ import type { DialogueLine } from "./types";
 export const MANSOUR_CALL_STRONG: DialogueLine[] = [
   { characterId: "mansour", text: "التقرير اللي بعتهولي ده شغل محترم . هشام الشريف اتصل بيا وكان مبسوط جداً.", mood: "happy", audioSrc: "/voiceover/mansour/mansour_call_strong_01.wav" },
   { characterId: "mansour", text: "أهم حاجة عملتها صح إنك مخدتش وصف العميل للمشكلة على إنه الحقيقة. ده بالظبط Problem Framing سليم. لو كنت جريت ورا كلامه كان ممكن يحصل مشاكل اكبر والشركة كانت هتخسر عميل كبير.", mood: "serious", audioSrc: "/voiceover/mansour/mansour_call_strong_02.wav" },
-  { characterId: "detective", text: "ده شرف ليّا يا أستاذ منصور.", mood: "happy" },
+  { characterId: "detective", text: "ده شرف ليّا يا أستاذ منصور.", mood: "happy", audioSrc: "/voiceover/analyst_male/analyst_ending_strong_response.wav" },
   { characterId: "mansour", text: "تستاهل. هكتبلك على مكافأة. وهكلمك الأسبوع الجاي على استشارة جديدة.", mood: "happy", audioSrc: "/voiceover/mansour/mansour_call_strong_03.wav" },
   { characterId: "mansour", text: "وكمل اللي إنت بتعمله — خليك ماشي على منهج IMP في التحليل، ده اللي فرق معاك النهارده. سلام.", mood: "happy", audioSrc: "/voiceover/mansour/mansour_call_strong_04.wav" },
 ];
