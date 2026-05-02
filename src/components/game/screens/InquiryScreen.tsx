@@ -10,7 +10,7 @@ import { PFNotebook } from "../PFNotebook";
 import { TOTAL_QUESTION_BUDGET } from "@/lib/pf-case/case-tree";
 import type { EvidenceData } from "@/lib/pf-case/evidence-catalog";
 import { getHeshamVoice } from "@/lib/voiceover/heshamVoiceMap";
-import { applyGenderToLine, getFemaleText, getVoiceoverSrc } from "@/lib/voiceover/genderedDialogue";
+import { getFemaleText, getVoiceoverSrc } from "@/lib/voiceover/genderedDialogue";
 import velaroInteriorWideImg from "@/assets/scenes/velaro-interior-wide.webp";
 import velaroCheckoutBusyImg from "@/assets/scenes/velaro-checkout-busy.webp";
 import velaroWomensSectionImg from "@/assets/scenes/velaro-womens-section.webp";
