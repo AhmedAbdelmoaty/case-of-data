@@ -65,11 +65,22 @@ const toFemaleCandidate = (maleSrc?: string): string | undefined => {
 /**
  * Resolve the audio src for a given gender.
  * - male / undefined → original
- * - female → female variant if it exists in the allow-list, else original
+ * - female:
+ *     • Analyst paths (/voiceover/analyst_male/...) ALWAYS swap to
+ *       /voiceover/analyst_female/<name>_female.wav (all 27 exist).
+ *     • Other paths swap only if the female variant is in the allow-list.
  */
 export const getVoiceoverSrc = (maleSrc: string | undefined, gender: Gender | null | undefined): string | undefined => {
   if (!maleSrc) return undefined;
   if (gender !== "female") return maleSrc;
+
+  // Analyst voice: always has a female counterpart with _female suffix
+  if (maleSrc.includes("/voiceover/analyst_male/")) {
+    return maleSrc
+      .replace("/voiceover/analyst_male/", "/voiceover/analyst_female/")
+      .replace(/\.wav$/, "_female.wav");
+  }
+
   const candidate = toFemaleCandidate(maleSrc);
   if (candidate && FEMALE_AUDIO_AVAILABLE.has(candidate)) return candidate;
   return maleSrc;
