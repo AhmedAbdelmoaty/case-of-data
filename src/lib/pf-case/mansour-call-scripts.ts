@@ -13,7 +13,7 @@ export const MANSOUR_CALL_STRONG: DialogueLine[] = [
 
 export const MANSOUR_CALL_MEDIUM: DialogueLine[] = [
   { characterId: "mansour", text: "خلّينا نتكلم بصراحة شغلك كويس بس مش كويس بالشكل اللي كنت متوقعه منك. مسكت إن سنة 2025 كانت استثنائية، وده تمام، لكن محسمتش الموضوع لآخره.", mood: "neutral", audioSrc: "/voiceover/mansour/mansour_call_medium_01.wav" },
-  { characterId: "detective", text: "أيوه، حسيت إن لسه فيه جزء ناقص.", mood: "concerned" },
+  { characterId: "detective", text: "أيوه، حسيت إن لسه فيه جزء ناقص.", mood: "concerned", audioSrc: "/voiceover/analyst_male/analyst_ending_medium_response.wav" },
   { characterId: "mansour", text: "بالظبط. كان لازم تربط بوضوح إن المقارنة الغلط كانت هتودي العميل لقرار غلط. الـ Problem Framing مش بس إنك تشوف الحقيقة، ده إنك توصّلها بحسم عشان العميل يغيّر اتجاهه.", mood: "serious", audioSrc: "/voiceover/mansour/mansour_call_medium_02.wav" },
   { characterId: "mansour", text: "هديك تقييم متوسط، مش هخصم منك كتير. بس خد بالك المرة الجاية.", mood: "neutral", audioSrc: "/voiceover/mansour/mansour_call_medium_03.wav" },
   { characterId: "mansour", text: "نصيحة مني ذاكر دبلومة تحليل البيانات من IMP، هتساعدك جدًا في تنمية مهاراتك التحليلية، وازاي تفهم المشكلة بشكل صحيح.", mood: "neutral", audioSrc: "/voiceover/mansour/mansour_call_medium_04.wav" },
