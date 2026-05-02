@@ -16,6 +16,7 @@ import mansourWelcomeFemaleImg from "@/assets/scenes/mansour-office-welcome-fema
 import mansourSeatedMaleImg from "@/assets/scenes/mansour-office-seated-male.webp";
 import mansourSeatedFemaleImg from "@/assets/scenes/mansour-office-seated-female.webp";
 import { MANSOUR_INTRO_DIALOGUES } from "@/data/pf-case";
+import { applyGenderToLine } from "@/lib/voiceover/genderedDialogue";
 
 interface CompanyBriefingScreenProps {
   onComplete: () => void;
@@ -83,12 +84,15 @@ export const CompanyBriefingScreen = ({
     }
   }, [phase, isReviewMode]);
 
-  const dialogues = MANSOUR_INTRO_DIALOGUES.map((line) => ({
-    characterId: line.characterId,
-    text: line.text,
-    mood: mapMood(line.mood),
-    audioSrc: line.audioSrc,
-  }));
+  const dialogues = MANSOUR_INTRO_DIALOGUES.map((line) => {
+    const adjusted = applyGenderToLine(line, g);
+    return {
+      characterId: adjusted.characterId,
+      text: adjusted.text,
+      mood: mapMood(adjusted.mood),
+      audioSrc: adjusted.audioSrc,
+    };
+  });
 
   const handleDialogueComplete = () => {
     if (isReviewMode) {

@@ -10,6 +10,7 @@ import { PFNotebook } from "../PFNotebook";
 import { TOTAL_QUESTION_BUDGET } from "@/lib/pf-case/case-tree";
 import type { EvidenceData } from "@/lib/pf-case/evidence-catalog";
 import { getHeshamVoice } from "@/lib/voiceover/heshamVoiceMap";
+import { getFemaleText, getVoiceoverSrc } from "@/lib/voiceover/genderedDialogue";
 import velaroInteriorWideImg from "@/assets/scenes/velaro-interior-wide.webp";
 import velaroCheckoutBusyImg from "@/assets/scenes/velaro-checkout-busy.webp";
 import velaroWomensSectionImg from "@/assets/scenes/velaro-womens-section.webp";
@@ -120,18 +121,23 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
           return;
         }
 
+        const baseMaleText = result.responseText;
+        const baseMaleAudio = getHeshamVoice(baseMaleText);
+        const finalText = g === "female" ? (getFemaleText(baseMaleText) ?? baseMaleText) : baseMaleText;
+        const finalAudio = getVoiceoverSrc(baseMaleAudio, g);
+
         const lines: DialogueLineUI[] = [
           // TEMPORARILY HIDDEN — uncomment to restore the analyst question line before Hisham's response
           // { characterId: "detective", text: result.questionText, mood: "neutral" },
           {
             characterId: "hisham",
-            text: result.responseText,
+            text: finalText,
             mood: option.isCorrect ? "happy" : "neutral",
             isSaveable: !!result.noteId,
             saveId: result.noteId,
             saveText: result.noteText,
             inlineEvidence: result.evidence,
-            audioSrc: getHeshamVoice(result.responseText),
+            audioSrc: finalAudio,
           },
         ];
 
@@ -142,7 +148,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
         setPhase("dialogue");
       }, 680);
     },
-    [pickChoice, playSound, selectedChoiceId]
+    [pickChoice, playSound, selectedChoiceId, g]
   );
 
   const handleDialogueComplete = useCallback(() => {

@@ -14,6 +14,7 @@ import hishamGreetingFemaleImg from "@/assets/scenes/hisham-greeting-female.webp
 import hishamOfficeSeatedMaleImg from "@/assets/scenes/hisham-office-seated-male.webp";
 import hishamOfficeSeatedFemaleImg from "@/assets/scenes/hisham-office-seated-female.webp";
 import { HISHAM_GREETING } from "@/data/pf-case";
+import { applyGenderToLine } from "@/lib/voiceover/genderedDialogue";
 
 interface ArrivalScreenProps {
   onComplete: () => void;
@@ -70,12 +71,15 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
     }
   }, [phase, playSound]);
 
-  const dialogues = HISHAM_GREETING.map((line) => ({
-    characterId: line.characterId,
-    text: line.text,
-    mood: mapMood(line.mood),
-    audioSrc: line.audioSrc,
-  }));
+  const dialogues = HISHAM_GREETING.map((line) => {
+    const adjusted = applyGenderToLine(line, g);
+    return {
+      characterId: adjusted.characterId,
+      text: adjusted.text,
+      mood: mapMood(adjusted.mood),
+      audioSrc: adjusted.audioSrc,
+    };
+  });
 
   // Dialogue background swaps from greeting → office after 2 lines
   const dialogueBg = dialogueIndex < 2 ? greetingImg : officeImg;
