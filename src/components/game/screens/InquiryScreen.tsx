@@ -112,9 +112,32 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
   }, [currentLines, g, phase, state.trackEntered, state.questionsUsed]);
 
   const handlePick = useCallback(
+  const stopQuestionAudio = useCallback(() => {
+    const a = questionAudioRef.current;
+    if (a) {
+      try { a.pause(); a.currentTime = 0; } catch { /* noop */ }
+      questionAudioRef.current = null;
+    }
+  }, []);
+
+  const enterDialoguePhase = useCallback(() => {
+    stopQuestionAudio();
+    const lines = pendingLinesRef.current;
+    if (!lines) return;
+    pendingLinesRef.current = null;
+    setCurrentLines(lines);
+    setDialogueIndex(0);
+    setDialogueKey((k) => k + 1);
+    setSelectedChoiceId(null);
+    setSelectedChoiceText("");
+    setPhase("dialogue");
+  }, [stopQuestionAudio]);
+
+  const handlePick = useCallback(
     (option: typeof choices[number]) => {
       if (selectedChoiceId) return;
       setSelectedChoiceId(option.id);
+      setSelectedChoiceText(option.text);
       try { playSound("click"); } catch { /* noop */ }
       setTimeout(() => { try { playSound("whoosh"); } catch { /* noop */ } }, 120);
 
@@ -122,6 +145,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
         const result = pickChoice(option);
         if (!result) {
           setSelectedChoiceId(null);
+          setSelectedChoiceText("");
           return;
         }
 
@@ -131,8 +155,6 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
         const finalAudio = getVoiceoverSrc(baseMaleAudio, g);
 
         const lines: DialogueLineUI[] = [
-          // TEMPORARILY HIDDEN — uncomment to restore the analyst question line before Hisham's response
-          // { characterId: "detective", text: result.questionText, mood: "neutral" },
           {
             characterId: "hisham",
             text: finalText,
@@ -144,16 +166,43 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
             audioSrc: finalAudio,
           },
         ];
+        pendingLinesRef.current = lines;
 
-        setCurrentLines(lines);
-        setDialogueIndex(0);
-        setDialogueKey((k) => k + 1);
-        setSelectedChoiceId(null);
-        setPhase("dialogue");
+        // Try to play the analyst question voice first
+        const questionVoice = getAnalystVoice(option.text, g);
+        if (questionVoice) {
+          stopQuestionAudio();
+          try {
+            const audio = new Audio(questionVoice);
+            audio.preload = "auto";
+            questionAudioRef.current = audio;
+            audio.onended = () => {
+              if (questionAudioRef.current === audio) enterDialoguePhase();
+            };
+            audio.onerror = () => {
+              if (questionAudioRef.current === audio) enterDialoguePhase();
+            };
+            setPhase("questionVoice");
+            const p = audio.play();
+            if (p && typeof p.catch === "function") {
+              p.catch(() => enterDialoguePhase());
+            }
+          } catch {
+            enterDialoguePhase();
+          }
+        } else {
+          enterDialoguePhase();
+        }
       }, 680);
     },
-    [pickChoice, playSound, selectedChoiceId, g]
+    [pickChoice, playSound, selectedChoiceId, g, stopQuestionAudio, enterDialoguePhase]
   );
+
+  // Stop question audio if component unmounts or phase changes away
+  useEffect(() => {
+    return () => stopQuestionAudio();
+  }, [stopQuestionAudio]);
+
 
   const handleDialogueComplete = useCallback(() => {
     if (state.isComplete) {
