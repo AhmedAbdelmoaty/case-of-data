@@ -310,6 +310,8 @@ export const EnhancedDialogue = ({
       collectCurrentFindingsNow();
     }
 
+    stopAudio();
+
     if (currentIndex < dialogues.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
