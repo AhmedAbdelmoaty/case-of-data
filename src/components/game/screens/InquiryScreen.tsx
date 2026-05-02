@@ -111,7 +111,6 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
     return velaroInteriorWideImg;
   }, [currentLines, g, phase, state.trackEntered, state.questionsUsed]);
 
-  const handlePick = useCallback(
   const stopQuestionAudio = useCallback(() => {
     const a = questionAudioRef.current;
     if (a) {
