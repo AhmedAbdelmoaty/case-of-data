@@ -1,99 +1,170 @@
-# Gender-Aware Dialogue + Voice-Over Plan
+## ما فهمته من طلبك
 
-## What I read and understood
+عندنا 3 مشاكل/مهام:
 
-I inspected the relevant code and the uploaded WAV files. Here is exactly what's there:
+1. **صوت المحلل (اللاعب) لسه مش مضاف** — أنت رفعت 27 ملف ذكر (analyst_male) و27 ملف أنثى (analyst_female) ولازم اللعبة تشغّل الملف الصح حسب جنس اللاعب في كل سطور المحلل (مع منصور أول/آخر، مع هشام، وأسئلة الكروت).
+2. **الصوت بيكمل بعد الجملة/المشهد** — لازم أي صوت يقف فورًا عند: ضغط استمرار، تغيير الجملة، تغيير المشهد، قفل الديالوج.
+3. **سؤال الكارت بيتعدى من غير ما صوته يتسمع** — لما اللاعب يضغط كارت السؤال، رد هشام بيظهر فورًا. عايزين صوت السؤال يشتغل الأول، وبعدين يظهر رد هشام، مع إمكانية التخطي.
 
-**Voice-over files in `public/voiceover/`:**
-- `mansour/` — every Mansour file has a matching `_female.wav` version (16 male + 16 female, total 32). Covers all of: `mansour_intro_office_01..04`, `mansour_call_strong_01..04`, `mansour_call_medium_01..04`, `mansour_call_weak_01..04`.
-- `hesham/` — only some files have `_female.wav` versions:
-  - Has female: `hisham_arrival_01_welcome`, `hisham_arrival_02_problem_feeling`, `hisham_s3_correct_year_report`, `hisham_s4_correct_three_year_report`, `hisham_s4_wrong_competitor_prices`, `hisham_s5_correct_breakdown`, `hisham_s5_wrong_marketing_entry`, `hisham_track_a_01_team_performance`, `hisham_track_d_03_marketing_report`.
-  - No female version (will keep male audio): the other Hisham files (s1, s2, s3 wrong, track_a 02/03/04, all track_c, track_d 01/02/04).
+## قراءة الملفات والـ Mapping
 
-**Where dialogue is consumed:**
-- `EnhancedDialogue.tsx` already accepts `playerGender` and uses cached/preloaded `audioSrc` with instant playback + stop-on-change. This is the single render point for all dialogue.
-- Scripts: `src/lib/pf-case/mansour-scripts.ts` (HISHAM_GREETING, MANSOUR_INTRO, MANSOUR_DEBRIEF_*), `src/lib/pf-case/mansour-call-scripts.ts` (MANSOUR_CALL_*), `src/lib/pf-case/case-tree.ts` (SPINE + TRACKS hisham replies).
-- Voice map: `src/lib/voiceover/heshamVoiceMap.ts` matches Hisham reply text → audio path.
-- Screens that build dialogue arrays: `ArrivalScreen.tsx`, `CompanyBriefingScreen.tsx`, `InquiryScreen.tsx`, `PhoneCallDebriefScreen.tsx` — all already pass `playerGender` and `profile.gender`.
+قرأت كل ملفات الـ voiceover في `public/voiceover/analyst_male/` و`analyst_female/`. الأسماء مطابقة 1:1 (نفس الـ 27 ملف، النسخة الأنثى بإضافة `_female` قبل `.wav`). كمان قرأت `case-tree.ts` و `mansour-scripts.ts` و `mansour-call-scripts.ts` و `InquiryScreen.tsx` و `EnhancedDialogue.tsx` عشان أتأكد من كل سطر هيتربط بأنهي ملف.
 
-**Key insight:** Male behavior must be byte-identical to today. So the cleanest approach is:
-1. Keep all existing text and `audioSrc` strings exactly as they are (= male path).
-2. Add a small helper that, **only when `playerGender === "female"`**, swaps in a female text variant (if one is defined) and tries `_female.wav` (only if that path is in an allow-list of files we know exist).
+### جدول الربط الكامل (نسخة الذكر — الأنثى نفس الاسم + `_female`)
 
-## Plan
+**أ) مع منصور في المكتب (بداية المهمة) — `MANSOUR_INTRO_DIALOGUES**`
 
-### 1) New helper: `src/lib/voiceover/genderedDialogue.ts`
 
-Two pure functions:
+| ملف                                             | جملة المحلل                                           |
+| ----------------------------------------------- | ----------------------------------------------------- |
+| `analyst_intro_with_mansour_01_accept_task.wav` | "تمام يا أستاذ منصور، هروح وأحاول أفهم الصورة كاملة." |
 
-- `getFemaleAudioSrc(maleSrc?: string): string | undefined`
-  - If no `maleSrc` → return undefined.
-  - Compute candidate `<basename>_female.wav`.
-  - Look up against a hard-coded `Set<string>` of known-existing female files (the 16 Mansour + 9 Hisham listed above). If present → return female path. Else → return original `maleSrc`. **Never guess a path that doesn't exist.**
-- `applyGenderToLine(line, gender)`
-  - For `gender === "male"` → return line unchanged.
-  - For `gender === "female"` → return `{ ...line, text: femaleTextFor(line.text) ?? line.text, audioSrc: getFemaleAudioSrc(line.audioSrc) }`.
-- `femaleTextFor(maleText)` → looks up an explicit female-text map. If no entry → returns undefined (keeps male text). This avoids blindly rewriting neutral lines.
 
-Example entries in the female-text map (only for lines that have direct masculine address to the analyst):
+**ب) الترحيب مع هشام — `HISHAM_GREETING**`
 
-```
-"التقرير اللي بعتهولي ده شغل محترم . هشام الشريف اتصل بيا وكان مبسوط جداً."
-  → "التقرير اللي بعتيهولي ده شغل محترم . هشام الشريف اتصل بيا وكان مبسوط جداً."
 
-"أهلاً، اتفضل اقعد. عندنا استشارة جديدة محتاجة تركيز."
-  → "أهلاً، اتفضلي اقعدي. عندنا استشارة جديدة محتاجة تركيز."
+| ملف                                        | جملة المحلل                                                                     |
+| ------------------------------------------ | ------------------------------------------------------------------------------- |
+| `analyst_arrival_hisham_01_greeting.wav`   | "أهلاً بيك يا أستاذ هشام. أستاذ منصور قالي إن حضرتك عاوز تتكلم في موضوع شاغلك." |
+| `analyst_arrival_hisham_02_calm_start.wav` | "متشغلش بالك. خلينا نهدى ونفهم سوا. هسألك كام سؤال براحة، وانت قولي اللي عندك." |
 
-"أهلاً وسهلاً يا فندم، نوّرت. اتفضل اقعد، تشرب حاجة؟"
-  → "أهلاً وسهلاً يا فندمة، نوّرتي. اتفضلي اقعدي، تشربي حاجة؟"
 
-"عايزك تروح تقعد معاه، وتسأل صح وتفهم المشكلة بشكل كامل."
-  → "عايزك تروحي تقعدي معاه، وتسألي صح وتفهمي المشكلة بشكل كامل."
-```
+**ج) أسئلة المحور الصحيح S1–S5 (correct) في `case-tree.ts**`
 
-I'll go through every Mansour + Hisham line in the four script sources and add a female variant **only** where there is real masculine address (verbs/pronouns directed at the analyst). Lines like *"إحنا شغلنا نفهم المشكلة الأول"* or any narration that doesn't address the analyst stay untouched.
 
-### 2) Wire the helper into the four screens
+| ملف                                   | السؤال                                                                                                 |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `analyst_s1_correct_open_problem.wav` | "خلينا نبدأ من الأول يا أستاذ هشام. إيه اللي خلاك تحس إن في مشكلة؟ حصل إيه بالظبط في الشهر ده؟"        |
+| `analyst_s2_correct_baseline.wav`     | "طب خلينا نقف هنا. لما بتقول المبيعات أقل من المتوقع، ممكن تقولي قلت بنسبة قد ايه وحضرتك بتقارن بإيه؟" |
+| `analyst_s3_correct_ask_report.wav`   | "تمام. طب ممكن أشوف الأرقام دي على ورق؟ هل فيه تقرير بيأكد الكلام ده؟"                                 |
+| `analyst_s4_correct_three_years.wav`  | "حضرتك بتقارن بسنة واحدة بس. ممكن نشوف مبيعات فبراير لآخر 3 سنين؟…"                                    |
+| `analyst_s5_correct_breakdown.wav`    | "حضرتك عندك تقرير بيوضح المبيعات دي ماشية إزاي؟ يعني نوعية البيع، تفاصيله، مش بس رقم إجمالي؟"          |
 
-In each screen that builds a `dialogues` array, map through `applyGenderToLine(line, g)` before passing to `EnhancedDialogue`:
 
-- `src/components/game/screens/ArrivalScreen.tsx` (HISHAM_GREETING)
-- `src/components/game/screens/CompanyBriefingScreen.tsx` (MANSOUR_INTRO_DIALOGUES)
-- `src/components/game/screens/PhoneCallDebriefScreen.tsx` (MANSOUR_CALL_*)
-- `src/components/game/screens/InquiryScreen.tsx` (already calls `getHeshamVoice(result.responseText)` — I'll wrap the produced Hisham line through `applyGenderToLine` so its text + audio get female-shifted; player/detective lines pass through untouched)
+**د) أسئلة المحور الخطأ (wrong entries في S1–S5)**
 
-Detective/player lines have no `audioSrc` so the audio swap is a no-op for them. Their text doesn't need gender swapping (they ARE the player; the existing UI already shows the player's name + chosen avatar).
 
-### 3) Update `heshamVoiceMap.ts` (no breaking changes)
+| ملف                                            | السؤال                                                                                                   |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `analyst_s1_wrong_sales_team_entry.wav`        | "أستاذ هشام، عندي إحساس إن المشكلة دي غالبًا من فريق البيع…"                                             |
+| `analyst_s2_wrong_sales_report_entry.wav`      | "تمام، ممكن أبص على تقرير مبيعات الشهر ده؟…"                                                             |
+| `analyst_s3_wrong_competitors_entry.wav`       | "طب قبل ما نكمل، المنافسين حواليك بيعملوا إيه دلوقتي؟…"                                                  |
+| `analyst_s4_wrong_competitor_offers_entry.wav` | "إيه طبيعة العروض اللي بيقدمها المنافسين دلوقتي؟" (نفس نص `c_competitor_offers` — مفيد لإعادة الاستخدام) |
+| `analyst_s5_wrong_marketing_entry.wav`         | "طب ممكن نبص على أداء الحملات الإعلانية الأخيرة؟"                                                        |
 
-Keep existing male map exactly as-is (so male behavior is byte-identical). The female swap is handled centrally by `getFemaleAudioSrc` looking at the resulting path — no second map needed. Add a comment block listing which Hisham files have `_female.wav` available so future edits stay consistent.
 
-### 4) Behavior guarantees
+**هـ) Track A — فريق البيع**
 
-- Male player: zero change. Same text, same `.wav`, same timing.
-- Female player:
-  - Text changes only on lines we explicitly added a female variant for. Neutral lines stay identical.
-  - Audio: tries `<file>_female.wav`; if that exact file isn't in the known-female allow-list, falls back to the original male file. We never request a non-existent file.
-- Audio playback path is unchanged (`EnhancedDialogue` already preloads, stops on change, plays instantly). So no desync, no overlap, no delay regression.
 
-## Files to add / edit
+| ملف                              | السؤال                                                          |
+| -------------------------------- | --------------------------------------------------------------- |
+| `analyst_a_team_performance.wav` | "ممكن أشوف تقرير بأداء كل واحد في فريق المبيعات؟"               |
+| `analyst_a_team_conversion.wav`  | "طب ممكن نبص على نسبة التحويل لكل فرد في الفريق؟"               |
+| `analyst_a_team_training.wav`    | "في تدريب أو متابعة منتظمة بتعملها للفريق؟ آخر تدريب كان امتى؟" |
+| `analyst_a_conclusion.wav`       | "تمام، الصورة بقت أوضح. فيه ضعف تنفيذ ومتابعة من ناحية الفريق." |
 
-**New:**
-- `src/lib/voiceover/genderedDialogue.ts` — helper with `applyGenderToLine`, `getFemaleAudioSrc`, female text map, female-audio allow-list.
 
-**Edited (small wrapping changes only):**
-- `src/components/game/screens/ArrivalScreen.tsx`
-- `src/components/game/screens/CompanyBriefingScreen.tsx`
-- `src/components/game/screens/PhoneCallDebriefScreen.tsx`
-- `src/components/game/screens/InquiryScreen.tsx`
-- `src/lib/voiceover/heshamVoiceMap.ts` — add a documentation comment listing female-available files (no logic change).
+**و) Track C — منافسين/تسعير**
 
-## Out of scope (intentionally not touched)
 
-- Story content, dialogue meaning, scene flow, scoring, animations.
-- Mansour debrief text and call text aren't required to change for female (no female versions of debrief audio exist anyway). Female text variants in those will only be added where there's clear masculine address; otherwise left untouched.
-- No new audio files will be requested or invented.
+| ملف                                     | السؤال                                                           |
+| --------------------------------------- | ---------------------------------------------------------------- |
+| `analyst_c_customer_price_feedback.wav` | "فيه زباين عندك بيشتكوا من السعر مقارنة بالسوق؟"                 |
+| `analyst_c_price_response.wav`          | "نعمل رد سعري تنافسي. عرض محدد لفترة قصيرة على خط معين؟"         |
+| `analyst_c_conclusion.wav`              | "كده الصورة بقت أوضح، السوق بيضغط على السعر ومحتاجين تحرك سعري." |
 
-## Confirmation
 
-Yes — I read the uploaded files in `public/voiceover/mansour/` and `public/voiceover/hesham/`, identified exactly which `_female.wav` files exist, and my plan only references those. For files without a female version, the original male audio stays.
+> ملحوظة: `c_competitor_offers` نفس نص `S4 wrong`، فهيستخدم `analyst_s4_wrong_competitor_offers_entry.wav` لما يظهر في تراك C.
+
+**ز) Track D — تسويق/طلب**
+
+
+| ملف                              | السؤال                                                                   |
+| -------------------------------- | ------------------------------------------------------------------------ |
+| `analyst_d_active_campaign.wav`  | "هل في أي حملة تنشيط أو ترويج كانت شغالة الشهر ده؟"                      |
+| `analyst_d_new_vs_returning.wav` | "طب الشراء خلال الشهر ده جاي أكتر من عملاء جدد ولا من الزباين الدائمين؟" |
+| `analyst_d_marketing_report.wav` | "ممكن نبص على ملخص أداء التسويق السنة دي مقارنة بالسنة اللي فاتت؟"       |
+| `analyst_d_conclusion.wav`       | "يبقى محتاجين حملة تنشيط مدروسة قبل الموسم الجاي، بميزانية محسوبة."      |
+
+
+**ح) المكالمة النهائية مع منصور (mansour-call-scripts.ts) — ردود المحلل**
+
+
+| ملف                                  | المكان                                                |
+| ------------------------------------ | ----------------------------------------------------- |
+| `analyst_ending_strong_response.wav` | "ده شرف ليّا يا أستاذ منصور." MANSOUR_CALL_STRONG     |
+| `analyst_ending_medium_response.wav` | "أيوه، حسيت إن لسه فيه جزء ناقص." MANSOUR_CALL_MEDIUM |
+| `analyst_ending_weak_response.wav`   | "حضرتك معاك حق… أنا استعجلت." MANSOUR_CALL_WEAK       |
+
+
+**الإجمالي:** 27 ملف موزعين على 27 سطر/سؤال محلل. مفيش ملف زيادة، ومفيش سطر ناقصه ملف.
+
+---
+
+## خطة التنفيذ
+
+### 1) ملف ربط مركزي للمحلل
+
+أنشئ `src/lib/voiceover/analystVoiceMap.ts`:
+
+- `ANALYST_VOICE_MAP`: `Record<string, string>` بيربط نص الجملة (بعد normalize للمسافات/التشكيل) بمسار الملف الذكر تحت `/voiceover/analyst_male/`.
+- `getAnalystVoice(text, gender)`: بيرجّع المسار الصح؛ لو `female` بيستبدل `analyst_male/` بـ `analyst_female/` وبيضيف `_female` قبل `.wav`. كل ملفات المحلل لها نسخة female مؤكدة (allow-list داخلية).
+- يدعم matching بالنص الكامل، ولو فشل يرجع `undefined` بدون إحلال.
+
+### 2) ربط الصوت في كل المشاهد
+
+- `**mansour-scripts.ts**`: أضف `audioSrc` للسطر الـ detective في `MANSOUR_INTRO_DIALOGUES` و للسطرين detective في `HISHAM_GREETING` (نسخة male كقيمة افتراضية، والاستبدال للأنثى يحصل في الـ screen عبر `getVoiceoverSrc`/الـ map).
+- `**mansour-call-scripts.ts` (debrief)**: أضف `audioSrc` للجملة الوحيدة للمحلل في كل من STRONG/MEDIUM/WEAK.
+- `**InquiryScreen.tsx**`: عند `pickChoice`، استخدم `getAnalystVoice(option.text, g)` لتوليد `audioSrc` لسطر سؤال المحلل (لو هنرجّع السطر — تحت في النقطة 4).
+- `**ArrivalScreen.tsx**` و `**CompanyBriefingScreen.tsx**` و `**PhoneCallDebriefScreen.tsx**`: مرّر السطور بالفعل خلال `applyGenderToLine` (موجودة) — بس كمّلها بحيث لو السطر detective وله `audioSrc` ذكر، تستبدله بـ female عبر helper جديد `getAnalystVoiceoverSrc(maleSrc, gender)`.
+
+### 3) إيقاف الصوت بشكل صارم
+
+في `EnhancedDialogue.tsx`:
+
+- `stopAudio()` موجود ومستخدم في تغيير الـ index و عند unmount/`!isActive`.
+- **إضافة:** `useEffect` cleanup عام يستدعي `stopAudio()` عند unmount نهائي للكومبوننت (يتأكد من إيقاف الصوت لو المشهد اتغير قبل ما الديالوج يكمل).
+- **إضافة:** في `handleNext` و `handleClose` و `handlePrevious` — `stopAudio()` بيتنادى قبل أي transition (بعضها موجود؛ هنوحّد كلها).
+- **إضافة:** عند انتهاء الجملة الحالية والـ user دوس استمرار، أوقف الصوت فورًا حتى لو لسه شغال.
+
+النتيجة: الصوت ميعيشش غير داخل سطر الـ dialogue بتاعه فقط.
+
+### 4) صوت سؤال الكارت قبل رد هشام
+
+في `InquiryScreen.tsx` (المشكلة الأهم):
+
+**التجربة المقترحة (سلسة):**
+
+1. اللاعب يضغط كارت السؤال.
+2. الكارت المختار يكبر شوية ويثبت في النص (الانيميشن الموجود حاليًا "scale up to center" مناسب — هنطوّله شوية).
+3. صوت سؤال المحلل يبدأ يشتغل فورًا (`getAnalystVoice(option.text, g)`).
+4. أثناء التشغيل: تظهر مؤشرات بصرية (نبض/موجة صوت صغيرة على الكارت) + زر "تخطي" صغير في الكورنر.
+5. عند انتهاء الصوت تلقائيًا (event `ended`) أو ضغط "تخطي": يقف الصوت فورًا، الكارت يختفي، نروح لرد هشام (الـ phase = `dialogue` مع صوت هشام).
+6. رد هشام يبدأ صوته فورًا أول ما الجملة تتكون (موجود حاليًا).
+
+**التنفيذ التقني:**
+
+- إضافة phase جديد `"questionVoice"` بين `choosing` و `dialogue`.
+- `handlePick` يحوّل لـ `questionVoice`، يشغل audio، ويربط `onended` يرجّع `setPhase("dialogue")` ويملأ `currentLines`.
+- لو مفيش audioSrc للسؤال (احتياطي)، يدخل `dialogue` مباشرة.
+- زر تخطي يستدعي نفس الـ handler.
+- ضمان عدم التداخل: قبل تشغيل صوت السؤال نوقف أي صوت سابق؛ EnhancedDialogue نفسه بيوقف صوت السؤال أول ما يبدأ صوت هشام (لأنه instance منفصل، هنشاركه عبر helper مشترك أو ببساطة `audio.pause()` في cleanup).
+
+### 5) ملاحظات
+
+- مفيش تغيير في نص أي ديالوج.
+- مفيش تغيير في تدفق اللعبة أو الـ scoring.
+- كل الملفات الـ 27 (×2 للجنس) هتتربط بسطورها الصح زي الجدول فوق.
+- لو حصل أي mismatch في النص (مسافات/علامات)، الـ normalize داخل `getAnalystVoice` بيتعامل معاه؛ ولو فشل الربط، السطر يفضل صامت بدون استبدال خاطئ.
+
+## الملفات اللي هتتعدّل/تتنشأ
+
+- **جديد:** `src/lib/voiceover/analystVoiceMap.ts`
+- **تعديل:** `src/lib/voiceover/genderedDialogue.ts` (إضافة female allow-list للمحلل)
+- **تعديل:** `src/lib/pf-case/mansour-scripts.ts` (إضافة audioSrc للمحلل في INTRO + HISHAM_GREETING )  
+**تعديل:** `src/lib/pf-case/mansour-call-scripts.ts` (إضافة audioSrc للمحلل في كل جملة في ال3 نهايات)
+- **تعديل:** `src/components/game/screens/InquiryScreen.tsx` (phase جديد للصوت قبل رد هشام + ربط صوت المحلل)
+- **تعديل:** `src/components/game/EnhancedDialogue.tsx` (تشديد إيقاف الصوت في كل المسارات)
+- **تعديل بسيط:** `ArrivalScreen.tsx` و `CompanyBriefingScreen.tsx` و `PhoneCallDebriefScreen.tsx` (التأكد إن audioSrc للمحلل بيمر خلال gender helper)
+
+وافق وأنا أنفّذ كل ده بالترتيب.

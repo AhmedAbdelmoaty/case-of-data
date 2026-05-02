@@ -11,6 +11,7 @@ export const HISHAM_GREETING: DialogueLine[] = [
     characterId: "detective",
     text: "أهلاً بيك يا أستاذ هشام. أستاذ منصور قالي إن حضرتك عاوز تتكلم في موضوع شاغلك.",
     mood: "neutral",
+    audioSrc: "/voiceover/analyst_male/analyst_arrival_hisham_01_greeting.wav",
   },
   {
     characterId: "hisham",
@@ -22,6 +23,7 @@ export const HISHAM_GREETING: DialogueLine[] = [
     characterId: "detective",
     text: "متشغلش بالك. خلينا نهدى ونفهم سوا. هسألك كام سؤال براحة، وانت قولي اللي عندك.",
     mood: "confident",
+    audioSrc: "/voiceover/analyst_male/analyst_arrival_hisham_02_calm_start.wav",
   },
 ];
 
@@ -48,6 +50,7 @@ export const MANSOUR_INTRO_DIALOGUES: DialogueLine[] = [
     characterId: "detective",
     text: "تمام يا أستاذ منصور، هروح وأحاول أفهم الصورة كاملة.",
     mood: "neutral",
+    audioSrc: "/voiceover/analyst_male/analyst_intro_with_mansour_01_accept_task.wav",
   },
   {
     characterId: "mansour",

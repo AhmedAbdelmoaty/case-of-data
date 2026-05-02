@@ -226,6 +226,17 @@ export const EnhancedDialogue = ({
     });
   }, [dialogues, isActive]);
 
+  // Hard cleanup on unmount: kill any audio so it can't survive a scene change
+  useEffect(() => {
+    return () => {
+      stopAudio();
+      // Also pause every cached audio just in case
+      audioCacheRef.current.forEach((a) => {
+        try { a.pause(); a.currentTime = 0; } catch { /* noop */ }
+      });
+    };
+  }, []);
+
   // Typing effect
   useEffect(() => {
     if (!isActive || !currentDialogue) return;
@@ -298,6 +309,8 @@ export const EnhancedDialogue = ({
     if (isCollecting) {
       collectCurrentFindingsNow();
     }
+
+    stopAudio();
 
     if (currentIndex < dialogues.length - 1) {
       setCurrentIndex(currentIndex + 1);
