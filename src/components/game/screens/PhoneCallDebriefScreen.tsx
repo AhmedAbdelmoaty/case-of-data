@@ -16,6 +16,7 @@ import {
   pickAnalystImage,
   type CallTier,
 } from "@/lib/pf-case/mansour-call-images";
+import { applyGenderToLine } from "@/lib/voiceover/genderedDialogue";
 
 interface PhoneCallDebriefScreenProps {
   onComplete: () => void;
@@ -74,13 +75,16 @@ export const PhoneCallDebriefScreen = ({ onComplete }: PhoneCallDebriefScreenPro
 
   const dialogues = useMemo(
     () =>
-      sourceLines.map((line) => ({
-        characterId: line.characterId,
-        text: line.text,
-        mood: mapMood(line.mood),
-        audioSrc: line.audioSrc,
-      })),
-    [sourceLines]
+      sourceLines.map((line) => {
+        const adjusted = applyGenderToLine(line, g);
+        return {
+          characterId: adjusted.characterId,
+          text: adjusted.text,
+          mood: mapMood(adjusted.mood),
+          audioSrc: adjusted.audioSrc,
+        };
+      }),
+    [sourceLines, g]
   );
 
   // Pre-compute, for each dialogue index, who speaks and which "mansour line index"
