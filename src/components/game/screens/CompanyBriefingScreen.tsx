@@ -83,12 +83,15 @@ export const CompanyBriefingScreen = ({
     }
   }, [phase, isReviewMode]);
 
-  const dialogues = MANSOUR_INTRO_DIALOGUES.map((line) => ({
-    characterId: line.characterId,
-    text: line.text,
-    mood: mapMood(line.mood),
-    audioSrc: line.audioSrc,
-  }));
+  const dialogues = MANSOUR_INTRO_DIALOGUES.map((line) => {
+    const adjusted = applyGenderToLine(line, g);
+    return {
+      characterId: adjusted.characterId,
+      text: adjusted.text,
+      mood: mapMood(adjusted.mood),
+      audioSrc: adjusted.audioSrc,
+    };
+  });
 
   const handleDialogueComplete = () => {
     if (isReviewMode) {

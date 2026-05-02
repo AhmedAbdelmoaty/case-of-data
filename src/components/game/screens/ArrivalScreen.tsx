@@ -70,12 +70,15 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
     }
   }, [phase, playSound]);
 
-  const dialogues = HISHAM_GREETING.map((line) => ({
-    characterId: line.characterId,
-    text: line.text,
-    mood: mapMood(line.mood),
-    audioSrc: line.audioSrc,
-  }));
+  const dialogues = HISHAM_GREETING.map((line) => {
+    const adjusted = applyGenderToLine(line, g);
+    return {
+      characterId: adjusted.characterId,
+      text: adjusted.text,
+      mood: mapMood(adjusted.mood),
+      audioSrc: adjusted.audioSrc,
+    };
+  });
 
   // Dialogue background swaps from greeting → office after 2 lines
   const dialogueBg = dialogueIndex < 2 ? greetingImg : officeImg;
