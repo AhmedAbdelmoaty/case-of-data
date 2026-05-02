@@ -21,7 +21,7 @@ export const MANSOUR_CALL_MEDIUM: DialogueLine[] = [
 
 export const MANSOUR_CALL_WEAK: DialogueLine[] = [
   { characterId: "mansour", text: " التقرير ده مش اللي كنت متوقعه منك خالص. إنت دخلت على الحل قبل ما تتأكد إن في مشكلة أصلًا!", mood: "disappointed", audioSrc: "/voiceover/mansour/mansour_call_weak_01.wav" },
-  { characterId: "detective", text: "حضرتك معاك حق… أنا استعجلت.", mood: "concerned" },
+  { characterId: "detective", text: "حضرتك معاك حق… أنا استعجلت.", mood: "concerned", audioSrc: "/voiceover/analyst_male/analyst_ending_weak_response.wav" },
   { characterId: "mansour", text: "لو هشام نفّذ اللي إنت كاتبه ده هيروح في داهية، وهييجي يقول لنا  إنتو نصحتوني غلط. إحنا شغلنا نفهم المشكلة الأول، مش نمشي ورا أول كلمة العميل يقولها.", mood: "disappointed", audioSrc: "/voiceover/mansour/mansour_call_weak_02.wav" },
   { characterId: "mansour", text: "الـ Problem Framing مش رفاهية. ده الفرق بين استشاري حقيقي، وحد بيكتب تقارير وخلاص. أنا هخصملك يومين والتقييم ضعيف.", mood: "serious", audioSrc: "/voiceover/mansour/mansour_call_weak_03.wav" },
   { characterId: "mansour", text: "روح ذاكر دبلومة تحليل البيانات من IMP. هتساعدك جدًا إنك تطوّر تفكيرك. ولما تفهم ده صح… ابقى كلّمني سلام.", mood: "disappointed", audioSrc: "/voiceover/mansour/mansour_call_weak_04.wav" },
