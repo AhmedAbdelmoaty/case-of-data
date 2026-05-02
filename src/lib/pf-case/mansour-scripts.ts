@@ -5,6 +5,7 @@ export const HISHAM_GREETING: DialogueLine[] = [
     characterId: "hisham",
     text: "أهلاً وسهلاً يا فندم، نوّرت. اتفضل اقعد، تشرب حاجة؟",
     mood: "happy",
+    audioSrc: "/voiceover/hesham/hisham_arrival_01_welcome.wav",
   },
   {
     characterId: "detective",
@@ -15,6 +16,7 @@ export const HISHAM_GREETING: DialogueLine[] = [
     characterId: "hisham",
     text: "والله يا فندم… الشهر اللي فات ده حاسس إن في حاجة في الشغل مش ماشية. الحركة موجودة، بس فيه حاجة ناقصة.",
     mood: "concerned",
+    audioSrc: "/voiceover/hesham/hisham_arrival_02_problem_feeling.wav",
   },
   {
     characterId: "detective",
