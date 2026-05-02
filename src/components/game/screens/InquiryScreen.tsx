@@ -44,13 +44,16 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
   const { playSound } = useSound();
   useSceneAmbience("store_interior");
 
-  const [phase, setPhase] = useState<"preQuestions" | "choosing" | "dialogue">("preQuestions");
+  const [phase, setPhase] = useState<"preQuestions" | "choosing" | "questionVoice" | "dialogue">("preQuestions");
   const [currentLines, setCurrentLines] = useState<DialogueLineUI[]>([]);
   const [dialogueIndex, setDialogueIndex] = useState(0);
   const [dialogueKey, setDialogueKey] = useState(0);
   const [showRestartConfirm, setShowRestartConfirm] = useState(false);
   const [selectedChoiceId, setSelectedChoiceId] = useState<string | null>(null);
+  const [selectedChoiceText, setSelectedChoiceText] = useState<string>("");
   const selectionTimerRef = useRef<number | null>(null);
+  const questionAudioRef = useRef<HTMLAudioElement | null>(null);
+  const pendingLinesRef = useRef<DialogueLineUI[] | null>(null);
 
   const playerName = profile?.display_name || "محلل";
   const g = (profile?.gender || "male") as "male" | "female";
