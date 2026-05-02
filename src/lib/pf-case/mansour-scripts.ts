@@ -50,6 +50,7 @@ export const MANSOUR_INTRO_DIALOGUES: DialogueLine[] = [
     characterId: "detective",
     text: "تمام يا أستاذ منصور، هروح وأحاول أفهم الصورة كاملة.",
     mood: "neutral",
+    audioSrc: "/voiceover/analyst_male/analyst_intro_with_mansour_01_accept_task.wav",
   },
   {
     characterId: "mansour",
