@@ -79,77 +79,64 @@ export const getVoiceoverSrc = (
 // - We never rewrite full sentences.
 // - If you need a new gendered word, add ONE entry here.
 // ============================================================
+// NOTE on ambiguity: words like "كنت" / "خد" / "روح" can refer to
+// either the analyst (2nd person, should swap) or the speaker
+// themselves (1st person, must NOT swap) — e.g. منصور saying
+// "كنت متوقعه منك". To stay safe we ONLY swap words that are
+// unambiguously addressing the listener (2nd-person colloquial
+// forms ending in ت/تش, or imperatives that only make sense as
+// commands to the listener). Anything ambiguous is left alone.
 const FEMALE_WORD_MAP: Record<string, string> = {
-  // verbs / past tense (أنت → أنتي)
+  // ---- 2nd-person past-tense (ends in ت / تش — unambiguous "أنت") ----
   "نوّرت": "نوّرتي",
   "نورت": "نورتي",
-  "اتفضل": "اتفضلي",
-  "اقعد": "اقعدي",
-  "تحب": "تحبي",
-  "تشرب": "تشربي",
-  "روح": "روحي",
-  "تروح": "تروحي",
-  "تسأل": "تسألي",
-  "تفهم": "تفهمي",
-  "خلّص": "خلّصي",
-  "خلص": "خلصي",
-  "ابعتلي": "ابعتيلي",
   "رجعت": "رجعتي",
   "فهمت": "فهمتي",
   "وصلت": "وصلتي",
   "خدت": "خدتي",
+  "خدتش": "خدتيش",
+  "مخدتش": "مخدتيش",
   "جريت": "جريتي",
+  "جريتش": "جريتيش",
   "لقيت": "لقيتي",
   "رجّعت": "رجّعتي",
-  "كنت": "كنتي",
-  "تكون": "تكوني",
   "مشيت": "مشيتي",
   "استعجلت": "استعجلتي",
   "دخلت": "دخلتي",
-  "تتأكد": "تتأكدي",
-  "تسأل،": "تسألي،",
-  "تساعده": "تساعديه",
   "مسكت": "مسكتي",
   "مسكتش": "مسكتيش",
   "بنيت": "بنيتي",
-  "اعتبرها": "اعتبريها",
-  "امسك": "امسكي",
   "بعتهولي": "بعتيهولي",
   "عملتها": "عملتيها",
-  "مخدتش": "مخدتيش",
-  "تستاهل": "تستاهلي",
+  "فرّقتش": "فرّقتيش",
+  "محسمتش": "محسمتيش",
+  // ---- 2nd-person imperatives addressed to the analyst ----
+  "اتفضل": "اتفضلي",
+  "اقعد": "اقعدي",
+  "ابعتلي": "ابعتيلي",
+  "اعتبرها": "اعتبريها",
+  "امسك": "امسكي",
   "كمل": "كمّلي",
-  "خليك": "خليكي",
-  "تربط": "تربطي",
-  "تشوف": "تشوفي",
-  "توصّلها": "توصّليها",
-  "هديك": "هديكي",
-  "خد": "خدي",
-  "ذاكر": "ذاكري",
-  "كاتبه": "كاتباه",
-  "تطوّر": "تطوّري",
-  "تفهمه": "تفهميه",
+  "ذاكري": "ذاكري", // already fem; harmless
   "ابقى": "ابقي",
   "كلّمني": "كلّميني",
   "طمّني": "طمّنيني",
+  // ---- 2nd-person present (تـ... addressed to listener) ----
+  "تحب": "تحبي",
+  "تشرب": "تشربي",
+  // ---- adjectives describing the listener ----
   "شايف": "شايفة",
   "محتاج": "محتاجة",
-  "محسمتش": "محسمتيش",
-  "مفرّقتش": "مفرّقتيش",
-  "فرّقتش": "فرّقتيش",
-  // pronoun
+  // ---- pronouns / suffixes (always 2nd person) ----
   "إنت": "إنتي",
   "انت": "انتي",
-  // prepositional pronouns / suffixes (masc → fem 2nd person)
   "معاك": "معاكي",
   "ليك": "ليكي",
   "بيك": "بيكي",
   "عليك": "عليكي",
-  "منك": "منّك", // keep neutral-ish; both are fine — leave as منك actually
+  "خليك": "خليكي",
+  "هديك": "هديكي",
 };
-
-// Remove ambiguous entry that shouldn't change.
-delete (FEMALE_WORD_MAP as Record<string, string>)["منك"];
 
 /**
  * Apply word-level female substitutions to a male/default text.
