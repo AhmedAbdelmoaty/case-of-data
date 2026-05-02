@@ -23,6 +23,7 @@ export const HISHAM_GREETING: DialogueLine[] = [
     characterId: "detective",
     text: "متشغلش بالك. خلينا نهدى ونفهم سوا. هسألك كام سؤال براحة، وانت قولي اللي عندك.",
     mood: "confident",
+    audioSrc: "/voiceover/analyst_male/analyst_arrival_hisham_02_calm_start.wav",
   },
 ];
 
