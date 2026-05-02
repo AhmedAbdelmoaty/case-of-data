@@ -11,6 +11,7 @@ export const HISHAM_GREETING: DialogueLine[] = [
     characterId: "detective",
     text: "أهلاً بيك يا أستاذ هشام. أستاذ منصور قالي إن حضرتك عاوز تتكلم في موضوع شاغلك.",
     mood: "neutral",
+    audioSrc: "/voiceover/analyst_male/analyst_arrival_hisham_01_greeting.wav",
   },
   {
     characterId: "hisham",
