@@ -422,7 +422,53 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
         )}
       </AnimatePresence>
 
-      {phase === "dialogue" && currentLines.length > 0 && (
+      {/* Question voice phase — analyst is "speaking" the chosen question */}
+      <AnimatePresence>
+        {phase === "questionVoice" && selectedChoiceText && (
+          <motion.div
+            key="question-voice"
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-background/70 backdrop-blur-sm px-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={enterDialoguePhase}
+          >
+            <motion.div
+              className="relative max-w-xl w-full rounded-3xl border-2 border-[#f2d992]/70 bg-gradient-to-br from-[#27221d]/95 to-[#100e0d]/95 p-8 shadow-[0_0_60px_rgba(244,222,176,0.25)]"
+              dir="rtl"
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ type: "spring", damping: 18 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Animated voice waves */}
+              <div className="flex items-center justify-center gap-1.5 mb-5">
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <motion.span
+                    key={i}
+                    className="w-1.5 rounded-full bg-[#f4deb0]"
+                    animate={{ height: ["8px", "22px", "8px"] }}
+                    transition={{ duration: 0.9, repeat: Infinity, delay: i * 0.12, ease: "easeInOut" }}
+                  />
+                ))}
+              </div>
+
+              <p className="text-center text-[17px] font-bold leading-9 text-[#f7f0df] mb-6">
+                {selectedChoiceText}
+              </p>
+
+              <button
+                onClick={enterDialoguePhase}
+                className="block mx-auto px-5 py-2 rounded-full border border-[#f2d992]/50 bg-white/5 text-[#f2d992] text-xs font-bold hover:bg-white/10 transition-colors"
+              >
+                تخطي
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
         <EnhancedDialogue
           key={dialogueKey}
           dialogues={currentLines}
