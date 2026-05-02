@@ -14,6 +14,7 @@ import hishamGreetingFemaleImg from "@/assets/scenes/hisham-greeting-female.webp
 import hishamOfficeSeatedMaleImg from "@/assets/scenes/hisham-office-seated-male.webp";
 import hishamOfficeSeatedFemaleImg from "@/assets/scenes/hisham-office-seated-female.webp";
 import { HISHAM_GREETING } from "@/data/pf-case";
+import { applyGenderToLine } from "@/lib/voiceover/genderedDialogue";
 
 interface ArrivalScreenProps {
   onComplete: () => void;

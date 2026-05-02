@@ -16,6 +16,7 @@ import mansourWelcomeFemaleImg from "@/assets/scenes/mansour-office-welcome-fema
 import mansourSeatedMaleImg from "@/assets/scenes/mansour-office-seated-male.webp";
 import mansourSeatedFemaleImg from "@/assets/scenes/mansour-office-seated-female.webp";
 import { MANSOUR_INTRO_DIALOGUES } from "@/data/pf-case";
+import { applyGenderToLine } from "@/lib/voiceover/genderedDialogue";
 
 interface CompanyBriefingScreenProps {
   onComplete: () => void;
