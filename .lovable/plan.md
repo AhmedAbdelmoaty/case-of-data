@@ -1,91 +1,99 @@
-## فهمي للطلبات (تأكيد)
+# Gender-Aware Dialogue + Voice-Over Plan
 
-عندك 7 نقاط، فهمتهم كالتالي:
+## What I read and understood
 
-1. **التقرير لما يتفتح أثناء الحوار** بيظهر منزّل لتحت ومقصوص (مش centered صح)، بينما لما يتفتح من الدفتر أو نهاية الأسئلة بيكون مظبوط. لازم في كل الحالات يبقى وسط الشاشة وكامل.
-2. **تقرير التسويق (`ev_marketing`)**: عايز تضيف ملاحظة تانية في **سطر منفصل** تحت الجملة الحالية:  
-   _"الأرقام تشمل الإعلانات المستمرة، حتى في غياب حملات موسمية."_
-3. **التقرير التفصيلي (`ev_breakdown`)**: حالياً الجملتين في سطر واحد. عايز تفصلهم لسطرين:
-   - سطر 1: "الأرقام بالألف جنيه مصري، صافي مبيعات بعد المرتجعات."
-   - سطر 2: "ملاحظة المحاسبة: في فبراير 2025 جالنا أوردر شركات استثنائي (حوالي 290 ألف)."
-4. **في كل التقارير اللي فيها أرقام**: تضيف حرف **K** بعد الرقم (سواء على أعمدة الـ bar/line labels أو في الـ tooltip اللي بيظهر لما تقف على نقطة). لو مش ممكن نضيف الحرف في مكان معين تسيبه زي ما هو.
-5. **تقرير أداء فريق البيع (`ev_team_performance`)**: المجموع الحالي 300 ألف، المفروض يقرب من مبيعات الشهر الفعلية (480 ألف بدون الشركات). نزوّد الأرقام بنفس النسب للمجموع يبقى بين 400–450.
-6. **تقرير المبيعات اليومية (`ev_daily_sales`)**: 
-   - عايزه يومي بالتاريخ (1/2, 2/2, 3/2... ) أو على الأقل كل 3-4 أيام بتاريخ حقيقي بدل "ي5".
-   - مجموع الأرقام يقرّب من 500 ألف.
-   - إضافة K زي باقي التقارير.
-7. **تقرير عروض المنافسين (`ev_competitor_offers`)**: بدل "محل 1، محل 2"، أسماء واقعية لمحلات أزياء (مثلاً "أزياء النخبة"، "بوتيك ليالي"، "ستايل هاوس"، "موضة ميلانو").
+I inspected the relevant code and the uploaded WAV files. Here is exactly what's there:
 
----
+**Voice-over files in `public/voiceover/`:**
+- `mansour/` — every Mansour file has a matching `_female.wav` version (16 male + 16 female, total 32). Covers all of: `mansour_intro_office_01..04`, `mansour_call_strong_01..04`, `mansour_call_medium_01..04`, `mansour_call_weak_01..04`.
+- `hesham/` — only some files have `_female.wav` versions:
+  - Has female: `hisham_arrival_01_welcome`, `hisham_arrival_02_problem_feeling`, `hisham_s3_correct_year_report`, `hisham_s4_correct_three_year_report`, `hisham_s4_wrong_competitor_prices`, `hisham_s5_correct_breakdown`, `hisham_s5_wrong_marketing_entry`, `hisham_track_a_01_team_performance`, `hisham_track_d_03_marketing_report`.
+  - No female version (will keep male audio): the other Hisham files (s1, s2, s3 wrong, track_a 02/03/04, all track_c, track_d 01/02/04).
 
-## الخطة بالتفصيل
+**Where dialogue is consumed:**
+- `EnhancedDialogue.tsx` already accepts `playerGender` and uses cached/preloaded `audioSrc` with instant playback + stop-on-change. This is the single render point for all dialogue.
+- Scripts: `src/lib/pf-case/mansour-scripts.ts` (HISHAM_GREETING, MANSOUR_INTRO, MANSOUR_DEBRIEF_*), `src/lib/pf-case/mansour-call-scripts.ts` (MANSOUR_CALL_*), `src/lib/pf-case/case-tree.ts` (SPINE + TRACKS hisham replies).
+- Voice map: `src/lib/voiceover/heshamVoiceMap.ts` matches Hisham reply text → audio path.
+- Screens that build dialogue arrays: `ArrivalScreen.tsx`, `CompanyBriefingScreen.tsx`, `InquiryScreen.tsx`, `PhoneCallDebriefScreen.tsx` — all already pass `playerGender` and `profile.gender`.
 
-### A. إصلاح ظهور التقرير وسط الشاشة أثناء الحوار  
-**ملف:** `src/components/game/EnhancedDialogue.tsx` (السطور 480–511)
+**Key insight:** Male behavior must be byte-identical to today. So the cleanest approach is:
+1. Keep all existing text and `audioSrc` strings exactly as they are (= male path).
+2. Add a small helper that, **only when `playerGender === "female"`**, swaps in a female text variant (if one is defined) and tries `_female.wav` (only if that path is in an allow-list of files we know exist).
 
-المشكلة: الـ modal كان `items-center` بس الكونتينر الداخلي `max-h-[88vh] overflow-y-auto` كان بيخلي التقرير يبدأ من فوق ولو طول التقرير أقل من 88vh كان بيتعلق بسبب الـ scroll container. كمان الـ dialogue card اللي تحت بتديله إحساس إنه نازل.
+## Plan
 
-التغيير:
-- حذف `overflow-y-auto` من الكونتينر الداخلي وخليه `overflow-visible`، وخلي الـ scroll على الـ outer flex container بدلاً منه (`overflow-y-auto` على الـ outer مع `min-h-full` و `my-auto` للداخلي).
-- استخدم `flex items-center justify-center min-h-screen` على الـ outer + `my-auto` على الداخلي علشان يتمركز فعلاً مهما كان الطول.
-- أزود الـ z-index لـ `z-[100]` وأزوّد الـ backdrop opacity شوية لإحساس فوكاس أحسن.
+### 1) New helper: `src/lib/voiceover/genderedDialogue.ts`
 
-نفس المعالجة هنطبقها على modal الدفتر `PFNotebook.tsx` (السطور حوالي 280–293) للاتساق لو فيه نفس المشكلة.
+Two pure functions:
 
-### B. إصلاحات بيانات التقارير  
-**ملف:** `src/lib/pf-case/evidence-catalog.ts`
+- `getFemaleAudioSrc(maleSrc?: string): string | undefined`
+  - If no `maleSrc` → return undefined.
+  - Compute candidate `<basename>_female.wav`.
+  - Look up against a hard-coded `Set<string>` of known-existing female files (the 16 Mansour + 9 Hisham listed above). If present → return female path. Else → return original `maleSrc`. **Never guess a path that doesn't exist.**
+- `applyGenderToLine(line, gender)`
+  - For `gender === "male"` → return line unchanged.
+  - For `gender === "female"` → return `{ ...line, text: femaleTextFor(line.text) ?? line.text, audioSrc: getFemaleAudioSrc(line.audioSrc) }`.
+- `femaleTextFor(maleText)` → looks up an explicit female-text map. If no entry → returns undefined (keeps male text). This avoids blindly rewriting neutral lines.
 
-#### B1. footnote متعدد السطور
-هضيف حقل اختياري جديد في الـ type:
-```ts
-footnotes?: string[];  // إذا موجود، يُعرض كل عنصر في سطر منفصل
+Example entries in the female-text map (only for lines that have direct masculine address to the analyst):
+
 ```
-وأخلي `footnote` (المفرد) لسه شغال للتوافق مع باقي التقارير.
+"التقرير اللي بعتهولي ده شغل محترم . هشام الشريف اتصل بيا وكان مبسوط جداً."
+  → "التقرير اللي بعتيهولي ده شغل محترم . هشام الشريف اتصل بيا وكان مبسوط جداً."
 
-في `ReportDocument.tsx` الـ footer هرندّر:
-- لو فيه `footnotes` → كل واحدة في `<p>` لوحدها بمسافة بسيطة بينهم.
-- وإلا → نفس السلوك القديم بـ `footnote`.
+"أهلاً، اتفضل اقعد. عندنا استشارة جديدة محتاجة تركيز."
+  → "أهلاً، اتفضلي اقعدي. عندنا استشارة جديدة محتاجة تركيز."
 
-#### B2. تعديلات على كل تقرير
+"أهلاً وسهلاً يا فندم، نوّرت. اتفضل اقعد، تشرب حاجة؟"
+  → "أهلاً وسهلاً يا فندمة، نوّرتي. اتفضلي اقعدي، تشربي حاجة؟"
 
-| Evidence | التعديل |
-|---|---|
-| `ev_marketing` | `footnotes: ["بيانات مجمّعة من حسابات السوشيال ميديا والإعلانات الممولة.", "الأرقام تشمل الإعلانات المستمرة، حتى في غياب حملات موسمية."]` |
-| `ev_breakdown` | `footnotes: ["الأرقام بالألف جنيه مصري، صافي مبيعات بعد المرتجعات.", "ملاحظة المحاسبة: في فبراير 2025 جالنا أوردر شركات استثنائي (حوالي 290 ألف)."]` |
-| `ev_team_performance` | الأرقام الجديدة (مجموع ≈ 430): كريم 145، سامح 105، وليد 95، هاني 85. نفس ترتيب الفروقات تقريباً. |
-| `ev_daily_sales` | استبدال 7 نقاط بـ 10 نقاط بتاريخ حقيقي كل 3 أيام: `1/2, 4/2, 7/2, 10/2, 13/2, 16/2, 19/2, 22/2, 25/2, 28/2` بقيم مجموعها ≈ 500: مثلاً `[35, 45, 50, 55, 60, 55, 50, 55, 50, 45]` (بـ K يبقى صافي شهر منطقي). |
-| `ev_competitor_offers` | أسماء محلات حقيقية الإحساس: "أزياء النخبة"، "بوتيك ليالي"، "ستايل هاوس"، "موضة ميلانو". |
-
-#### B3. علم لإضافة "K" بعد الأرقام
-أضيف حقل اختياري:
-```ts
-valueSuffix?: string;  // "K" مثلاً — يُلصق بعد الأرقام في labels و tooltips
+"عايزك تروح تقعد معاه، وتسأل صح وتفهم المشكلة بشكل كامل."
+  → "عايزك تروحي تقعدي معاه، وتسألي صح وتفهمي المشكلة بشكل كامل."
 ```
-وأفعّله في كل التقارير الرقمية: `ev_year_vs_year`, `ev_three_year`, `ev_breakdown`, `ev_team_performance`, `ev_daily_sales`, `ev_weekly_sales`.
 
-### C. إضافة حرف "K" في الرسومات  
-**ملف:** `src/components/game/ReportDocument.tsx`
+I'll go through every Mansour + Hisham line in the four script sources and add a female variant **only** where there is real masculine address (verbs/pronouns directed at the analyst). Lines like *"إحنا شغلنا نفهم المشكلة الأول"* or any narration that doesn't address the analyst stay untouched.
 
-- في `LabelList` لكل من `bar` و `grouped_bar`: استخدام `formatter={(v) => `${v}${suffix}`}`.
-- في `Tooltip` لكل الرسومات (bar, stacked_bar, grouped_bar, line): استخدام `formatter={(v) => [`${v}${suffix}`, name]}`.
-- في `YAxis`: `tickFormatter={(v) => `${v}${suffix}`}`.
+### 2) Wire the helper into the four screens
 
-`suffix` بييجي من `evidence.valueSuffix ?? ""`.
+In each screen that builds a `dialogues` array, map through `applyGenderToLine(line, g)` before passing to `EnhancedDialogue`:
 
-### D. ما لن يتغير
-- type definitions الأخرى (table/list rows) كما هي.
-- منطق فتح/قفل التقرير.
-- باقي الـ evidence اللي ما اتذكرتش (zي `ev_team_conversion`, `ev_weekly_sales`, `ev_customer_feedback`) هتفضل زي ما هي إلا لو ينطبق عليها قاعدة عامة (إضافة K للـ weekly_sales لأنها رقمية).
+- `src/components/game/screens/ArrivalScreen.tsx` (HISHAM_GREETING)
+- `src/components/game/screens/CompanyBriefingScreen.tsx` (MANSOUR_INTRO_DIALOGUES)
+- `src/components/game/screens/PhoneCallDebriefScreen.tsx` (MANSOUR_CALL_*)
+- `src/components/game/screens/InquiryScreen.tsx` (already calls `getHeshamVoice(result.responseText)` — I'll wrap the produced Hisham line through `applyGenderToLine` so its text + audio get female-shifted; player/detective lines pass through untouched)
 
----
+Detective/player lines have no `audioSrc` so the audio swap is a no-op for them. Their text doesn't need gender swapping (they ARE the player; the existing UI already shows the player's name + chosen avatar).
 
-## التحقق بعد التنفيذ
-- فتح أي تقرير من زرار "اعرض التقرير" أثناء الحوار → يظهر وسط الشاشة كامل بدون قص.
-- فتح تقرير التسويق → سطرين منفصلين تحت.
-- فتح تقرير breakdown → سطرين منفصلين تحت.
-- كل التقارير الرقمية فيها K بعد الأرقام في الـ labels والـ tooltip والـ Y axis.
-- تقرير الفريق مجموعه ≈ 430.
-- تقرير المبيعات اليومية بتواريخ حقيقية ومجموع ≈ 500.
-- تقرير المنافسين بأسماء محلات.
+### 3) Update `heshamVoiceMap.ts` (no breaking changes)
 
-لو فهمي لأي نقطة غلط أو الأرقام/الأسماء اللي اقترحتها مش عاجباك، قولي قبل ما أنفّذ.
+Keep existing male map exactly as-is (so male behavior is byte-identical). The female swap is handled centrally by `getFemaleAudioSrc` looking at the resulting path — no second map needed. Add a comment block listing which Hisham files have `_female.wav` available so future edits stay consistent.
+
+### 4) Behavior guarantees
+
+- Male player: zero change. Same text, same `.wav`, same timing.
+- Female player:
+  - Text changes only on lines we explicitly added a female variant for. Neutral lines stay identical.
+  - Audio: tries `<file>_female.wav`; if that exact file isn't in the known-female allow-list, falls back to the original male file. We never request a non-existent file.
+- Audio playback path is unchanged (`EnhancedDialogue` already preloads, stops on change, plays instantly). So no desync, no overlap, no delay regression.
+
+## Files to add / edit
+
+**New:**
+- `src/lib/voiceover/genderedDialogue.ts` — helper with `applyGenderToLine`, `getFemaleAudioSrc`, female text map, female-audio allow-list.
+
+**Edited (small wrapping changes only):**
+- `src/components/game/screens/ArrivalScreen.tsx`
+- `src/components/game/screens/CompanyBriefingScreen.tsx`
+- `src/components/game/screens/PhoneCallDebriefScreen.tsx`
+- `src/components/game/screens/InquiryScreen.tsx`
+- `src/lib/voiceover/heshamVoiceMap.ts` — add a documentation comment listing female-available files (no logic change).
+
+## Out of scope (intentionally not touched)
+
+- Story content, dialogue meaning, scene flow, scoring, animations.
+- Mansour debrief text and call text aren't required to change for female (no female versions of debrief audio exist anyway). Female text variants in those will only be added where there's clear masculine address; otherwise left untouched.
+- No new audio files will be requested or invented.
+
+## Confirmation
+
+Yes — I read the uploaded files in `public/voiceover/mansour/` and `public/voiceover/hesham/`, identified exactly which `_female.wav` files exist, and my plan only references those. For files without a female version, the original male audio stays.
