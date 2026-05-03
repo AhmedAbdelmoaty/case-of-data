@@ -61,20 +61,33 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
     if (localStorage.getItem(key)) return;
     recordedRef.current = true;
     localStorage.setItem(key, "1");
+
+    const fullSpine =
+      !state.trackEntered &&
+      state.history.length >= 5 &&
+      state.history.every((h) => h.choice === "correct");
+    const qualified = fullSpine && (state.framingCorrectCount ?? 0) >= 2;
+    const startedAt = state.gameStartedAt ?? Date.now();
+    const duration_ms = Date.now() - startedAt;
+
     supabase
       .from("completed_players")
       .insert({
         first_name: profile.first_name,
         last_name: profile.last_name,
+        qualified,
+        outcome: state.outcome,
+        framing_correct: state.framingCorrectCount,
+        duration_ms,
+        started_at: new Date(startedAt).toISOString(),
       })
       .then(({ error }) => {
         if (error) {
-          // Allow retry on next visit if it failed
           localStorage.removeItem(key);
           console.warn("Failed to record completion:", error.message);
         }
       });
-  }, [profile?.first_name, profile?.last_name]);
+  }, [profile?.first_name, profile?.last_name, state]);
 
   const outcome = state.outcome || "medium";
   const config = outcomeConfig[outcome];
