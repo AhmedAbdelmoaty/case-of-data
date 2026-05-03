@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trophy, LogOut, RotateCcw, Crown, Medal, Sparkles, Zap, Star, Flame, Rocket } from "lucide-react";
+import { Trophy, LogOut, RotateCcw, Crown, Sparkles, Zap, Star, Flame, Rocket } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 
