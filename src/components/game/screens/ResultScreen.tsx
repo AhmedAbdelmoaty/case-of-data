@@ -1,56 +1,103 @@
 import { useEffect, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
-import { Trophy, RotateCcw, AlertTriangle, Brain, Target, NotebookPen, CheckCircle } from "lucide-react";
+import { RotateCcw, Sparkles } from "lucide-react";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSound } from "@/hooks/useSoundEffects";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
-import analystImg from "@/assets/characters/analyst.png";
-import saraImg from "@/assets/characters/sara.png";
-import strongOutcomeImg from "@/assets/scenes/hisham-handing-report-male.webp";
-import otherOutcomeImg from "@/assets/scenes/prism-building-exterior.webp";
+import type { CaseOutcome } from "@/lib/pf-case/case-tree";
+import strongMascot from "@/assets/results/result-mascot-strong.png";
+import mediumMascot from "@/assets/results/result-mascot-medium.png";
+import weakMascot from "@/assets/results/result-mascot-weak.png";
 
 interface ResultScreenProps {
   onNavigate: (screen: string) => void;
 }
 
-const outcomeConfig = {
+const RESULT_VIEW = {
   strong: {
-    title: "تأطير قوي جدًا",
-    subtitle: "مسكت لبّ المشكلة ووقفت قبل الحل في الوقت الصح",
-    badge: "🏆",
-    gradient: "from-yellow-400 to-amber-600",
-    ring: "border-amber-400/50 shadow-amber-500/20",
-    panel: "bg-amber-500/10 border-amber-500/30",
-    text: "text-amber-300",
+    badge: "🎉 المهمة تمت!",
+    title: "برافو! مسكت أصل المشكلة",
+    feedback: "ثبتّ المرجع قبل ما تقترح حل. ده تفكير ممتاز.",
+    mascot: strongMascot,
+    stars: 3,
+    sound: "fanfare",
+    page: "bg-[linear-gradient(135deg,#6ee7f9_0%,#d9f99d_45%,#fde68a_100%)]",
+    stage: "border-[#fbbf24] bg-[#fffdf2]/92 shadow-[#f59e0b]/30",
+    titleColor: "text-[#12524c]",
+    badgeStyle: "border-[#f59e0b]/35 bg-white/75 text-[#8a4b00]",
+    starOn: "bg-[#ffd447] text-[#7c3d00] shadow-[#f59e0b]/35",
+    starOff: "bg-white/55 text-[#d9b56f]",
+    button: "bg-[#12b981] text-white shadow-[#10b981]/35 hover:bg-[#0ea674]",
+    chipOn: "bg-[#ecfccb] text-[#365314] border-[#84cc16]/45",
+    chipOff: "bg-white/50 text-[#8a7a5b] border-white/70",
+    confetti: ["#f59e0b", "#06b6d4", "#22c55e", "#ef4444", "#a855f7"],
   },
   medium: {
-    title: "فهم جيد... لكن لسه محتاج حسم أكتر",
-    subtitle: "اتحركت في الاتجاه الصح، لكن التأطير كان محتاج وضوح أعلى",
-    badge: "🥈",
-    gradient: "from-slate-300 to-slate-500",
-    ring: "border-slate-400/40 shadow-slate-400/15",
-    panel: "bg-slate-500/10 border-slate-400/25",
-    text: "text-slate-200",
+    badge: "✨ مستوى عدى!",
+    title: "قريب جدًا من الحل الصح",
+    feedback: "كنت قريب، بس محتاج تربط الاستنتاج بالقرار أوضح.",
+    mascot: mediumMascot,
+    stars: 2,
+    sound: "successChime",
+    page: "bg-[linear-gradient(135deg,#bae6fd_0%,#ede9fe_52%,#f8fafc_100%)]",
+    stage: "border-[#93c5fd] bg-white/90 shadow-[#60a5fa]/25",
+    titleColor: "text-[#233876]",
+    badgeStyle: "border-[#8b5cf6]/25 bg-white/72 text-[#4c1d95]",
+    starOn: "bg-[#facc15] text-[#713f12] shadow-[#facc15]/30",
+    starOff: "bg-white/58 text-[#b8b4ca]",
+    button: "bg-[#4f46e5] text-white shadow-[#6366f1]/35 hover:bg-[#4338ca]",
+    chipOn: "bg-[#dbeafe] text-[#1e3a8a] border-[#60a5fa]/45",
+    chipOff: "bg-white/52 text-[#74708a] border-white/70",
+    confetti: ["#38bdf8", "#a78bfa", "#facc15", "#94a3b8", "#22c55e"],
   },
   weak: {
-    title: "المشكلة ما اتمسكتش صح",
-    subtitle: "وصلت لتفسير قبل ما تثبت أصل المشكلة ومرجع المقارنة",
-    badge: "⚠️",
-    gradient: "from-amber-700 to-orange-800",
-    ring: "border-orange-500/40 shadow-orange-500/15",
-    panel: "bg-orange-500/10 border-orange-500/25",
-    text: "text-orange-200",
+    badge: "💡 محاولة تعليمية",
+    title: "لسه محتاج تبدأ من السؤال الصح",
+    feedback: "قبل أي حل، اسأل: هل المقارنة نفسها عادلة؟",
+    mascot: weakMascot,
+    stars: 1,
+    sound: "sparkle",
+    page: "bg-[linear-gradient(135deg,#ffedd5_0%,#fef3c7_48%,#dcfce7_100%)]",
+    stage: "border-[#fb923c] bg-[#fffaf0]/92 shadow-[#fb923c]/25",
+    titleColor: "text-[#7c2d12]",
+    badgeStyle: "border-[#fb923c]/30 bg-white/75 text-[#9a3412]",
+    starOn: "bg-[#fb923c] text-white shadow-[#fb923c]/28",
+    starOff: "bg-white/58 text-[#d8a77d]",
+    button: "bg-[#f97316] text-white shadow-[#fb923c]/35 hover:bg-[#ea580c]",
+    chipOn: "bg-[#ffedd5] text-[#9a3412] border-[#fb923c]/45",
+    chipOff: "bg-white/52 text-[#9b765d] border-white/70",
+    confetti: ["#fb923c", "#facc15", "#22c55e", "#38bdf8", "#f472b6"],
   },
-};
+} as const;
+
+const chips = ["🎯 اسأل صح", "📌 ثبت المرجع", "⚡ قرر بثقة"];
+
+const confettiPieces = Array.from({ length: 34 }, (_, index) => ({
+  id: index,
+  left: `${(index * 23) % 98}%`,
+  delay: (index % 10) * 0.09,
+  duration: 2.8 + (index % 5) * 0.25,
+  rotate: (index * 47) % 180,
+  size: index % 3 === 0 ? "h-3 w-2" : index % 3 === 1 ? "h-2 w-2" : "h-2.5 w-1.5",
+}));
+
+const sparkleDots = Array.from({ length: 16 }, (_, index) => ({
+  id: index,
+  left: `${8 + ((index * 29) % 84)}%`,
+  top: `${10 + ((index * 37) % 76)}%`,
+  delay: index * 0.12,
+}));
 
 export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
   const { state } = usePFGame();
   const { profile } = useAuth();
+  const { playSound } = useSound();
 
   const playerName = profile?.first_name || profile?.display_name || "محلل";
-  const g = profile?.gender || "male";
-  const avatarImg = g === "female" ? saraImg : analystImg;
+  const outcome = (state.outcome || "medium") as CaseOutcome;
+  const view = RESULT_VIEW[outcome];
 
   // Record completion once per game session
   const recordedRef = useRef(false);
@@ -89,121 +136,225 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
       });
   }, [profile?.first_name, profile?.last_name, state]);
 
-  const outcome = state.outcome || "medium";
-  const config = outcomeConfig[outcome];
+  const soundPlayedRef = useRef(false);
+  useEffect(() => {
+    if (soundPlayedRef.current) return;
+    soundPlayedRef.current = true;
+    playSound(view.sound);
+    if (outcome === "strong") {
+      const timer = window.setTimeout(() => playSound("confetti"), 460);
+      return () => window.clearTimeout(timer);
+    }
+  }, [outcome, playSound, view.sound]);
 
-  const trackLabel = useMemo(() => {
-    if (!state.trackEntered) return "مسار نظيف — مشيت على الـ spine للنهاية";
-    return `دخلت في مسار ${state.trackEntered} ووصلت لنهايته`;
-  }, [state.trackEntered]);
-
-  const summary = [
-    { label: "عدد الأسئلة", value: `${state.questionsUsed} / 5`, icon: <Target className="w-4 h-4" /> },
-    { label: "الملاحظات المحفوظة", value: `${state.savedNoteIds.length}`, icon: <NotebookPen className="w-4 h-4" /> },
-    { label: "صحة التأطير", value: `${state.framingCorrectCount} / 3`, icon: <Brain className="w-4 h-4" /> },
-  ];
+  const litChipCount = useMemo(() => {
+    if (outcome === "strong") return 3;
+    if (outcome === "medium") return 2;
+    return 1;
+  }, [outcome]);
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      <motion.div className="absolute inset-0" initial={{ scale: 1.1, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 1.5 }}>
-        <img src={outcome === "strong" ? strongOutcomeImg : otherOutcomeImg} alt="" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-black/75 backdrop-blur-md" />
-      </motion.div>
+    <div className={cn("relative h-[100dvh] overflow-hidden text-[#172033]", view.page)} dir="rtl">
+      <div className="pointer-events-none absolute inset-0 opacity-45 [background-image:linear-gradient(90deg,rgba(255,255,255,.32)_1px,transparent_1px),linear-gradient(rgba(255,255,255,.28)_1px,transparent_1px)] [background-size:42px_42px]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(255,255,255,.76),rgba(255,255,255,.2)_42%,transparent_68%)]" />
 
-      <div className="relative z-10 container mx-auto px-4 py-6 max-w-xl">
-        <motion.div
-          className={cn("p-5 rounded-2xl bg-card/75 backdrop-blur-sm border shadow-xl mb-5", config.ring)}
-          initial={{ y: -40, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-        >
-          <div className="flex items-center gap-4 mb-4" dir="rtl">
-            <motion.div
-              className={cn("relative w-20 h-20 rounded-full overflow-hidden border-4 bg-background/40", config.ring)}
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", damping: 10 }}
-            >
-              <img src={avatarImg} alt={playerName} className="w-full h-full object-cover" />
-            </motion.div>
-            <div className="flex-1">
-              <h2 className="text-xl font-bold text-foreground">{playerName}</h2>
-              <p className={cn("text-sm font-bold bg-clip-text text-transparent bg-gradient-to-r", config.gradient)}>
-                {config.title}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">{config.subtitle}</p>
-            </div>
-            <div className="text-4xl">{config.badge}</div>
-          </div>
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        {confettiPieces.map((piece) => (
+          <motion.span
+            key={piece.id}
+            className={cn("absolute top-[-8%] rounded-sm", piece.size)}
+            style={{
+              left: piece.left,
+              rotate: `${piece.rotate}deg`,
+              backgroundColor: view.confetti[piece.id % view.confetti.length],
+            }}
+            initial={{ y: "-10vh", opacity: 0, scale: 0.8 }}
+            animate={{ y: "112vh", opacity: [0, 1, 1, 0], scale: [0.7, 1, 0.95] }}
+            transition={{
+              delay: piece.delay,
+              duration: outcome === "weak" ? piece.duration + 1.2 : piece.duration,
+              repeat: outcome === "strong" ? Infinity : 0,
+              repeatDelay: 1.6,
+              ease: "linear",
+            }}
+          />
+        ))}
 
-          {state.restartCount > 0 && (
-            <div className="mb-3 flex justify-center">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted/60 border border-border text-xs text-muted-foreground" dir="rtl">
-                <RotateCcw className="w-3 h-3" />
-                أعاد المحادثة مرة
-              </span>
-            </div>
-          )}
-
-          <div className={cn("p-4 rounded-xl border text-center", config.panel)}>
-            <div className="flex items-center justify-center gap-2 mb-2">
-              {outcome === "weak" ? <AlertTriangle className="w-5 h-5 text-orange-300" /> : <Trophy className="w-5 h-5 text-amber-300" />}
-              <span className={cn("font-bold text-sm", config.text)}>
-                النتيجة النهائية: {outcome === "strong" ? "قوية" : outcome === "weak" ? "ضعيفة" : "متوسطة"}
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground leading-relaxed" dir="rtl">{trackLabel}</p>
-          </div>
-        </motion.div>
-
-        <motion.div className="grid grid-cols-2 gap-3 mb-5" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-          {summary.map((item, i) => (
-            <motion.div
-              key={item.label}
-              className="p-3 rounded-xl bg-card/55 backdrop-blur-sm border border-border"
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 + i * 0.06 }}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-primary">{item.icon}</span>
-                <span className="text-xs text-muted-foreground">{item.label}</span>
-              </div>
-              <p className="text-sm font-bold text-foreground" dir="rtl">{item.value}</p>
-            </motion.div>
-          ))}
-        </motion.div>
-
-        {state.notes.length > 0 && (
-          <motion.div
-            className="p-4 rounded-xl bg-card/50 border border-border mb-4"
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.42 }}
+        {sparkleDots.map((dot) => (
+          <motion.span
+            key={dot.id}
+            className="absolute text-lg"
+            style={{ left: dot.left, top: dot.top }}
+            initial={{ opacity: 0, scale: 0.4 }}
+            animate={{ opacity: [0, 1, 0], scale: [0.5, 1.15, 0.5], rotate: [0, 14, -8] }}
+            transition={{ delay: dot.delay, duration: 2.2, repeat: Infinity, repeatDelay: 1.1 }}
           >
-            <h3 className="text-sm font-bold text-foreground mb-3" dir="rtl">الملاحظات اللي حفظتها</h3>
-            <div className="space-y-2" dir="rtl">
-              {state.notes.map((note) => (
-                <div key={note.roundId} className="p-3 rounded-lg bg-background/35 border border-border">
-                  <p className="text-sm text-foreground leading-relaxed">{note.text}</p>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        <motion.button
-          onClick={() => onNavigate("company-briefing")}
-          className="w-full flex items-center justify-center gap-3 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.58 }}
-        >
-          <RotateCcw className="w-5 h-5" />
-          العب مرة أخرى
-        </motion.button>
+            ✦
+          </motion.span>
+        ))}
       </div>
+
+      <main className="relative z-10 flex h-full items-center justify-center px-3 py-3 sm:px-5 sm:py-4">
+        <section
+          className={cn(
+            "grid h-full max-h-[820px] w-full max-w-6xl grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden border-4 p-3 shadow-2xl sm:p-5",
+            view.stage
+          )}
+          style={{ borderRadius: "28px" }}
+        >
+          <motion.div
+            className="mx-auto inline-flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-black shadow-lg backdrop-blur-sm sm:h-11 sm:text-base"
+            initial={{ opacity: 0, y: -16, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ type: "spring", stiffness: 260, damping: 18 }}
+            dir="rtl"
+          >
+            <span className={cn("rounded-full border px-4 py-1", view.badgeStyle)}>{view.badge}</span>
+            <span className="hidden text-[#4b5563] sm:inline">يا {playerName}</span>
+          </motion.div>
+
+          <div className="grid min-h-0 grid-cols-1 items-center gap-2 lg:grid-cols-[1.08fr_0.92fr] lg:gap-8">
+            <div className="relative flex min-h-0 items-center justify-center">
+              <motion.div
+                className="absolute bottom-[5%] h-[18%] w-[76%] max-w-[520px] bg-black/10 blur-2xl"
+                style={{ borderRadius: "50%" }}
+                initial={{ opacity: 0, scaleX: 0.5 }}
+                animate={{ opacity: 1, scaleX: 1 }}
+                transition={{ delay: 0.45, duration: 0.45 }}
+              />
+              <motion.img
+                src={view.mascot}
+                alt=""
+                className="relative z-10 max-h-[min(52vh,520px)] w-auto max-w-[92%] object-contain drop-shadow-[0_28px_38px_rgba(15,23,42,.22)] sm:max-h-[min(60vh,560px)]"
+                initial={{ opacity: 0, y: 42, scale: 0.74, rotate: outcome === "weak" ? -4 : 4 }}
+                animate={{
+                  opacity: 1,
+                  y: [0, -7, 0],
+                  scale: 1,
+                  rotate: 0,
+                }}
+                transition={{
+                  opacity: { delay: 0.15, duration: 0.25 },
+                  scale: { delay: 0.15, type: "spring", stiffness: 180, damping: 12 },
+                  rotate: { delay: 0.15, duration: 0.42 },
+                  y: { delay: 0.8, duration: 2.8, repeat: Infinity, ease: "easeInOut" },
+                }}
+              />
+            </div>
+
+            <div className="flex min-h-0 flex-col items-center justify-center text-center">
+              <motion.div
+                className="mb-2 flex items-center justify-center gap-2 sm:mb-3"
+                initial="hidden"
+                animate="show"
+                variants={{
+                  hidden: {},
+                  show: { transition: { staggerChildren: 0.16, delayChildren: 0.42 } },
+                }}
+              >
+                {[0, 1, 2].map((index) => {
+                  const earned = index < view.stars;
+                  return (
+                    <motion.div
+                      key={index}
+                      className={cn(
+                        "flex h-[clamp(46px,7vw,82px)] w-[clamp(46px,7vw,82px)] items-center justify-center text-[clamp(1.8rem,4.8vw,3.9rem)] font-black shadow-xl",
+                        earned ? view.starOn : view.starOff
+                      )}
+                      style={{
+                        clipPath:
+                          "polygon(50% 0%, 61% 34%, 98% 35%, 68% 56%, 79% 91%, 50% 70%, 21% 91%, 32% 56%, 2% 35%, 39% 34%)",
+                      }}
+                      variants={{
+                        hidden: { opacity: 0, scale: 0.25, y: 18, rotate: -24 },
+                        show: { opacity: 1, scale: 1, y: 0, rotate: 0 },
+                      }}
+                      transition={{ type: "spring", stiffness: 260, damping: 13 }}
+                    >
+                      ★
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+
+              <motion.h1
+                className={cn(
+                  "max-w-[620px] text-balance text-[clamp(1.7rem,5vw,4.15rem)] font-black leading-[1.08]",
+                  view.titleColor
+                )}
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.72, duration: 0.42 }}
+              >
+                {view.title}
+              </motion.h1>
+
+              <motion.p
+                className="mt-2 max-w-[520px] text-balance text-[clamp(.95rem,1.8vw,1.25rem)] font-black leading-7 text-[#475569] sm:mt-3"
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.88, duration: 0.38 }}
+              >
+                {view.feedback}
+              </motion.p>
+
+              <motion.div
+                className="mt-3 flex flex-wrap items-center justify-center gap-2 sm:mt-5"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.02, duration: 0.34 }}
+              >
+                {chips.map((chip, index) => (
+                  <span
+                    key={chip}
+                    className={cn(
+                      "inline-flex h-9 items-center rounded-full border px-3 text-xs font-black shadow-sm sm:h-10 sm:px-4 sm:text-sm",
+                      index < litChipCount ? view.chipOn : view.chipOff
+                    )}
+                  >
+                    {chip}
+                  </span>
+                ))}
+              </motion.div>
+
+              {outcome === "weak" && (
+                <motion.div
+                  className="mt-2 inline-flex items-center gap-2 rounded-full bg-white/65 px-4 py-2 text-sm font-black text-[#92400e] shadow-md sm:mt-4"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: [1, 1.04, 1] }}
+                  transition={{
+                    opacity: { delay: 1.12, duration: 0.3 },
+                    scale: { delay: 1.3, duration: 1.4, repeat: Infinity, ease: "easeInOut" },
+                  }}
+                >
+                  <Sparkles className="h-4 w-4" />
+                  كل محاولة بتقربك
+                </motion.div>
+              )}
+            </div>
+          </div>
+
+          <motion.div
+            className="mx-auto flex w-full max-w-[360px] justify-center"
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.12, duration: 0.35 }}
+          >
+            <motion.button
+              onClick={() => onNavigate("company-briefing")}
+              className={cn(
+                "flex h-12 w-full items-center justify-center gap-2 rounded-full px-6 text-base font-black shadow-xl outline-none ring-offset-2 transition-transform focus-visible:ring-2 focus-visible:ring-slate-900 sm:h-14",
+                view.button
+              )}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
+            >
+              <RotateCcw className="h-5 w-5" />
+              العب مرة أخرى
+            </motion.button>
+          </motion.div>
+        </section>
+      </main>
     </div>
   );
 };
