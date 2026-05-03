@@ -7,9 +7,12 @@ import { useSound } from "@/hooks/useSoundEffects";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import type { CaseOutcome } from "@/lib/pf-case/case-tree";
-import strongMascot from "@/assets/results/result-mascot-strong.png";
-import mediumMascot from "@/assets/results/result-mascot-medium.png";
-import weakMascot from "@/assets/results/result-mascot-weak.png";
+import femaleStrongMascot from "@/assets/results/result-mascot-female-strong.png";
+import femaleMediumMascot from "@/assets/results/result-mascot-female-medium.png";
+import femaleWeakMascot from "@/assets/results/result-mascot-female-weak.png";
+import maleStrongMascot from "@/assets/results/result-mascot-male-strong.png";
+import maleMediumMascot from "@/assets/results/result-mascot-male-medium.png";
+import maleWeakMascot from "@/assets/results/result-mascot-male-weak.png";
 
 interface ResultScreenProps {
   onNavigate: (screen: string) => void;
@@ -17,10 +20,13 @@ interface ResultScreenProps {
 
 const RESULT_VIEW = {
   strong: {
-    badge: "🎉 المهمة تمت!",
-    title: "برافو! مسكت أصل المشكلة",
-    feedback: "ثبتّ المرجع قبل ما تقترح حل. ده تفكير ممتاز.",
-    mascot: strongMascot,
+    badge: "🎉 أداء ممتاز",
+    title: { male: "برافو! سألت صح", female: "برافو! سألتي صح" },
+    feedback: {
+      male: "وصلت للصورة قبل ما تستعجل الحل. ده Problem Framing قوي.",
+      female: "وصلتي للصورة قبل ما تستعجلي الحل. ده Problem Framing قوي.",
+    },
+    mascot: { male: maleStrongMascot, female: femaleStrongMascot },
     stars: 3,
     sound: "fanfare",
     page: "bg-[linear-gradient(135deg,#6ee7f9_0%,#d9f99d_45%,#fde68a_100%)]",
@@ -35,10 +41,13 @@ const RESULT_VIEW = {
     confetti: ["#f59e0b", "#06b6d4", "#22c55e", "#ef4444", "#a855f7"],
   },
   medium: {
-    badge: "✨ مستوى عدى!",
-    title: "قريب جدًا من الحل الصح",
-    feedback: "كنت قريب، بس محتاج تربط الاستنتاج بالقرار أوضح.",
-    mascot: mediumMascot,
+    badge: "✨ أداء جيد",
+    title: { male: "حلّك ماشي صح", female: "حلّك ماشي صح" },
+    feedback: {
+      male: "أداؤك جيد، بس محتاج ترتب الأسئلة والاستنتاج بثقة أكتر.",
+      female: "أداؤك جيد، بس محتاجة ترتبي الأسئلة والاستنتاج بثقة أكتر.",
+    },
+    mascot: { male: maleMediumMascot, female: femaleMediumMascot },
     stars: 2,
     sound: "successChime",
     page: "bg-[linear-gradient(135deg,#bae6fd_0%,#ede9fe_52%,#f8fafc_100%)]",
@@ -53,10 +62,13 @@ const RESULT_VIEW = {
     confetti: ["#38bdf8", "#a78bfa", "#facc15", "#94a3b8", "#22c55e"],
   },
   weak: {
-    badge: "💡 محاولة تعليمية",
-    title: "لسه محتاج تبدأ من السؤال الصح",
-    feedback: "قبل أي حل، اسأل: هل المقارنة نفسها عادلة؟",
-    mascot: weakMascot,
+    badge: "💡 جرّب تاني",
+    title: { male: "محتاج تسأل أذكى", female: "محتاجة تسألي أذكى" },
+    feedback: {
+      male: "ابدأ بأسئلة تفتح الصورة بدل ما تروح للحل بسرعة.",
+      female: "ابدأي بأسئلة تفتح الصورة بدل ما تروحي للحل بسرعة.",
+    },
+    mascot: { male: maleWeakMascot, female: femaleWeakMascot },
     stars: 1,
     sound: "sparkle",
     page: "bg-[linear-gradient(135deg,#ffedd5_0%,#fef3c7_48%,#dcfce7_100%)]",
@@ -72,7 +84,20 @@ const RESULT_VIEW = {
   },
 } as const;
 
-const chips = ["🎯 اسأل صح", "📌 ثبت المرجع", "⚡ قرر بثقة"];
+const chips = {
+  male: ["🎯 اسأل صح", "🧩 افهم الصورة", "⚡ قرر بثقة"],
+  female: ["🎯 اسألي صح", "🧩 افهمي الصورة", "⚡ قرري بثقة"],
+} as const;
+
+const helperCopy = {
+  male: "كل محاولة بتقربك",
+  female: "كل محاولة بتقربك",
+} as const;
+
+const replayCopy = {
+  male: "العب مرة أخرى",
+  female: "العبي مرة أخرى",
+} as const;
 
 const confettiPieces = Array.from({ length: 34 }, (_, index) => ({
   id: index,
@@ -83,21 +108,19 @@ const confettiPieces = Array.from({ length: 34 }, (_, index) => ({
   size: index % 3 === 0 ? "h-3 w-2" : index % 3 === 1 ? "h-2 w-2" : "h-2.5 w-1.5",
 }));
 
-const sparkleDots = Array.from({ length: 16 }, (_, index) => ({
-  id: index,
-  left: `${8 + ((index * 29) % 84)}%`,
-  top: `${10 + ((index * 37) % 76)}%`,
-  delay: index * 0.12,
-}));
-
 export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
   const { state } = usePFGame();
   const { profile } = useAuth();
   const { playSound } = useSound();
 
   const playerName = profile?.first_name || profile?.display_name || "محلل";
+  const playerGender = (profile?.gender || "male") as "male" | "female";
   const outcome = (state.outcome || "medium") as CaseOutcome;
   const view = RESULT_VIEW[outcome];
+  const mascot = view.mascot[playerGender];
+  const title = view.title[playerGender];
+  const feedback = view.feedback[playerGender];
+  const genderedChips = chips[playerGender];
 
   // Record completion once per game session
   const recordedRef = useRef(false);
@@ -159,39 +182,27 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(255,255,255,.76),rgba(255,255,255,.2)_42%,transparent_68%)]" />
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        {confettiPieces.map((piece) => (
-          <motion.span
-            key={piece.id}
-            className={cn("absolute top-[-8%] rounded-sm", piece.size)}
-            style={{
-              left: piece.left,
-              rotate: `${piece.rotate}deg`,
-              backgroundColor: view.confetti[piece.id % view.confetti.length],
-            }}
-            initial={{ y: "-10vh", opacity: 0, scale: 0.8 }}
-            animate={{ y: "112vh", opacity: [0, 1, 1, 0], scale: [0.7, 1, 0.95] }}
-            transition={{
-              delay: piece.delay,
-              duration: outcome === "weak" ? piece.duration + 1.2 : piece.duration,
-              repeat: outcome === "strong" ? Infinity : 0,
-              repeatDelay: 1.6,
-              ease: "linear",
-            }}
-          />
-        ))}
-
-        {sparkleDots.map((dot) => (
-          <motion.span
-            key={dot.id}
-            className="absolute text-lg"
-            style={{ left: dot.left, top: dot.top }}
-            initial={{ opacity: 0, scale: 0.4 }}
-            animate={{ opacity: [0, 1, 0], scale: [0.5, 1.15, 0.5], rotate: [0, 14, -8] }}
-            transition={{ delay: dot.delay, duration: 2.2, repeat: Infinity, repeatDelay: 1.1 }}
-          >
-            ✦
-          </motion.span>
-        ))}
+        {outcome !== "weak" &&
+          confettiPieces.map((piece) => (
+            <motion.span
+              key={piece.id}
+              className={cn("absolute top-[-8%] rounded-sm", piece.size)}
+              style={{
+                left: piece.left,
+                rotate: `${piece.rotate}deg`,
+                backgroundColor: view.confetti[piece.id % view.confetti.length],
+              }}
+              initial={{ y: "-10vh", opacity: 0, scale: 0.8 }}
+              animate={{ y: "112vh", opacity: [0, 1, 1, 0], scale: [0.7, 1, 0.95] }}
+              transition={{
+                delay: piece.delay,
+                duration: piece.duration,
+                repeat: outcome === "strong" ? Infinity : 0,
+                repeatDelay: 1.6,
+                ease: "linear",
+              }}
+            />
+          ))}
       </div>
 
       <main className="relative z-10 flex h-full items-center justify-center px-3 py-3 sm:px-5 sm:py-4">
@@ -203,14 +214,18 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
           style={{ borderRadius: "28px" }}
         >
           <motion.div
-            className="mx-auto inline-flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-black shadow-lg backdrop-blur-sm sm:h-11 sm:text-base"
+            className={cn(
+              "mx-auto inline-flex h-11 items-center gap-2 rounded-2xl border px-5 text-sm font-black shadow-lg backdrop-blur-sm sm:h-12 sm:text-base",
+              view.badgeStyle
+            )}
             initial={{ opacity: 0, y: -16, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ type: "spring", stiffness: 260, damping: 18 }}
             dir="rtl"
           >
-            <span className={cn("rounded-full border px-4 py-1", view.badgeStyle)}>{view.badge}</span>
-            <span className="hidden text-[#4b5563] sm:inline">يا {playerName}</span>
+            <span>{view.badge}</span>
+            <span className="h-5 w-px bg-current/20" />
+            <span className="text-[#4b5563]">يا {playerName}</span>
           </motion.div>
 
           <div className="grid min-h-0 grid-cols-1 items-center gap-2 lg:grid-cols-[1.08fr_0.92fr] lg:gap-8">
@@ -223,13 +238,13 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
                 transition={{ delay: 0.45, duration: 0.45 }}
               />
               <motion.img
-                src={view.mascot}
+                src={mascot}
                 alt=""
                 className="relative z-10 max-h-[min(52vh,520px)] w-auto max-w-[92%] object-contain drop-shadow-[0_28px_38px_rgba(15,23,42,.22)] sm:max-h-[min(60vh,560px)]"
                 initial={{ opacity: 0, y: 42, scale: 0.74, rotate: outcome === "weak" ? -4 : 4 }}
                 animate={{
                   opacity: 1,
-                  y: [0, -7, 0],
+                  y: outcome === "weak" ? 0 : [0, -7, 0],
                   scale: 1,
                   rotate: 0,
                 }}
@@ -237,7 +252,7 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
                   opacity: { delay: 0.15, duration: 0.25 },
                   scale: { delay: 0.15, type: "spring", stiffness: 180, damping: 12 },
                   rotate: { delay: 0.15, duration: 0.42 },
-                  y: { delay: 0.8, duration: 2.8, repeat: Infinity, ease: "easeInOut" },
+                  y: { delay: 0.8, duration: 2.8, repeat: outcome === "weak" ? 0 : Infinity, ease: "easeInOut" },
                 }}
               />
             </div>
@@ -279,14 +294,14 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
 
               <motion.h1
                 className={cn(
-                  "max-w-[620px] text-balance text-[clamp(1.7rem,5vw,4.15rem)] font-black leading-[1.08]",
+                  "max-w-[560px] text-balance text-[clamp(1.35rem,3.4vw,2.8rem)] font-black leading-[1.16]",
                   view.titleColor
                 )}
                 initial={{ opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.72, duration: 0.42 }}
               >
-                {view.title}
+                {title}
               </motion.h1>
 
               <motion.p
@@ -295,7 +310,7 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.88, duration: 0.38 }}
               >
-                {view.feedback}
+                {feedback}
               </motion.p>
 
               <motion.div
@@ -304,7 +319,7 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1.02, duration: 0.34 }}
               >
-                {chips.map((chip, index) => (
+                {genderedChips.map((chip, index) => (
                   <span
                     key={chip}
                     className={cn(
@@ -328,7 +343,7 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
                   }}
                 >
                   <Sparkles className="h-4 w-4" />
-                  كل محاولة بتقربك
+                  {helperCopy[playerGender]}
                 </motion.div>
               )}
             </div>
@@ -350,7 +365,7 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
               whileTap={{ scale: 0.96 }}
             >
               <RotateCcw className="h-5 w-5" />
-              العب مرة أخرى
+              {replayCopy[playerGender]}
             </motion.button>
           </motion.div>
         </section>
