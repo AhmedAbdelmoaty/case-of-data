@@ -36,6 +36,8 @@ export interface PFGameState extends GameState {
   restartCount: number;
   /** Transient flag: navigate back to the start of the in-store flow */
   restartFromBeginning: boolean;
+  /** Timestamp (ms) when the player first entered the inquiry */
+  gameStartedAt: number | null;
 }
 
 interface ChoiceResult {
