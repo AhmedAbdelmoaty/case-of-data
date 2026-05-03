@@ -258,6 +258,7 @@ export const PFGameProvider = ({ children }: { children: ReactNode }) => {
         setFramingSelection,
         submitFraming,
         resetGame,
+        markGameStarted,
         isInquiryComplete,
       }}
     >
