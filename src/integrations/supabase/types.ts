@@ -17,21 +17,36 @@ export type Database = {
       completed_players: {
         Row: {
           completed_at: string
+          duration_ms: number | null
           first_name: string
+          framing_correct: number | null
           id: string
           last_name: string
+          outcome: string | null
+          qualified: boolean
+          started_at: string | null
         }
         Insert: {
           completed_at?: string
+          duration_ms?: number | null
           first_name: string
+          framing_correct?: number | null
           id?: string
           last_name: string
+          outcome?: string | null
+          qualified?: boolean
+          started_at?: string | null
         }
         Update: {
           completed_at?: string
+          duration_ms?: number | null
           first_name?: string
+          framing_correct?: number | null
           id?: string
           last_name?: string
+          outcome?: string | null
+          qualified?: boolean
+          started_at?: string | null
         }
         Relationships: []
       }
