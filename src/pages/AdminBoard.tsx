@@ -24,13 +24,13 @@ const sortByCompletedAt = (a: CompletedPlayer, b: CompletedPlayer) => {
 };
 
 const PODIUM_MEDALS = ["🥇", "🥈", "🥉"];
-const SUCCESS_EMOJIS = ["✨", "⭐", "🎯", "✅", "💫"];
+const SUCCESS_ICONS = ["🎯", "🎆", "🎮", "🏅", "🚀", "🌟"];
 
 const getSuccessEmoji = (player: CompletedPlayer, rank: number) => {
   if (rank === 0) return "🏆";
 
   const seed = Array.from(player.id).reduce((total, char) => total + char.charCodeAt(0), 0);
-  return SUCCESS_EMOJIS[seed % SUCCESS_EMOJIS.length];
+  return SUCCESS_ICONS[seed % SUCCESS_ICONS.length];
 };
 
 const AdminBoard = () => {
@@ -190,7 +190,7 @@ const AdminBoard = () => {
             </motion.div>
           </motion.div>
         ) : (
-          <ol className="space-y-2.5" dir="ltr">
+          <ol className="mx-auto space-y-2.5 lg:max-w-[38rem] xl:max-w-[40rem]" dir="ltr">
             <AnimatePresence initial={false}>
               {players.map((p, i) => (
                 <PlayerRow key={p.id} player={p} rank={i} isNew={newId === p.id} />
@@ -337,7 +337,7 @@ const PlayerRow = ({
         </motion.div>
 
         {/* Podium medal slot keeps names aligned */}
-        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center text-xl">
+        <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center text-2xl lg:text-3xl">
           {isPodium && <span className="drop-shadow-lg">{PODIUM_MEDALS[rank]}</span>}
         </div>
 
@@ -353,14 +353,14 @@ const PlayerRow = ({
 
         {/* Success mark */}
         <motion.div
-          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/10 text-2xl shadow-inner shadow-white/5"
+          className="flex h-11 w-14 flex-shrink-0 items-center justify-center text-4xl leading-none drop-shadow-[0_0_16px_rgba(255,214,102,0.38)] lg:text-5xl"
           animate={
             isFirst
-              ? { y: [0, -3, 0], scale: [1, 1.08, 1] }
-              : { rotate: [0, 6, -6, 0] }
+              ? { y: [0, -4, 0], scale: [1, 1.12, 1], rotate: [0, -4, 4, 0] }
+              : { y: [0, -3, 0], scale: [1, 1.1, 1] }
           }
           transition={{
-            duration: isFirst ? 1.8 : 3,
+            duration: isFirst ? 1.7 : 2.4,
             repeat: Infinity,
             delay: isFirst ? 0 : rank * 0.08,
             ease: "easeInOut",
