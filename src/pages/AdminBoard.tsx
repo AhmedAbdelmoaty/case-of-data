@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trophy, LogOut, RotateCcw, Crown, Sparkles, Zap, Star, Flame, Rocket } from "lucide-react";
+import { Trophy, LogOut, RotateCcw, Sparkles } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -10,21 +10,28 @@ interface CompletedPlayer {
   first_name: string;
   last_name: string;
   completed_at: string;
-  duration_ms: number | null;
   qualified: boolean;
 }
 
-const formatDuration = (ms: number | null) => {
-  if (!ms || ms < 0) return "—";
-  const total = Math.floor(ms / 1000);
-  const m = Math.floor(total / 60);
-  const s = total % 60;
-  return `${m}:${s.toString().padStart(2, "0")}`;
+const completedAtTime = (player: CompletedPlayer) => {
+  const time = new Date(player.completed_at).getTime();
+  return Number.isFinite(time) ? time : Infinity;
 };
 
-const RANK_EMOJIS = ["🥇", "🥈", "🥉"];
-const REST_EMOJIS = ["⭐", "🔥", "⚡", "💎", "🚀", "✨", "🎯", "🌟"];
-const REST_ICONS = [Star, Flame, Zap, Sparkles, Rocket];
+const sortByCompletedAt = (a: CompletedPlayer, b: CompletedPlayer) => {
+  const delta = completedAtTime(a) - completedAtTime(b);
+  return Number.isFinite(delta) && delta !== 0 ? delta : a.id.localeCompare(b.id);
+};
+
+const PODIUM_MEDALS = ["🥇", "🥈", "🥉"];
+const SUCCESS_EMOJIS = ["✨", "⭐", "🎯", "✅", "💫"];
+
+const getSuccessEmoji = (player: CompletedPlayer, rank: number) => {
+  if (rank === 0) return "🏆";
+
+  const seed = Array.from(player.id).reduce((total, char) => total + char.charCodeAt(0), 0);
+  return SUCCESS_EMOJIS[seed % SUCCESS_EMOJIS.length];
+};
 
 const AdminBoard = () => {
   const { session, isAdmin, loading: authLoading } = useAuth();
@@ -43,9 +50,9 @@ const AdminBoard = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("completed_players")
-      .select("id, first_name, last_name, completed_at, duration_ms, qualified")
+      .select("id, first_name, last_name, completed_at, qualified")
       .eq("qualified", true)
-      .order("duration_ms", { ascending: true })
+      .order("completed_at", { ascending: true })
       .limit(100);
     if (!error && data) setPlayers(data as CompletedPlayer[]);
     setLoading(false);
@@ -65,9 +72,7 @@ const AdminBoard = () => {
           if (!row.qualified) return;
           setPlayers((prev) => {
             if (prev.find((p) => p.id === row.id)) return prev;
-            const next = [...prev, row].sort(
-              (a, b) => (a.duration_ms ?? Infinity) - (b.duration_ms ?? Infinity)
-            );
+            const next = [...prev, row].sort(sortByCompletedAt);
             return next.slice(0, 100);
           });
           setNewId(row.id);
@@ -127,34 +132,24 @@ const AdminBoard = () => {
         />
       </div>
 
-      <div className="relative z-10 max-w-4xl mx-auto px-4 py-6 lg:py-10">
+      <div className="relative z-10 max-w-4xl mx-auto px-4 py-6 lg:py-8">
         {/* Header */}
         <motion.div
-          className="flex items-center justify-between mb-8"
+          className="flex items-center justify-between mb-6"
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
         >
-          <div className="flex items-center gap-3" dir="rtl">
+          <div className="flex items-center gap-2.5">
             <motion.div
               animate={{ rotate: [0, -8, 8, -8, 0] }}
               transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
             >
-              <Trophy className="w-10 h-10 lg:w-14 lg:h-14 text-amber-400 drop-shadow-[0_0_20px_rgba(251,191,36,0.6)]" />
+              <Trophy className="w-8 h-8 lg:w-11 lg:h-11 text-amber-400 drop-shadow-[0_0_18px_rgba(251,191,36,0.6)]" />
             </motion.div>
             <div>
-              <h1 className="text-3xl lg:text-5xl font-black bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent tracking-tight">
-                لوحة الأبطال
+              <h1 className="text-2xl lg:text-4xl font-black bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent tracking-tight">
+                Champions Board
               </h1>
-              <div className="flex items-center gap-2 mt-1">
-                <motion.span
-                  className="inline-block w-2 h-2 rounded-full bg-red-500"
-                  animate={{ opacity: [1, 0.3, 1], scale: [1, 1.3, 1] }}
-                  transition={{ duration: 1.4, repeat: Infinity }}
-                />
-                <span className="text-xs lg:text-sm font-bold text-red-400 tracking-widest">LIVE</span>
-                <span className="text-xs text-muted-foreground mx-2">•</span>
-                <span className="text-xs lg:text-sm text-muted-foreground">{players.length} بطل</span>
-              </div>
             </div>
           </div>
 
@@ -187,16 +182,15 @@ const AdminBoard = () => {
             animate={{ opacity: 1, y: 0 }}
           >
             <motion.div
-              className="text-7xl mb-4"
+              className="text-6xl"
               animate={{ y: [0, -10, 0] }}
               transition={{ duration: 2.5, repeat: Infinity }}
             >
               🏆
             </motion.div>
-            <p className="text-lg text-muted-foreground">في انتظار أول بطل...</p>
           </motion.div>
         ) : (
-          <ol className="space-y-3" dir="rtl">
+          <ol className="space-y-2.5" dir="ltr">
             <AnimatePresence initial={false}>
               {players.map((p, i) => (
                 <PlayerRow key={p.id} player={p} rank={i} isNew={newId === p.id} />
@@ -264,16 +258,7 @@ const PlayerRow = ({
   const isFirst = rank === 0;
   const isPodium = rank < 3;
   const fullName = `${player.first_name} ${player.last_name}`;
-
-  // Pick a stable rest emoji based on id
-  const restEmoji = useMemo(() => {
-    const seed = player.id.charCodeAt(0) + player.id.charCodeAt(1);
-    return REST_EMOJIS[seed % REST_EMOJIS.length];
-  }, [player.id]);
-  const RestIcon = useMemo(() => {
-    const seed = player.id.charCodeAt(2) + player.id.charCodeAt(3);
-    return REST_ICONS[seed % REST_ICONS.length];
-  }, [player.id]);
+  const successEmoji = getSuccessEmoji(player, rank);
 
   // Style per rank
   let cardClass = "bg-white/5 border-white/10";
@@ -314,111 +299,75 @@ const PlayerRow = ({
       }}
       exit={{ opacity: 0, x: -40, scale: 0.9 }}
       transition={{ type: "spring", stiffness: 220, damping: 22 }}
-      className={`relative rounded-2xl border backdrop-blur-sm overflow-hidden ${cardClass} ${glow} ${
-        isFirst ? "p-5 lg:p-6" : isPodium ? "p-4 lg:p-5" : "p-3.5 lg:p-4"
-      }`}
+      className={`relative min-h-[4.5rem] rounded-xl border p-3.5 backdrop-blur-sm overflow-hidden ${cardClass} ${glow}`}
+      dir="ltr"
     >
       {/* Confetti-ish sparkles for #1 */}
       {isFirst && (
         <>
           <motion.div
-            className="absolute top-2 left-4 text-amber-300"
+            className="absolute top-2 right-4 text-amber-300"
             animate={{ y: [0, -6, 0], rotate: [0, 15, 0] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
-            <Sparkles className="w-5 h-5" />
+            <Sparkles className="w-4 h-4" />
           </motion.div>
           <motion.div
-            className="absolute bottom-2 right-8 text-yellow-200"
+            className="absolute bottom-2 left-8 text-yellow-200"
             animate={{ y: [0, -8, 0], rotate: [0, -20, 0] }}
             transition={{ duration: 2.4, repeat: Infinity, delay: 0.5 }}
           >
-            <Sparkles className="w-4 h-4" />
+            <Sparkles className="w-3.5 h-3.5" />
           </motion.div>
         </>
       )}
 
-      <div className="flex items-center gap-3 lg:gap-4">
-        {/* Rank badge */}
+      <div className="flex min-h-11 items-center gap-2.5 lg:gap-3">
+        {/* Rank number */}
         <motion.div
-          className={`flex-shrink-0 flex items-center justify-center font-black tabular-nums ${
-            isFirst
-              ? "w-16 h-16 lg:w-20 lg:h-20 text-4xl lg:text-5xl"
-              : isPodium
-              ? "w-14 h-14 text-3xl"
-              : "w-11 h-11 text-xl bg-white/5 rounded-xl border border-white/10"
-          }`}
-          animate={
-            isFirst
-              ? { scale: [1, 1.08, 1], rotate: [0, -5, 5, 0] }
-              : isPodium
-              ? { y: [0, -3, 0] }
-              : undefined
-          }
+          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-sm font-black tabular-nums text-foreground/90 shadow-inner shadow-white/5"
+          animate={isFirst ? { scale: [1, 1.05, 1] } : undefined}
           transition={{
-            duration: isFirst ? 2.2 : 2.6,
+            duration: 2.2,
             repeat: Infinity,
             ease: "easeInOut",
           }}
         >
-          {isPodium ? (
-            <span className="drop-shadow-lg">{RANK_EMOJIS[rank]}</span>
-          ) : (
-            <span className="text-muted-foreground">{rank + 1}</span>
-          )}
+          {rank + 1}
         </motion.div>
 
-        {/* Crown for #1 */}
-        {isFirst && (
-          <motion.div
-            className="flex-shrink-0"
-            animate={{ y: [0, -4, 0] }}
-            transition={{ duration: 1.8, repeat: Infinity }}
-          >
-            <Crown className="w-8 h-8 lg:w-10 lg:h-10 text-yellow-300 drop-shadow-[0_0_12px_rgba(253,224,71,0.8)]" />
-          </motion.div>
-        )}
+        {/* Podium medal slot keeps names aligned */}
+        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center text-xl">
+          {isPodium && <span className="drop-shadow-lg">{PODIUM_MEDALS[rank]}</span>}
+        </div>
 
         {/* Name */}
-        <div className="flex-1 min-w-0" dir="auto">
+        <div className="min-w-0 flex-1 text-left" dir="auto">
           <p
-            className={`font-extrabold truncate ${
-              isFirst
-                ? "text-2xl lg:text-4xl"
-                : isPodium
-                ? "text-xl lg:text-2xl"
-                : "text-base lg:text-lg"
-            } ${nameClass}`}
+            className={`truncate text-left text-base font-extrabold lg:text-lg ${nameClass}`}
             style={{ fontFamily: "'Cairo', 'Tajawal', system-ui, sans-serif" }}
           >
             {fullName}
           </p>
         </div>
 
-        {/* Side emoji/icon for non-podium */}
-        {!isPodium && (
-          <motion.div
-            className="flex-shrink-0 text-2xl"
-            animate={{ rotate: [0, 10, -10, 0] }}
-            transition={{ duration: 3, repeat: Infinity, delay: rank * 0.1 }}
-          >
-            {restEmoji}
-          </motion.div>
-        )}
-
-        {/* Time */}
-        <div
-          className={`flex-shrink-0 font-mono font-bold tabular-nums ${
+        {/* Success mark */}
+        <motion.div
+          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/10 text-2xl shadow-inner shadow-white/5"
+          animate={
             isFirst
-              ? "text-3xl lg:text-4xl text-amber-100"
-              : isPodium
-              ? "text-2xl text-foreground"
-              : "text-lg text-muted-foreground"
-          }`}
-          style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace" }}
+              ? { y: [0, -3, 0], scale: [1, 1.08, 1] }
+              : { rotate: [0, 6, -6, 0] }
+          }
+          transition={{
+            duration: isFirst ? 1.8 : 3,
+            repeat: Infinity,
+            delay: isFirst ? 0 : rank * 0.08,
+            ease: "easeInOut",
+          }}
         >
-          {formatDuration(player.duration_ms)}
-        </div>
+          {successEmoji}
+        </motion.div>
       </div>
     </motion.li>
   );
