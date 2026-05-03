@@ -226,6 +226,10 @@ export const PFGameProvider = ({ children }: { children: ReactNode }) => {
 
   const resetGame = useCallback(() => setState(initialState), []);
 
+  const markGameStarted = useCallback(() => {
+    setState((prev) => (prev.gameStartedAt ? prev : { ...prev, gameStartedAt: Date.now() }));
+  }, []);
+
   const isInquiryComplete = useCallback(() => state.isComplete, [state.isComplete]);
 
   const framingSections = useMemo<FramingSection[]>(
