@@ -39,7 +39,9 @@ interface DialogueLineUI {
 }
 
 export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
-  const { state, getChoices, pickChoice, collectInquiryFindings, restartInquiry, canRestart } = usePFGame();
+  const { state, getChoices, pickChoice, collectInquiryFindings, restartInquiry, canRestart, markGameStarted } = usePFGame();
+
+  useEffect(() => { markGameStarted(); }, [markGameStarted]);
   const { profile } = useAuth();
   const { playSound } = useSound();
   useSceneAmbience("store_interior");

@@ -1,170 +1,163 @@
-## ما فهمته من طلبك
+# فهمت إيه بالظبط
 
-عندنا 3 مشاكل/مهام:
+اللي طالبه يتلخص في 4 محاور:
 
-1. **صوت المحلل (اللاعب) لسه مش مضاف** — أنت رفعت 27 ملف ذكر (analyst_male) و27 ملف أنثى (analyst_female) ولازم اللعبة تشغّل الملف الصح حسب جنس اللاعب في كل سطور المحلل (مع منصور أول/آخر، مع هشام، وأسئلة الكروت).
-2. **الصوت بيكمل بعد الجملة/المشهد** — لازم أي صوت يقف فورًا عند: ضغط استمرار، تغيير الجملة، تغيير المشهد، قفل الديالوج.
-3. **سؤال الكارت بيتعدى من غير ما صوته يتسمع** — لما اللاعب يضغط كارت السؤال، رد هشام بيظهر فورًا. عايزين صوت السؤال يشتغل الأول، وبعدين يظهر رد هشام، مع إمكانية التخطي.
-
-## قراءة الملفات والـ Mapping
-
-قرأت كل ملفات الـ voiceover في `public/voiceover/analyst_male/` و`analyst_female/`. الأسماء مطابقة 1:1 (نفس الـ 27 ملف، النسخة الأنثى بإضافة `_female` قبل `.wav`). كمان قرأت `case-tree.ts` و `mansour-scripts.ts` و `mansour-call-scripts.ts` و `InquiryScreen.tsx` و `EnhancedDialogue.tsx` عشان أتأكد من كل سطر هيتربط بأنهي ملف.
-
-### جدول الربط الكامل (نسخة الذكر — الأنثى نفس الاسم + `_female`)
-
-**أ) مع منصور في المكتب (بداية المهمة) — `MANSOUR_INTRO_DIALOGUES**`
-
-
-| ملف                                             | جملة المحلل                                           |
-| ----------------------------------------------- | ----------------------------------------------------- |
-| `analyst_intro_with_mansour_01_accept_task.wav` | "تمام يا أستاذ منصور، هروح وأحاول أفهم الصورة كاملة." |
-
-
-**ب) الترحيب مع هشام — `HISHAM_GREETING**`
-
-
-| ملف                                        | جملة المحلل                                                                     |
-| ------------------------------------------ | ------------------------------------------------------------------------------- |
-| `analyst_arrival_hisham_01_greeting.wav`   | "أهلاً بيك يا أستاذ هشام. أستاذ منصور قالي إن حضرتك عاوز تتكلم في موضوع شاغلك." |
-| `analyst_arrival_hisham_02_calm_start.wav` | "متشغلش بالك. خلينا نهدى ونفهم سوا. هسألك كام سؤال براحة، وانت قولي اللي عندك." |
-
-
-**ج) أسئلة المحور الصحيح S1–S5 (correct) في `case-tree.ts**`
-
-
-| ملف                                   | السؤال                                                                                                 |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `analyst_s1_correct_open_problem.wav` | "خلينا نبدأ من الأول يا أستاذ هشام. إيه اللي خلاك تحس إن في مشكلة؟ حصل إيه بالظبط في الشهر ده؟"        |
-| `analyst_s2_correct_baseline.wav`     | "طب خلينا نقف هنا. لما بتقول المبيعات أقل من المتوقع، ممكن تقولي قلت بنسبة قد ايه وحضرتك بتقارن بإيه؟" |
-| `analyst_s3_correct_ask_report.wav`   | "تمام. طب ممكن أشوف الأرقام دي على ورق؟ هل فيه تقرير بيأكد الكلام ده؟"                                 |
-| `analyst_s4_correct_three_years.wav`  | "حضرتك بتقارن بسنة واحدة بس. ممكن نشوف مبيعات فبراير لآخر 3 سنين؟…"                                    |
-| `analyst_s5_correct_breakdown.wav`    | "حضرتك عندك تقرير بيوضح المبيعات دي ماشية إزاي؟ يعني نوعية البيع، تفاصيله، مش بس رقم إجمالي؟"          |
-
-
-**د) أسئلة المحور الخطأ (wrong entries في S1–S5)**
-
-
-| ملف                                            | السؤال                                                                                                   |
-| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `analyst_s1_wrong_sales_team_entry.wav`        | "أستاذ هشام، عندي إحساس إن المشكلة دي غالبًا من فريق البيع…"                                             |
-| `analyst_s2_wrong_sales_report_entry.wav`      | "تمام، ممكن أبص على تقرير مبيعات الشهر ده؟…"                                                             |
-| `analyst_s3_wrong_competitors_entry.wav`       | "طب قبل ما نكمل، المنافسين حواليك بيعملوا إيه دلوقتي؟…"                                                  |
-| `analyst_s4_wrong_competitor_offers_entry.wav` | "إيه طبيعة العروض اللي بيقدمها المنافسين دلوقتي؟" (نفس نص `c_competitor_offers` — مفيد لإعادة الاستخدام) |
-| `analyst_s5_wrong_marketing_entry.wav`         | "طب ممكن نبص على أداء الحملات الإعلانية الأخيرة؟"                                                        |
-
-
-**هـ) Track A — فريق البيع**
-
-
-| ملف                              | السؤال                                                          |
-| -------------------------------- | --------------------------------------------------------------- |
-| `analyst_a_team_performance.wav` | "ممكن أشوف تقرير بأداء كل واحد في فريق المبيعات؟"               |
-| `analyst_a_team_conversion.wav`  | "طب ممكن نبص على نسبة التحويل لكل فرد في الفريق؟"               |
-| `analyst_a_team_training.wav`    | "في تدريب أو متابعة منتظمة بتعملها للفريق؟ آخر تدريب كان امتى؟" |
-| `analyst_a_conclusion.wav`       | "تمام، الصورة بقت أوضح. فيه ضعف تنفيذ ومتابعة من ناحية الفريق." |
-
-
-**و) Track C — منافسين/تسعير**
-
-
-| ملف                                     | السؤال                                                           |
-| --------------------------------------- | ---------------------------------------------------------------- |
-| `analyst_c_customer_price_feedback.wav` | "فيه زباين عندك بيشتكوا من السعر مقارنة بالسوق؟"                 |
-| `analyst_c_price_response.wav`          | "نعمل رد سعري تنافسي. عرض محدد لفترة قصيرة على خط معين؟"         |
-| `analyst_c_conclusion.wav`              | "كده الصورة بقت أوضح، السوق بيضغط على السعر ومحتاجين تحرك سعري." |
-
-
-> ملحوظة: `c_competitor_offers` نفس نص `S4 wrong`، فهيستخدم `analyst_s4_wrong_competitor_offers_entry.wav` لما يظهر في تراك C.
-
-**ز) Track D — تسويق/طلب**
-
-
-| ملف                              | السؤال                                                                   |
-| -------------------------------- | ------------------------------------------------------------------------ |
-| `analyst_d_active_campaign.wav`  | "هل في أي حملة تنشيط أو ترويج كانت شغالة الشهر ده؟"                      |
-| `analyst_d_new_vs_returning.wav` | "طب الشراء خلال الشهر ده جاي أكتر من عملاء جدد ولا من الزباين الدائمين؟" |
-| `analyst_d_marketing_report.wav` | "ممكن نبص على ملخص أداء التسويق السنة دي مقارنة بالسنة اللي فاتت؟"       |
-| `analyst_d_conclusion.wav`       | "يبقى محتاجين حملة تنشيط مدروسة قبل الموسم الجاي، بميزانية محسوبة."      |
-
-
-**ح) المكالمة النهائية مع منصور (mansour-call-scripts.ts) — ردود المحلل**
-
-
-| ملف                                  | المكان                                                |
-| ------------------------------------ | ----------------------------------------------------- |
-| `analyst_ending_strong_response.wav` | "ده شرف ليّا يا أستاذ منصور." MANSOUR_CALL_STRONG     |
-| `analyst_ending_medium_response.wav` | "أيوه، حسيت إن لسه فيه جزء ناقص." MANSOUR_CALL_MEDIUM |
-| `analyst_ending_weak_response.wav`   | "حضرتك معاك حق… أنا استعجلت." MANSOUR_CALL_WEAK       |
-
-
-**الإجمالي:** 27 ملف موزعين على 27 سطر/سؤال محلل. مفيش ملف زيادة، ومفيش سطر ناقصه ملف.
+1. **فلترة صارمة**: الداشبورد يعرض **فقط** اللي:
+  - خلصوا اللعبة (وصلوا لشاشة النتيجة).
+  - حلّوا الـ 5 أسئلة كلها صح (يعني مشيوا على الـ spine كامل من غير ما يدخلوا في wrong track).
+  - والتأطير في التقرير 2/3 أو 3/3 صح.
+  - أي حد عمل سؤال غلط واحد أو framing < 2 → مش هيظهر خالص حتى لو خلّص بسرعة.
+2. **الترتيب بالسرعة**: الأسرع في الأعلى. مفيش وقت متسجل حاليًا، فلازم نسجّل `started_at` لما اللاعب يبدأ + `duration_ms` عند الإنهاء، والترتيب بيكون بالأقل duration.
+3. **تحديث Live اوتوماتيك**: شاشة الإيفنت تتحدث لحظة ما حد جديد يأهّل، من غير refresh، عبر Supabase Realtime + animation للداخل الجديد.
+4. **Reset** زر "Reset" تاني (احتياطي) يمسح كل شيء لو حبيت.  
+خلينا دلوقتي نبدأ بزر الريست وبعدين نبقى نطور ونعمل ال EVENT SESSION او اي تطوير اخر بس خلينا دلوقتي نبدأ بابسط حاجه 
+5. **تصميم gamified**: ميداليات (🥇🥈🥉)، كاس للأول، خلفية متدرجة، fonts عصرية (Cairo display)، animations دخول من اليمين مع glow، confetti بسيط للأول، أوقات الإنهاش بشكل واضح (مثلًا "2:14")، شارة "LIVE" نابضة.
 
 ---
 
-## خطة التنفيذ
+# الـ Plan الكاملة
 
-### 1) ملف ربط مركزي للمحلل
+## 1. تعديلات قاعدة البيانات (Migration)
 
-أنشئ `src/lib/voiceover/analystVoiceMap.ts`:
+### جدول `completed_players` — إضافة أعمدة:
 
-- `ANALYST_VOICE_MAP`: `Record<string, string>` بيربط نص الجملة (بعد normalize للمسافات/التشكيل) بمسار الملف الذكر تحت `/voiceover/analyst_male/`.
-- `getAnalystVoice(text, gender)`: بيرجّع المسار الصح؛ لو `female` بيستبدل `analyst_male/` بـ `analyst_female/` وبيضيف `_female` قبل `.wav`. كل ملفات المحلل لها نسخة female مؤكدة (allow-list داخلية).
-- يدعم matching بالنص الكامل، ولو فشل يرجع `undefined` بدون إحلال.
+```sql
+ALTER TABLE completed_players
+  ADD COLUMN qualified boolean NOT NULL DEFAULT false,
+  ADD COLUMN outcome text,                  -- 'strong' | 'medium' | 'weak'
+  ADD COLUMN framing_correct int,           -- 0..3
+  ADD COLUMN duration_ms int,               -- وقت اللعب بالمللي ثانية
+  ADD COLUMN started_at timestamptz;        -- وقت بداية الجلسة للاعب
+```
 
-### 2) ربط الصوت في كل المشاهد
+- **ملاحظة**: `qualified = true` فقط لما (full spine صح) AND (framing_correct >= 2).
+- نضيف index: `(qualified, duration_ms ASC)` للأداء.
 
-- `**mansour-scripts.ts**`: أضف `audioSrc` للسطر الـ detective في `MANSOUR_INTRO_DIALOGUES` و للسطرين detective في `HISHAM_GREETING` (نسخة male كقيمة افتراضية، والاستبدال للأنثى يحصل في الـ screen عبر `getVoiceoverSrc`/الـ map).
-- `**mansour-call-scripts.ts` (debrief)**: أضف `audioSrc` للجملة الوحيدة للمحلل في كل من STRONG/MEDIUM/WEAK.
-- `**InquiryScreen.tsx**`: عند `pickChoice`، استخدم `getAnalystVoice(option.text, g)` لتوليد `audioSrc` لسطر سؤال المحلل (لو هنرجّع السطر — تحت في النقطة 4).
-- `**ArrivalScreen.tsx**` و `**CompanyBriefingScreen.tsx**` و `**PhoneCallDebriefScreen.tsx**`: مرّر السطور بالفعل خلال `applyGenderToLine` (موجودة) — بس كمّلها بحيث لو السطر detective وله `audioSrc` ذكر، تستبدله بـ female عبر helper جديد `getAnalystVoiceoverSrc(maleSrc, gender)`.
+### جدول جديد `event_sessions`:
 
-### 3) إيقاف الصوت بشكل صارم
+```sql
+CREATE TABLE event_sessions (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text,
+  started_at timestamptz NOT NULL DEFAULT now(),
+  ended_at timestamptz,
+  is_active boolean NOT NULL DEFAULT true,
+  created_by uuid REFERENCES auth.users(id)
+);
+```
 
-في `EnhancedDialogue.tsx`:
+- RLS: قراءة public (anon)، insert/update للأدمن فقط.
+- Trigger أو منطق يضمن جلسة active واحدة بس.
 
-- `stopAudio()` موجود ومستخدم في تغيير الـ index و عند unmount/`!isActive`.
-- **إضافة:** `useEffect` cleanup عام يستدعي `stopAudio()` عند unmount نهائي للكومبوننت (يتأكد من إيقاف الصوت لو المشهد اتغير قبل ما الديالوج يكمل).
-- **إضافة:** في `handleNext` و `handleClose` و `handlePrevious` — `stopAudio()` بيتنادى قبل أي transition (بعضها موجود؛ هنوحّد كلها).
-- **إضافة:** عند انتهاء الجملة الحالية والـ user دوس استمرار، أوقف الصوت فورًا حتى لو لسه شغال.
+### Realtime:
 
-النتيجة: الصوت ميعيشش غير داخل سطر الـ dialogue بتاعه فقط.
+```sql
+ALTER PUBLICATION supabase_realtime ADD TABLE completed_players;
+ALTER PUBLICATION supabase_realtime ADD TABLE event_sessions;
+```
 
-### 4) صوت سؤال الكارت قبل رد هشام
+## 2. تعديلات اللعبة (تتبع الوقت + التأهل)
 
-في `InquiryScreen.tsx` (المشكلة الأهم):
+### `PFGameContext.tsx`:
 
-**التجربة المقترحة (سلسة):**
+- نضيف `gameStartedAt: number` يتسجّل أول لما اللاعب يدخل الـ inquiry (أو الـ company-briefing).
+- يتحفظ في الـ state ويتمرّر لـ ResultScreen.
 
-1. اللاعب يضغط كارت السؤال.
-2. الكارت المختار يكبر شوية ويثبت في النص (الانيميشن الموجود حاليًا "scale up to center" مناسب — هنطوّله شوية).
-3. صوت سؤال المحلل يبدأ يشتغل فورًا (`getAnalystVoice(option.text, g)`).
-4. أثناء التشغيل: تظهر مؤشرات بصرية (نبض/موجة صوت صغيرة على الكارت) + زر "تخطي" صغير في الكورنر.
-5. عند انتهاء الصوت تلقائيًا (event `ended`) أو ضغط "تخطي": يقف الصوت فورًا، الكارت يختفي، نروح لرد هشام (الـ phase = `dialogue` مع صوت هشام).
-6. رد هشام يبدأ صوته فورًا أول ما الجملة تتكون (موجود حاليًا).
+### `ResultScreen.tsx` — تعديل الـ insert:
 
-**التنفيذ التقني:**
+```ts
+const fullSpine = !state.trackEntered &&
+  state.history.length >= 5 &&
+  state.history.every(h => h.choice === "correct");
+const qualified = fullSpine && state.framingCorrectCount >= 2;
+const duration_ms = Date.now() - state.gameStartedAt;
 
-- إضافة phase جديد `"questionVoice"` بين `choosing` و `dialogue`.
-- `handlePick` يحوّل لـ `questionVoice`، يشغل audio، ويربط `onended` يرجّع `setPhase("dialogue")` ويملأ `currentLines`.
-- لو مفيش audioSrc للسؤال (احتياطي)، يدخل `dialogue` مباشرة.
-- زر تخطي يستدعي نفس الـ handler.
-- ضمان عدم التداخل: قبل تشغيل صوت السؤال نوقف أي صوت سابق؛ EnhancedDialogue نفسه بيوقف صوت السؤال أول ما يبدأ صوت هشام (لأنه instance منفصل، هنشاركه عبر helper مشترك أو ببساطة `audio.pause()` في cleanup).
+supabase.from("completed_players").insert({
+  first_name, last_name,
+  qualified,
+  outcome: state.outcome,
+  framing_correct: state.framingCorrectCount,
+  duration_ms,
+  started_at: new Date(state.gameStartedAt).toISOString(),
+});
+```
 
-### 5) ملاحظات
+- (مش هنغيّر شاشة النتيجة للاعب نفسه — هي زي ما هي).
 
-- مفيش تغيير في نص أي ديالوج.
-- مفيش تغيير في تدفق اللعبة أو الـ scoring.
-- كل الملفات الـ 27 (×2 للجنس) هتتربط بسطورها الصح زي الجدول فوق.
-- لو حصل أي mismatch في النص (مسافات/علامات)، الـ normalize داخل `getAnalystVoice` بيتعامل معاه؛ ولو فشل الربط، السطر يفضل صامت بدون استبدال خاطئ.
+## 3. الداشبورد الجديدة (`AdminBoard.tsx`)
 
-## الملفات اللي هتتعدّل/تتنشأ
+### Logic:
 
-- **جديد:** `src/lib/voiceover/analystVoiceMap.ts`
-- **تعديل:** `src/lib/voiceover/genderedDialogue.ts` (إضافة female allow-list للمحلل)
-- **تعديل:** `src/lib/pf-case/mansour-scripts.ts` (إضافة audioSrc للمحلل في INTRO + HISHAM_GREETING )  
-**تعديل:** `src/lib/pf-case/mansour-call-scripts.ts` (إضافة audioSrc للمحلل في كل جملة في ال3 نهايات)
-- **تعديل:** `src/components/game/screens/InquiryScreen.tsx` (phase جديد للصوت قبل رد هشام + ربط صوت المحلل)
-- **تعديل:** `src/components/game/EnhancedDialogue.tsx` (تشديد إيقاف الصوت في كل المسارات)
-- **تعديل بسيط:** `ArrivalScreen.tsx` و `CompanyBriefingScreen.tsx` و `PhoneCallDebriefScreen.tsx` (التأكد إن audioSrc للمحلل بيمر خلال gender helper)
+- جيب `event_sessions` الـ active الواحدة.
+- جيب `completed_players` WHERE `qualified = true` AND `completed_at >= active.started_at` ORDER BY `duration_ms ASC`.
+- اشترك على Realtime channel للجدولين:
+  - عند INSERT جديد مؤهل → ضيفه في القائمة بـ animation.
+  - عند تغيير الـ active session → اعمل reload وتفريغ.
 
-وافق وأنا أنفّذ كل ده بالترتيب.
+### UI / تصميم gamified:
+
+**Layout** (full-screen مناسب للعرض على شاشة كبيرة):
+
+```
+┌─────────────────────────────────────────────┐
+│  🏆 لوحة المتصدرين  •  ● LIVE   [⚙ جلسة]  │
+│                 │
+├─────────────────────────────────────────────┤
+│  ╔═══════════════════════════════════════╗  │
+│  ║ 🥇  أحمد عبدالمعطي         02:14    ║  │  ← ، gradient ذهبي، كاس، glow
+│  ║                         ║  │
+│  ╚═══════════════════════════════════════╝  │
+│  ┌─────────────────────────────────────┐    │
+│  │ 🥈  سارة محمد              02:48   │    │  ← 
+│  │                       │    │
+│  └─────────────────────────────────────┘    │
+│  ┌─────────────────────────────────────┐    │
+│  │ 🥉  محمد علي               03:05   │    │  ← 
+│  └─────────────────────────────────────┘    │
+│  ┌─────────────────────────────────────┐    │
+│  │ 4    خالد ...              03:22   │    │
+│  ...                                          │
+└─────────────────────────────────────────────┘
+```
+
+انا مش عايز البورد يكون فيها حاجات كتير هو الاسم فقط وانجاوات بقى وانميشن على حسب اللاعب وترتيبه    
+لكن مش عايز اي نصوص تانيه ولا كلمة تأطير قوي او متوسط ولا اي حاجه من ده ولا حتى ذهبي وفضي  وكده انا عايز النص فقط يكون اسم اللاعب واي حاجه تانيه هي ايموجيز وانميشن وعايز الوان واحساس لعب ممتع  مش عايز الداشوبرد تكون مليانة كلام وخلاص هي حاجه بس للمرح وتركيز يكون على الانميشن واحساس اللعب وكده وعايز ايموجيز او احساس انجاز لكل اللاعيبة حتى لو بدرجة اقل من اول3 مراكز بس على الاقل الباقي يكون ليهم بردو احساس ايموجي وانجاز مش يبقى الاسم بس   
+**عناصر التصميم**:
+
+- خلفية: gradient غامق متحرك (slate-900 → blue-950) + particles خفيفة.
+- الأول: كرت كبير، ذهبي gradient، أيقونة كأس Trophy متحركة (bouncing/glow)، شارة "البطل"، confetti إن جا جديد.
+- 2 و 3: ميداليات فضية/برونزية، أحجام أصغر.
+- 4+: كروت موحّدة بسيطة برقم.
+- كل كرت يدخل بـ slide-in من اليمين + scale + glow flash لما يكون جديد (highlight لمدة 3 ثواني).
+- شارة `● LIVE` نابضة (pulse) أحمر.
+- الوقت بفونت monospace كبير واضح.
+- Header يعرض اسم الجلسة + وقت البداية + عدد المؤهلين.
+- شريط جانبي/زرار صغير أعلى للأدمن:
+  - "جلسة جديدة" (يعمل end للـ active ويبدأ واحدة جديدة → القايمة تتفضى لحظيًا).  
+  وممكن ميكونش اسم الزر"جلسة جديدة"  ممكن يبقى ايموجي يعبر عن الريست او حتى كلمة REST
+  - "تصدير" CSV للنتايج الحالية.
+  - "خروج".
+
+**Fonts**: Cairo / Tajawal للعربي، JetBrains Mono للأرقام.
+
+**Responsiveness**: مصمّمة بريمري لشاشة كبيرة (1920×1080) مع تكبير الفونت، لكن تشتغل على لابتوب عادي.
+
+## 4. ملاحظات تقنية
+
+- اللاعبين الحاليين في الجدول هيبقوا بـ `qualified = NULL/false` و `duration_ms = NULL`، فمش هيظهروا في الداشبورد الجديدة (وده اللي عايزينه).
+- Realtime subscription لازم يتعمله cleanup عند unmount.
+- نضيف protection: لو في أكتر من 100 مؤهل، نعرض top 50 + scroll.
+- زر "تصدير CSV" مفيد بعد الإيفنت.
+
+## ملفات هتتعدل/تتعمل
+
+- **Migration SQL** (أعمدة جديدة + جدول `event_sessions` + RLS + realtime).
+- `src/contexts/PFGameContext.tsx` — تتبع `gameStartedAt`.
+- `src/components/game/screens/ResultScreen.tsx` — insert بالحقول الجديدة.
+- `src/pages/AdminBoard.tsx` — إعادة كتابة كاملة بالتصميم الـ gamified + realtime + session control.
+- (احتمال) `src/components/admin/SessionControl.tsx` — modal منفصل للإدارة.
+- `tailwind.config.ts` / `index.css` — animations جديدة (gold-glow, slide-in-highlight, pulse-live).
+
+---
+
+**سؤال واحد قبل التنفيذ**: تفضّل الوقت يبدأ يتحسب من **بداية الـ inquiry** (أول سؤال) أم من **company-briefing** (دخول اللعبة الفعلي)؟ أنا مرشّح **بداية الـ inquiry** عشان مايتأثرش بسرعة قراءة المقدمة — لكن قولي رأيك. (لو مش مهم، هختار inquiry start).

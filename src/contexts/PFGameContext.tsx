@@ -36,6 +36,8 @@ export interface PFGameState extends GameState {
   restartCount: number;
   /** Transient flag: navigate back to the start of the in-store flow */
   restartFromBeginning: boolean;
+  /** Timestamp (ms) when the player first entered the inquiry */
+  gameStartedAt: number | null;
 }
 
 interface ChoiceResult {
@@ -70,6 +72,7 @@ interface PFGameContextValue {
   submitFraming: () => CaseOutcome;
   // Lifecycle
   resetGame: () => void;
+  markGameStarted: () => void;
   // Helpers
   isInquiryComplete: () => boolean;
 }
@@ -84,6 +87,7 @@ const initialState: PFGameState = {
   collectedReports: [],
   restartCount: 0,
   restartFromBeginning: false,
+  gameStartedAt: null,
 };
 
 const PFGameContext = createContext<PFGameContextValue | null>(null);
@@ -222,6 +226,10 @@ export const PFGameProvider = ({ children }: { children: ReactNode }) => {
 
   const resetGame = useCallback(() => setState(initialState), []);
 
+  const markGameStarted = useCallback(() => {
+    setState((prev) => (prev.gameStartedAt ? prev : { ...prev, gameStartedAt: Date.now() }));
+  }, []);
+
   const isInquiryComplete = useCallback(() => state.isComplete, [state.isComplete]);
 
   const framingSections = useMemo<FramingSection[]>(
@@ -250,6 +258,7 @@ export const PFGameProvider = ({ children }: { children: ReactNode }) => {
         setFramingSelection,
         submitFraming,
         resetGame,
+        markGameStarted,
         isInquiryComplete,
       }}
     >
