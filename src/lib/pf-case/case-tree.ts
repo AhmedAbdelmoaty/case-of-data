@@ -1,3 +1,5 @@
+import { genderLine, v, type GenderText } from "@/lib/genderText";
+
 // ============================================================
 // Case Tree — Spine (S1..S5) + Topic Pools for wrong tracks (A/C/D)
 // ============================================================
@@ -20,8 +22,8 @@ export interface CaseNoteCandidate {
 }
 
 export interface CaseQuestionOption {
-  text: string;
-  hishamReply: string;
+  text: GenderText;
+  hishamReply: GenderText;
   evidenceId?: string;
   note?: CaseNoteCandidate;
 }
@@ -43,8 +45,8 @@ export interface SpineNode {
 /** A single inquiry topic inside a wrong track */
 export interface TrackTopic {
   id: string;
-  text: string;
-  hishamReply: string;
+  text: GenderText;
+  hishamReply: GenderText;
   evidenceId?: string;
   note?: CaseNoteCandidate;
 }
@@ -120,8 +122,15 @@ export const SPINE: Record<SpineNodeId, SpineNode> = {
     context: "عرفت إنه بيقارن بسنة وحدة. محتاج تشوف المقارنة دي على ورق.",
     correct: {
       text: "تمام. طب ممكن أشوف الأرقام دي على ورق؟ هل فيه تقرير بيأكد الكلام ده؟",
-      hishamReply:
-        "   أنا طلبت من المحاسبة تطبعلي التقرير لما بدأت أقلق. اتفضل، خد التقرير ده وبص بنفسك.",
+      hishamReply: genderLine([
+        "أنا طلبت من المحاسبة تطبعلي التقرير لما بدأت أقلق. ",
+        v("اتفضل", "اتفضلي"),
+        "، ",
+        v("خد", "خدي"),
+        " التقرير ده و",
+        v("بص", "بصي"),
+        " بنفسك.",
+      ]),
       evidenceId: "ev_year_vs_year",
       note: {
         id: "n_s3_chart1_confirmed",
@@ -151,8 +160,13 @@ export const SPINE: Record<SpineNodeId, SpineNode> = {
     context: "التقرير عرض سنة واحدة بس. السنة دي طبيعية ولا استثنائية؟",
     correct: {
       text: "حضرتك بتقارن بسنة واحدة بس. ممكن نشوف مبيعات فبراير لآخر 3 سنين؟ عشان نعرف هل سنة 2025 كانت طبيعية ولا لأ؟",
-      hishamReply:
-        "مفيش مشكلة. خليني أطلب التقرير من المحاسبة… اتفضل ده التقرير. شوف بنفسك.",
+      hishamReply: genderLine([
+        "مفيش مشكلة. خليني أطلب التقرير من المحاسبة… ",
+        v("اتفضل", "اتفضلي"),
+        " ده التقرير. ",
+        v("شوف", "شوفي"),
+        " بنفسك.",
+      ]),
       evidenceId: "ev_three_year",
       note: {
         id: "n_s4_chart2_anomaly",
@@ -161,8 +175,7 @@ export const SPINE: Record<SpineNodeId, SpineNode> = {
     },
     wrong: {
       text: "إيه طبيعة العروض اللي بيقدمها المنافسين دلوقتي؟",
-      hishamReply:
-        "اتفضل. ده تقرير فيه العروض والخصومات من المحلات اللي حوالينا.",
+      hishamReply: genderLine([v("اتفضل", "اتفضلي"), ". ده تقرير فيه العروض والخصومات من المحلات اللي حوالينا."]),
       evidenceId: "ev_competitor_offers",
       note: {
         id: "n_s4_jumped_external",
@@ -180,8 +193,7 @@ export const SPINE: Record<SpineNodeId, SpineNode> = {
     context: "التقرير وضّح إن سنة 2025 طالعة عن الباقي. ليه؟ محتاج تفكيك للرقم.",
     correct: {
       text: "حضرتك عندك تقرير بيوضح المبيعات دي ماشية إزاي؟ يعني نوعية البيع، تفاصيله، مش بس رقم إجمالي؟",
-      hishamReply:
-        "آه طبعًا، عندي تقرير بيقسّم المبيعات. اتفضل.",
+      hishamReply: genderLine(["آه طبعًا، عندي تقرير بيقسّم المبيعات. ", v("اتفضل", "اتفضلي"), "."]),
       evidenceId: "ev_breakdown",
       note: {
         id: "n_s5_truth",
@@ -190,8 +202,7 @@ export const SPINE: Record<SpineNodeId, SpineNode> = {
     },
     wrong: {
       text: "طب ممكن نبص على أداء الحملات الإعلانية الأخيرة؟",
-      hishamReply:
-        "اتفضل يا فندم، ده تقرير التسويق بتاع السنة دي والسنة اللي فاتت. هتلاقي فيه الميزانية والأرقام.",
+      hishamReply: genderLine([v("اتفضل", "اتفضلي"), " يا فندم، ده تقرير التسويق بتاع السنة دي والسنة اللي فاتت. هتلاقي فيه الميزانية والأرقام."]),
       evidenceId: "ev_marketing",
       note: {
         id: "n_s5_jumped_marketing",
@@ -226,8 +237,7 @@ export const TRACKS: Record<TrackId, TrackPool> = {
       {
         id: "a_team_performance",
         text: "ممكن أشوف تقرير بأداء كل واحد في فريق المبيعات؟",
-        hishamReply:
-          "أكيد يا فندم. اتفضل، ده التقرير. هتلاقي في فروق بين الأفراد.",
+        hishamReply: genderLine(["أكيد يا فندم. ", v("اتفضل", "اتفضلي"), "، ده التقرير. هتلاقي في فروق بين الأفراد."]),
         evidenceId: "ev_team_performance",
         note: {
           id: "n_a_perf",
@@ -275,8 +285,7 @@ export const TRACKS: Record<TrackId, TrackPool> = {
       {
         id: "c_competitor_offers",
         text: "إيه طبيعة العروض اللي بيقدمها المنافسين دلوقتي؟",
-        hishamReply:
-          "اتفضل يا فندم، ده اللي جمعته من حوالينا. أكتر حاجة شايفها خصومات وعروض 2+1 على بعض الموديلات.",
+        hishamReply: genderLine([v("اتفضل", "اتفضلي"), " يا فندم، ده اللي جمعته من حوالينا. أكتر حاجة شايفها خصومات وعروض 2+1 على بعض الموديلات."]),
         evidenceId: "ev_competitor_offers",
         note: { id: "n_c_offers", text: "المنافسين عاملين عروض مختلفة وخصومات كتير والمنافسة قوية." },
       },
@@ -341,8 +350,7 @@ export const TRACKS: Record<TrackId, TrackPool> = {
       {
         id: "d_marketing_report",
         text: "ممكن نبص على ملخص أداء التسويق السنة دي مقارنة بالسنة اللي فاتت؟",
-        hishamReply:
-          "اتفضل يا فندم. ده تقرير التسويق بميزانية وأرقام السنتين جنب بعض.",
+        hishamReply: genderLine([v("اتفضل", "اتفضلي"), " يا فندم. ده تقرير التسويق بميزانية وأرقام السنتين جنب بعض."]),
         evidenceId: "ev_marketing",
         note: {
           id: "n_d_marketing",

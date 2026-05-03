@@ -1,3 +1,6 @@
+import { renderMaleText, type GenderText } from "@/lib/genderText";
+import { getVoiceoverSrc } from "@/lib/voiceover/genderedDialogue";
+
 // ============================================================
 // Analyst (player) voice-over map
 // ------------------------------------------------------------
@@ -23,7 +26,7 @@ const RAW_MALE_MAP: Record<string, string> = {
   // ---------- Hisham greeting ----------
   "أهلاً بيك يا أستاذ هشام. أستاذ منصور قالي إن حضرتك عاوز تتكلم في موضوع شاغلك.":
     "/voiceover/analyst_male/analyst_arrival_hisham_01_greeting.wav",
-  "متشغلش بالك. خلينا نهدى ونفهم سوا. هسألك كام سؤال براحة، وانت قولي اللي عندك.":
+  "متشغلش بالك. خلينا نهدى ونفهم سوا. هسألك كام سؤال، وانت قولي اللي عندك.":
     "/voiceover/analyst_male/analyst_arrival_hisham_02_calm_start.wav",
 
   // ---------- Spine S1–S5 (correct) ----------
@@ -96,9 +99,7 @@ const NORMALIZED_MAP: Map<string, string> = new Map(
  *   /voiceover/analyst_male/foo.wav → /voiceover/analyst_female/foo_female.wav
  */
 export const toAnalystFemalePath = (maleSrc: string): string => {
-  return maleSrc
-    .replace("/voiceover/analyst_male/", "/voiceover/analyst_female/")
-    .replace(/\.wav$/, "_female.wav");
+  return getVoiceoverSrc(maleSrc, "female") ?? maleSrc;
 };
 
 /**
@@ -106,11 +107,11 @@ export const toAnalystFemalePath = (maleSrc: string): string => {
  * Returns undefined if the line text has no mapped voice.
  */
 export const getAnalystVoice = (
-  text: string | undefined,
+  text: GenderText | undefined,
   gender: Gender | null | undefined,
 ): string | undefined => {
   if (!text) return undefined;
-  const male = NORMALIZED_MAP.get(normalize(text));
+  const male = NORMALIZED_MAP.get(normalize(renderMaleText(text)));
   if (!male) return undefined;
   return gender === "female" ? toAnalystFemalePath(male) : male;
 };

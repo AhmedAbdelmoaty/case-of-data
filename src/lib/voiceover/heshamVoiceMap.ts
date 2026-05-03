@@ -1,3 +1,5 @@
+import { renderMaleText, type GenderText } from "@/lib/genderText";
+
 // ============================================================
 // Hisham (هشام) voice-over mapping
 // ------------------------------------------------------------
@@ -21,7 +23,7 @@ const normalize = (s: string): string => s.replace(/\s+/g, " ").trim();
 
 const RAW_MAP: Record<string, string> = {
   // ---------------- ARRIVAL ----------------
-  "أهلاً وسهلاً يا فندم، نوّرت. اتفضل اقعد، تشرب حاجة؟":
+  "أهلاً وسهلاً يا فندم، نوّرت. اتفضل اقعد، تحب تشرب حاجة؟":
     `${HESHAM_VOICE_BASE}/hisham_arrival_01_welcome.wav`,
   "والله يا فندم… الشهر اللي فات ده حاسس إن في حاجة في الشغل مش ماشية. الحركة موجودة، بس فيه حاجة ناقصة.":
     `${HESHAM_VOICE_BASE}/hisham_arrival_02_problem_feeling.wav`,
@@ -102,7 +104,7 @@ const NORMALIZED_MAP: Map<string, string> = new Map(
  * Look up Hisham's voice-over file for a given reply text.
  * Returns undefined if no audio is mapped (line will play silently — never substituted).
  */
-export const getHeshamVoice = (text: string | undefined): string | undefined => {
+export const getHeshamVoice = (text: GenderText | undefined): string | undefined => {
   if (!text) return undefined;
-  return NORMALIZED_MAP.get(normalize(text));
+  return NORMALIZED_MAP.get(normalize(renderMaleText(text)));
 };

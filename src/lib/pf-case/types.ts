@@ -1,3 +1,5 @@
+import type { GenderText } from "@/lib/genderText";
+
 export type GamePhase =
   | "briefing"
   | "travel"
@@ -32,7 +34,7 @@ export type OutcomeType = "strong" | "medium" | "weak";
 
 export interface DialogueLine {
   characterId: string;
-  text: string;
+  text: GenderText;
   mood?: "neutral" | "happy" | "serious" | "concerned" | "impressed" | "disappointed" | "confident" | "uncertain";
   audioSrc?: string;
 }

@@ -10,8 +10,9 @@ import { PFNotebook } from "../PFNotebook";
 import { TOTAL_QUESTION_BUDGET } from "@/lib/pf-case/case-tree";
 import type { EvidenceData } from "@/lib/pf-case/evidence-catalog";
 import { getHeshamVoice } from "@/lib/voiceover/heshamVoiceMap";
-import { getFemaleText, getVoiceoverSrc } from "@/lib/voiceover/genderedDialogue";
+import { getVoiceoverSrc } from "@/lib/voiceover/genderedDialogue";
 import { getAnalystVoice } from "@/lib/voiceover/analystVoiceMap";
+import { renderGenderText } from "@/lib/genderText";
 import velaroInteriorWideImg from "@/assets/scenes/velaro-interior-wide.webp";
 import velaroCheckoutBusyImg from "@/assets/scenes/velaro-checkout-busy.webp";
 import velaroWomensSectionImg from "@/assets/scenes/velaro-womens-section.webp";
@@ -138,7 +139,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
     (option: typeof choices[number]) => {
       if (selectedChoiceId) return;
       setSelectedChoiceId(option.id);
-      setSelectedChoiceText(option.text);
+      setSelectedChoiceText(renderGenderText(option.text, g));
       try { playSound("click"); } catch { /* noop */ }
       setTimeout(() => { try { playSound("whoosh"); } catch { /* noop */ } }, 120);
 
@@ -152,7 +153,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
 
         const baseMaleText = result.responseText;
         const baseMaleAudio = getHeshamVoice(baseMaleText);
-        const finalText = g === "female" ? (getFemaleText(baseMaleText) ?? baseMaleText) : baseMaleText;
+        const finalText = renderGenderText(baseMaleText, g);
         const finalAudio = getVoiceoverSrc(baseMaleAudio, g);
 
         const lines: DialogueLineUI[] = [
@@ -412,7 +413,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
 
                       <div className="relative z-10 flex min-h-[140px] items-center justify-center px-5 py-5 sm:px-6">
                         <p className="text-center text-[15px] font-bold leading-8 text-[#f7f0df] transition-colors group-hover:text-white sm:text-right md:text-base">
-                          {option.text}
+                          {renderGenderText(option.text, g)}
                         </p>
                       </div>
                     </motion.button>

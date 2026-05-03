@@ -14,6 +14,7 @@ import {
   type TrackTopic,
 } from "@/lib/pf-case/case-tree";
 import { countCorrectFraming, type FramingSelection } from "@/lib/pf-case/framing-board";
+import type { GenderText } from "@/lib/genderText";
 
 export interface GameState {
   /** Either a spine node id or "ON_TRACK" when inside a wrong track */
@@ -51,7 +52,7 @@ export function resetInquiryState(): GameState {
 
 export interface ChoicePresentation {
   id: string;
-  text: string;
+  text: GenderText;
   isCorrect: boolean;
   /** When on a track, this is the topic id the option corresponds to */
   topicId?: string;
@@ -150,10 +151,10 @@ export function getChoices(state: GameState, shuffleSalt: number = 0): ChoicePre
 
 export interface ApplyChoiceResult {
   nextState: GameState;
-  responseText: string;
+  responseText: GenderText;
   evidenceId?: string;
   note?: { id: string; text: string };
-  questionText: string;
+  questionText: GenderText;
   isCorrect: boolean;
 }
 
