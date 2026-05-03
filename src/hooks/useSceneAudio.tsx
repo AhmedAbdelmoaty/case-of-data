@@ -33,7 +33,7 @@ const SCENE_MAP: Record<SceneAudioKey, SceneSpec> = {
   door_knock:         { src: "/sounds/interaction_office_door_knock.mp3",     loop: false, volume: 0.95 },
   car_traffic:        { src: "/sounds/ambience_car_driving_traffic.mp3",      loop: true,  volume: 0.55 },
   storefront_street:  { src: "/sounds/ambience_storefront_street.mp3",        loop: true,  volume: 0.5 },
-  store_interior:     { src: "/sounds/ambience_store_interior_light.mp3",     loop: true,  volume: 0.35 },
+  store_interior:     { src: "/sounds/ambience_store_interior_light.mp3",     loop: true,  volume: 0.58 },
   report_writing:     { src: "/sounds/interaction_report_writing_paper.mp3",  loop: true,  volume: 0.55 },
   keyboard_typing:    { src: "/sounds/interaction_keyboard_typing.mp3",       loop: true,  volume: 0.55 },
   phone_ringtone:     { src: "/sounds/interaction_phone_ringtone.mp3",        loop: true,  volume: 0.7 },
