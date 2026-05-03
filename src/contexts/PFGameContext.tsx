@@ -86,6 +86,7 @@ const initialState: PFGameState = {
   collectedReports: [],
   restartCount: 0,
   restartFromBeginning: false,
+  gameStartedAt: null,
 };
 
 const PFGameContext = createContext<PFGameContextValue | null>(null);
