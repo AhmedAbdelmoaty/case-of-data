@@ -72,6 +72,7 @@ interface PFGameContextValue {
   submitFraming: () => CaseOutcome;
   // Lifecycle
   resetGame: () => void;
+  markGameStarted: () => void;
   // Helpers
   isInquiryComplete: () => boolean;
 }
