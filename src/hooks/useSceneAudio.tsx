@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 import { useSound } from "./useSoundEffects";
-import { getPreloadedAudio, preloadAudio, warmAudioUnlock } from "@/lib/assetPreloader";
 
 /**
  * File-based scene audio manager.
@@ -59,7 +58,7 @@ class AudioManager {
 
   private make(key: SceneAudioKey): HTMLAudioElement {
     const spec = SCENE_MAP[key];
-    const el = getPreloadedAudio(spec.src);
+    const el = new Audio(spec.src);
     el.loop = spec.loop;
     el.volume = spec.volume;
     el.preload = "auto";
@@ -73,9 +72,7 @@ class AudioManager {
     // Stop previous
     this.stopAmbience();
     const el = this.make(key);
-    preloadAudio(SCENE_MAP[key].src, 1800).catch(() => {});
     this.currentAmbience = { key, el };
-    try { el.currentTime = 0; } catch { /* noop */ }
     const p = el.play();
     if (p && typeof (p as Promise<void>).then === "function") {
       (p as Promise<void>).catch(() => { /* autoplay blocked — ignore */ });
@@ -105,7 +102,6 @@ class AudioManager {
     }
     const el = this.make(key);
     el.loop = false;
-    preloadAudio(SCENE_MAP[key].src, 1800).catch(() => {});
     this.oneShots.set(key, el);
     el.addEventListener("ended", () => {
       if (this.oneShots.get(key) === el) this.oneShots.delete(key);
@@ -126,10 +122,6 @@ class AudioManager {
 
 const audioManager = new AudioManager();
 
-Object.values(SCENE_MAP).forEach((spec) => {
-  preloadAudio(spec.src, 2200).catch(() => {});
-});
-
 // ============================================================
 // React hooks
 // ============================================================
@@ -140,16 +132,6 @@ Object.values(SCENE_MAP).forEach((spec) => {
  */
 export const useSceneAmbience = (key: SceneAudioKey | null) => {
   const { isSoundEnabled } = useSound();
-
-  useEffect(() => {
-    const unlock = () => warmAudioUnlock();
-    window.addEventListener("pointerdown", unlock, { once: true });
-    window.addEventListener("keydown", unlock, { once: true });
-    return () => {
-      window.removeEventListener("pointerdown", unlock);
-      window.removeEventListener("keydown", unlock);
-    };
-  }, []);
 
   // Keep the manager mute state in sync with the global toggle.
   useEffect(() => {

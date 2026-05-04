@@ -12,6 +12,8 @@ import { MansourReceivesEmailScreen } from "@/components/game/screens/MansourRec
 import { IncomingCallScreen } from "@/components/game/screens/IncomingCallScreen";
 import { PhoneCallDebriefScreen } from "@/components/game/screens/PhoneCallDebriefScreen";
 import { ResultScreen } from "@/components/game/screens/ResultScreen";
+import { SoundProvider } from "@/hooks/useSoundEffects";
+import { MusicProvider } from "@/hooks/useBackgroundMusic";
 import { PlayerSettingsPanel } from "@/components/game/PlayerSettingsPanel";
 import { PFGameProvider, usePFGame } from "@/contexts/PFGameContext";
 import { ScreenTransition } from "@/components/game/ScreenTransition";
@@ -78,6 +80,7 @@ const GameContent = () => {
         }
 
         setCurrentScreen(screen);
+
         setTimeout(() => {
           setTransitioning(false);
         }, 100);

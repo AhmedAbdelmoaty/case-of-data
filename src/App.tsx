@@ -11,7 +11,6 @@ import Setup from "./pages/Setup";
 import AdminLogin from "./pages/AdminLogin";
 import AdminBoard from "./pages/AdminBoard";
 import NotFound from "./pages/NotFound";
-import { GlobalAssetLoader } from "@/components/game/GlobalAssetLoader";
 
 const queryClient = new QueryClient();
 
@@ -37,7 +36,6 @@ const App = () => (
         <AuthProvider>
           <MusicProvider>
             <SoundProvider>
-              <GlobalAssetLoader>
               <Routes>
                 {/* Player routes — no login required */}
                 <Route path="/setup" element={<Setup />} />
@@ -53,7 +51,6 @@ const App = () => (
 
                 <Route path="*" element={<NotFound />} />
               </Routes>
-              </GlobalAssetLoader>
             </SoundProvider>
           </MusicProvider>
         </AuthProvider>

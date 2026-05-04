@@ -102,11 +102,6 @@ export const toAnalystFemalePath = (maleSrc: string): string => {
   return getVoiceoverSrc(maleSrc, "female") ?? maleSrc;
 };
 
-export const ALL_ANALYST_VOICEOVER = Object.values(RAW_MALE_MAP).flatMap((src) => {
-  const female = toAnalystFemalePath(src);
-  return female === src ? [src] : [src, female];
-});
-
 /**
  * Resolve the correct analyst voice file for a line, by gender.
  * Returns undefined if the line text has no mapped voice.

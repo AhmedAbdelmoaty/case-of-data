@@ -29,8 +29,6 @@ const FEMALE_AUDIO_AVAILABLE: ReadonlySet<string> = new Set<string>([
   "/voiceover/hesham/hisham_track_d_03_marketing_report_female.wav",
 ]);
 
-export const KNOWN_FEMALE_VOICEOVER = [...FEMALE_AUDIO_AVAILABLE];
-
 const ANALYST_FEMALE_AUDIO_OVERRIDES: Readonly<Record<string, string>> = {
   "/voiceover/analyst_male/analyst_a_team_performance.wav":
     "/voiceover/analyst_female/analyst_a_team_performance.wav",
