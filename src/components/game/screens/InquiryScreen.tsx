@@ -27,6 +27,8 @@ import hishamGreetingMaleImg from "@/assets/scenes/hisham-greeting-male.webp";
 import hishamGreetingFemaleImg from "@/assets/scenes/hisham-greeting-female.webp";
 import hishamHandingReportMaleImg from "@/assets/scenes/hisham-handing-report-male.webp";
 import hishamHandingReportFemaleImg from "@/assets/scenes/hisham-handing-report-female.webp";
+import { getPreloadedAudio, preloadAudio } from "@/lib/assetPreloader";
+import { ReadyImage } from "@/components/game/ReadyImage";
 
 interface InquiryScreenProps {
   onComplete: () => void;
@@ -207,6 +209,8 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
         text: renderGenderText(option.text, g),
         audioSrc: getAnalystVoice(option.text, g),
       });
+      const voice = getAnalystVoice(option.text, g);
+      if (voice) preloadAudio(voice, 2400).catch(() => {});
       setQuestionProgress(0);
       questionCommittedRef.current = false;
       try { playSound("click"); } catch { /* noop */ }
@@ -258,11 +262,12 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
     }
 
     try {
-      const audio = new Audio(activeQuestion.audioSrc);
-      audio.preload = "auto";
+      const audio = getPreloadedAudio(activeQuestion.audioSrc);
       questionAudioRef.current = audio;
       audio.onended = finish;
       audio.onerror = finish;
+      preloadAudio(activeQuestion.audioSrc, 2400).catch(() => {});
+      try { audio.currentTime = 0; } catch { /* noop */ }
       const p = audio.play();
       if (p && typeof p.catch === "function") {
         p.catch(startFallback);
@@ -316,7 +321,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
     <div className="min-h-screen bg-background relative">
       <AnimatePresence mode="wait">
         <motion.div key={dialogueScene} className="absolute inset-0 overflow-hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.8 }}>
-          <img src={dialogueScene} alt="VELARO conversation scene" className="w-full h-full object-cover animate-ken-burns" />
+          <ReadyImage src={dialogueScene} alt="VELARO conversation scene" className="w-full h-full object-cover animate-ken-burns" />
           <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/25 to-transparent" />
         </motion.div>
       </AnimatePresence>

@@ -7,6 +7,7 @@ import { ReportDocument } from "./ReportDocument";
 import type { EvidenceData } from "@/lib/pf-case/evidence-catalog";
 import analystImg from "@/assets/characters/analyst.png";
 import saraImg from "@/assets/characters/sara.png";
+import { getPreloadedAudio, preloadAudio } from "@/lib/assetPreloader";
 
 interface DialogueLine {
   characterId: string;
@@ -88,7 +89,6 @@ export const EnhancedDialogue = ({
   const [collectibles, setCollectibles] = useState<FlyingCollectible[]>([]);
   const [isCollecting, setIsCollecting] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const audioCacheRef = useRef<Map<string, HTMLAudioElement>>(new Map());
   const collectibleIdRef = useRef(0);
   const collectionStartedRef = useRef(false);
   const collectionTimersRef = useRef<number[]>([]);
@@ -106,15 +106,7 @@ export const EnhancedDialogue = ({
   };
 
   const getCachedAudio = (src: string): HTMLAudioElement => {
-    let a = audioCacheRef.current.get(src);
-    if (!a) {
-      a = new Audio();
-      a.preload = "auto";
-      a.src = src;
-      try { a.load(); } catch {/* noop */}
-      audioCacheRef.current.set(src, a);
-    }
-    return a;
+    return getPreloadedAudio(src);
   };
 
   const currentIndex = externalIndex ?? internalIndex;
@@ -222,7 +214,7 @@ export const EnhancedDialogue = ({
   useEffect(() => {
     if (!isActive) return;
     dialogues.forEach((d) => {
-      if (d.audioSrc) getCachedAudio(d.audioSrc);
+      if (d.audioSrc) preloadAudio(d.audioSrc, 2600).catch(() => {});
     });
   }, [dialogues, isActive]);
 
@@ -230,10 +222,6 @@ export const EnhancedDialogue = ({
   useEffect(() => {
     return () => {
       stopAudio();
-      // Also pause every cached audio just in case
-      audioCacheRef.current.forEach((a) => {
-        try { a.pause(); a.currentTime = 0; } catch { /* noop */ }
-      });
     };
   }, []);
 
@@ -253,37 +241,47 @@ export const EnhancedDialogue = ({
     setIsCollecting(false);
 
     // Play voice over if available — use cached/preloaded audio for instant start
-    if (currentDialogue.audioSrc) {
-      try {
-        const audio = getCachedAudio(currentDialogue.audioSrc);
-        try { audio.currentTime = 0; } catch {/* noop */}
-        audioRef.current = audio;
-        const p = audio.play();
-        if (p && typeof p.catch === "function") p.catch(() => {/* silent */});
-      } catch {/* silent fallback */}
-    }
+    let cancelled = false;
+    let typingInterval: number | null = null;
 
-    // Preload next dialogue's audio so it's ready instantly
-    const next = dialogues[currentIndex + 1];
-    if (next?.audioSrc) {
-      getCachedAudio(next.audioSrc);
-    }
+    const startTyping = () => {
+      let charIndex = 0;
+      const text = currentDialogue.text;
+      typingInterval = window.setInterval(() => {
+        if (charIndex < text.length) {
+          setDisplayedText(text.slice(0, charIndex + 1));
+          charIndex++;
+        } else {
+          if (typingInterval) window.clearInterval(typingInterval);
+          finishTyping();
+        }
+      }, 30);
+    };
 
-    let charIndex = 0;
-    const text = currentDialogue.text;
+    const beginLine = async () => {
+      const next = dialogues[currentIndex + 1];
+      if (next?.audioSrc) preloadAudio(next.audioSrc, 2400).catch(() => {});
 
-    const typingInterval = setInterval(() => {
-      if (charIndex < text.length) {
-        setDisplayedText(text.slice(0, charIndex + 1));
-        charIndex++;
-      } else {
-        clearInterval(typingInterval);
-        finishTyping();
+      if (currentDialogue.audioSrc) {
+        await preloadAudio(currentDialogue.audioSrc, 2400);
+        if (cancelled) return;
+        try {
+          const audio = getCachedAudio(currentDialogue.audioSrc);
+          try { audio.currentTime = 0; } catch {/* noop */}
+          audioRef.current = audio;
+          const p = audio.play();
+          if (p && typeof p.catch === "function") p.catch(() => {/* silent */});
+        } catch {/* silent fallback */}
       }
-    }, 30);
+
+      if (!cancelled) startTyping();
+    };
+
+    beginLine();
 
     return () => {
-      clearInterval(typingInterval);
+      cancelled = true;
+      if (typingInterval) window.clearInterval(typingInterval);
       clearCollectionTimers();
     };
   }, [clearCollectionTimers, currentIndex, isActive, currentDialogue, finishTyping]);

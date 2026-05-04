@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { preloadImage } from "@/lib/assetPreloader";
 
 // Import character images
 import analystImg from "@/assets/characters/analyst.png";
@@ -90,6 +91,10 @@ export const AnimatedCharacter = ({
   const displayImage = imageOverride || character.image;
   const displayName = nameOverride || character.name;
 
+  useEffect(() => {
+    preloadImage(displayImage, 3000).catch(() => {});
+  }, [displayImage]);
+
   return (
     <motion.div
       className={`flex flex-col items-center ${onClick ? "cursor-pointer" : ""} ${className}`}
@@ -112,6 +117,8 @@ export const AnimatedCharacter = ({
         <motion.img
           src={displayImage}
           alt={character.nameEn}
+          loading="eager"
+          decoding="async"
           className={`${sizeClass.image} object-cover rounded-full ${!isSpeaking ? "animate-idle-breath" : ""}`}
           animate={isSpeaking ? { scale: [1, 1.025, 1], transition: { duration: 0.28, repeat: Infinity } } : {}}
         />

@@ -1,4 +1,5 @@
 import { renderMaleText, type GenderText } from "@/lib/genderText";
+import { KNOWN_FEMALE_VOICEOVER } from "@/lib/voiceover/genderedDialogue";
 
 // ============================================================
 // Hisham (هشام) voice-over mapping
@@ -99,6 +100,11 @@ const RAW_MAP: Record<string, string> = {
 const NORMALIZED_MAP: Map<string, string> = new Map(
   Object.entries(RAW_MAP).map(([k, v]) => [normalize(k), v])
 );
+
+export const ALL_HESHAM_VOICEOVER = [
+  ...Object.values(RAW_MAP),
+  ...KNOWN_FEMALE_VOICEOVER.filter((src) => src.includes("/voiceover/hesham/")),
+];
 
 /**
  * Look up Hisham's voice-over file for a given reply text.
