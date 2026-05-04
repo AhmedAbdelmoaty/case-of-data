@@ -1,18 +1,22 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles } from "lucide-react";
+import { SkipForward, Sparkles } from "lucide-react";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSound } from "@/hooks/useSoundEffects";
 import { useSceneAmbience } from "@/hooks/useSceneAudio";
 import { EnhancedDialogue } from "../EnhancedDialogue";
+import { AnimatedCharacter } from "../AnimatedCharacter";
 import { PFNotebook } from "../PFNotebook";
 import { TOTAL_QUESTION_BUDGET } from "@/lib/pf-case/case-tree";
+import type { ChoicePresentation } from "@/lib/pf-case-engine/gameStateMachine";
 import type { EvidenceData } from "@/lib/pf-case/evidence-catalog";
 import { getHeshamVoice } from "@/lib/voiceover/heshamVoiceMap";
 import { getVoiceoverSrc } from "@/lib/voiceover/genderedDialogue";
 import { getAnalystVoice } from "@/lib/voiceover/analystVoiceMap";
 import { renderGenderText } from "@/lib/genderText";
+import analystImg from "@/assets/characters/analyst.png";
+import saraImg from "@/assets/characters/sara.png";
 import velaroInteriorWideImg from "@/assets/scenes/velaro-interior-wide.webp";
 import velaroCheckoutBusyImg from "@/assets/scenes/velaro-checkout-busy.webp";
 import velaroWomensSectionImg from "@/assets/scenes/velaro-womens-section.webp";
@@ -39,6 +43,17 @@ interface DialogueLineUI {
   audioSrc?: string;
 }
 
+type InquiryPhase = "preQuestions" | "choosing" | "askingQuestion" | "dialogue";
+
+interface ActiveQuestion {
+  option: ChoicePresentation;
+  text: string;
+  audioSrc?: string;
+}
+
+const QUESTION_TO_DIALOGUE_DELAY_MS = 520;
+const QUESTION_FALLBACK_MS = 1200;
+
 export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
   const { state, getChoices, pickChoice, collectInquiryFindings, restartInquiry, canRestart, markGameStarted } = usePFGame();
 
@@ -47,16 +62,18 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
   const { playSound } = useSound();
   useSceneAmbience("store_interior");
 
-  const [phase, setPhase] = useState<"preQuestions" | "choosing" | "questionVoice" | "dialogue">("preQuestions");
+  const [phase, setPhase] = useState<InquiryPhase>("preQuestions");
   const [currentLines, setCurrentLines] = useState<DialogueLineUI[]>([]);
   const [dialogueIndex, setDialogueIndex] = useState(0);
   const [dialogueKey, setDialogueKey] = useState(0);
   const [showRestartConfirm, setShowRestartConfirm] = useState(false);
   const [selectedChoiceId, setSelectedChoiceId] = useState<string | null>(null);
-  const [selectedChoiceText, setSelectedChoiceText] = useState<string>("");
+  const [activeQuestion, setActiveQuestion] = useState<ActiveQuestion | null>(null);
+  const [questionProgress, setQuestionProgress] = useState(0);
   const selectionTimerRef = useRef<number | null>(null);
   const questionAudioRef = useRef<HTMLAudioElement | null>(null);
-  const pendingLinesRef = useRef<DialogueLineUI[] | null>(null);
+  const questionCommittedRef = useRef(false);
+  const questionFallbackTimerRef = useRef<number | null>(null);
 
   const playerName = profile?.display_name || "محلل";
   const g = (profile?.gender || "male") as "male" | "female";
@@ -78,11 +95,15 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
     setPhase("preQuestions");
     setCurrentLines([]);
     setDialogueIndex(0);
+    setSelectedChoiceId(null);
+    setActiveQuestion(null);
+    setQuestionProgress(0);
   };
 
   useEffect(() => {
     return () => {
       if (selectionTimerRef.current) window.clearTimeout(selectionTimerRef.current);
+      if (questionFallbackTimerRef.current) window.clearTimeout(questionFallbackTimerRef.current);
     };
   }, []);
 
@@ -122,88 +143,154 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
     }
   }, []);
 
-  const enterDialoguePhase = useCallback(() => {
-    stopQuestionAudio();
-    const lines = pendingLinesRef.current;
-    if (!lines) return;
-    pendingLinesRef.current = null;
-    setCurrentLines(lines);
-    setDialogueIndex(0);
-    setDialogueKey((k) => k + 1);
-    setSelectedChoiceId(null);
-    setSelectedChoiceText("");
-    setPhase("dialogue");
-  }, [stopQuestionAudio]);
+  const clearQuestionFallbackTimer = useCallback(() => {
+    if (!questionFallbackTimerRef.current) return;
+    window.clearTimeout(questionFallbackTimerRef.current);
+    questionFallbackTimerRef.current = null;
+  }, []);
+
+  const commitQuestionToDialogue = useCallback(
+    (optionOverride?: ChoicePresentation) => {
+      if (questionCommittedRef.current) return;
+
+      const option = optionOverride ?? activeQuestion?.option;
+      if (!option) return;
+
+      questionCommittedRef.current = true;
+      clearQuestionFallbackTimer();
+      stopQuestionAudio();
+      setQuestionProgress(1);
+
+      const result = pickChoice(option);
+      if (!result) {
+        setSelectedChoiceId(null);
+        setActiveQuestion(null);
+        setQuestionProgress(0);
+        setPhase("choosing");
+        return;
+      }
+
+      const baseMaleText = result.responseText;
+      const baseMaleAudio = getHeshamVoice(baseMaleText);
+      const finalText = renderGenderText(baseMaleText, g);
+      const finalAudio = getVoiceoverSrc(baseMaleAudio, g);
+
+      const lines: DialogueLineUI[] = [
+        {
+          characterId: "hisham",
+          text: finalText,
+          mood: option.isCorrect ? "happy" : "neutral",
+          isSaveable: !!result.noteId,
+          saveId: result.noteId,
+          saveText: result.noteText,
+          inlineEvidence: result.evidence,
+          audioSrc: finalAudio,
+        },
+      ];
+
+      setCurrentLines(lines);
+      setDialogueIndex(0);
+      setDialogueKey((k) => k + 1);
+      setSelectedChoiceId(null);
+      setActiveQuestion(null);
+      setPhase("dialogue");
+    },
+    [activeQuestion, clearQuestionFallbackTimer, g, pickChoice, stopQuestionAudio]
+  );
 
   const handlePick = useCallback(
     (option: typeof choices[number]) => {
-      if (selectedChoiceId) return;
+      if (selectedChoiceId || phase !== "choosing") return;
       setSelectedChoiceId(option.id);
-      setSelectedChoiceText(renderGenderText(option.text, g));
+      setActiveQuestion({
+        option,
+        text: renderGenderText(option.text, g),
+        audioSrc: getAnalystVoice(option.text, g),
+      });
+      setQuestionProgress(0);
+      questionCommittedRef.current = false;
       try { playSound("click"); } catch { /* noop */ }
       setTimeout(() => { try { playSound("whoosh"); } catch { /* noop */ } }, 120);
 
       selectionTimerRef.current = window.setTimeout(() => {
-        const result = pickChoice(option);
-        if (!result) {
-          setSelectedChoiceId(null);
-          setSelectedChoiceText("");
-          return;
-        }
-
-        const baseMaleText = result.responseText;
-        const baseMaleAudio = getHeshamVoice(baseMaleText);
-        const finalText = renderGenderText(baseMaleText, g);
-        const finalAudio = getVoiceoverSrc(baseMaleAudio, g);
-
-        const lines: DialogueLineUI[] = [
-          {
-            characterId: "hisham",
-            text: finalText,
-            mood: option.isCorrect ? "happy" : "neutral",
-            isSaveable: !!result.noteId,
-            saveId: result.noteId,
-            saveText: result.noteText,
-            inlineEvidence: result.evidence,
-            audioSrc: finalAudio,
-          },
-        ];
-        pendingLinesRef.current = lines;
-
-        // Try to play the analyst question voice first
-        const questionVoice = getAnalystVoice(option.text, g);
-        if (questionVoice) {
-          stopQuestionAudio();
-          try {
-            const audio = new Audio(questionVoice);
-            audio.preload = "auto";
-            questionAudioRef.current = audio;
-            audio.onended = () => {
-              if (questionAudioRef.current === audio) enterDialoguePhase();
-            };
-            audio.onerror = () => {
-              if (questionAudioRef.current === audio) enterDialoguePhase();
-            };
-            setPhase("questionVoice");
-            const p = audio.play();
-            if (p && typeof p.catch === "function") {
-              p.catch(() => enterDialoguePhase());
-            }
-          } catch {
-            enterDialoguePhase();
-          }
-        } else {
-          enterDialoguePhase();
-        }
-      }, 680);
+        selectionTimerRef.current = null;
+        setPhase("askingQuestion");
+      }, QUESTION_TO_DIALOGUE_DELAY_MS);
     },
-    [pickChoice, playSound, selectedChoiceId, g, stopQuestionAudio, enterDialoguePhase]
+    [phase, playSound, selectedChoiceId, g]
   );
+
+  useEffect(() => {
+    if (phase !== "askingQuestion" || !activeQuestion) return;
+
+    let cancelled = false;
+    let progressTimer: number | null = null;
+
+    clearQuestionFallbackTimer();
+    stopQuestionAudio();
+    setQuestionProgress(0.04);
+
+    const finish = () => {
+      if (!cancelled) commitQuestionToDialogue(activeQuestion.option);
+    };
+
+    const startFallback = () => {
+      clearQuestionFallbackTimer();
+      questionFallbackTimerRef.current = window.setTimeout(finish, QUESTION_FALLBACK_MS);
+    };
+
+    progressTimer = window.setInterval(() => {
+      const audio = questionAudioRef.current;
+      if (audio && Number.isFinite(audio.duration) && audio.duration > 0) {
+        setQuestionProgress(Math.min(audio.currentTime / audio.duration, 0.96));
+        return;
+      }
+      setQuestionProgress((prev) => Math.min(prev + 0.035, 0.88));
+    }, 120);
+
+    if (!activeQuestion.audioSrc) {
+      startFallback();
+      return () => {
+        cancelled = true;
+        if (progressTimer) window.clearInterval(progressTimer);
+        clearQuestionFallbackTimer();
+      };
+    }
+
+    try {
+      const audio = new Audio(activeQuestion.audioSrc);
+      audio.preload = "auto";
+      questionAudioRef.current = audio;
+      audio.onended = finish;
+      audio.onerror = finish;
+      const p = audio.play();
+      if (p && typeof p.catch === "function") {
+        p.catch(startFallback);
+      }
+    } catch {
+      startFallback();
+    }
+
+    return () => {
+      cancelled = true;
+      if (progressTimer) window.clearInterval(progressTimer);
+      clearQuestionFallbackTimer();
+    };
+  }, [
+    activeQuestion,
+    clearQuestionFallbackTimer,
+    commitQuestionToDialogue,
+    phase,
+    stopQuestionAudio,
+  ]);
 
   // Stop question audio if component unmounts or phase changes away
   useEffect(() => {
-    return () => stopQuestionAudio();
-  }, [stopQuestionAudio]);
+    return () => {
+      stopQuestionAudio();
+      clearQuestionFallbackTimer();
+    };
+  }, [clearQuestionFallbackTimer, stopQuestionAudio]);
 
 
   const handleDialogueComplete = useCallback(() => {
@@ -211,6 +298,9 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
       onComplete();
       return;
     }
+    setSelectedChoiceId(null);
+    setActiveQuestion(null);
+    setQuestionProgress(0);
     setPhase("choosing");
   }, [state.isComplete, onComplete]);
 
@@ -355,9 +445,16 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
       </AnimatePresence>
       <AnimatePresence>
         {phase === "choosing" && choices.length > 0 && !state.isComplete && (
-          <motion.div key={`choices-${state.currentNodeId}-${state.questionsUsed}`} className="fixed inset-0 z-40 flex items-end justify-center px-3 pb-5" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <div className="w-full max-w-2xl">
-              <div className="grid gap-3 sm:grid-cols-2">
+          <motion.div
+            key={`choices-${state.currentNodeId}-${state.questionsUsed}`}
+            className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-3 pb-4 pt-24 sm:pb-6"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 16 }}
+            transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <div className="pointer-events-auto w-full max-w-3xl">
+              <div className="grid gap-2.5 sm:grid-cols-2">
                 {choices.map((option, i) => {
                   const isSelected = selectedChoiceId === option.id;
                   const isDeferred = !!selectedChoiceId && selectedChoiceId !== option.id;
@@ -365,54 +462,47 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
                   return (
                     <motion.button
                       key={option.id}
+                      layoutId={`question-choice-${option.id}`}
                       onClick={() => handlePick(option)}
                       disabled={!!selectedChoiceId}
-                      className="group relative min-h-[142px] overflow-hidden rounded-[18px] border border-[#d8bd77]/35 bg-[#141210]/88 p-[1px] text-right shadow-[0_22px_60px_rgba(0,0,0,0.42)] backdrop-blur-md transition-colors hover:border-[#f2d992]/75 disabled:cursor-default"
+                      className="group relative min-h-[116px] overflow-hidden rounded-lg border border-white/15 bg-background/72 p-4 text-right shadow-[0_18px_44px_rgba(0,0,0,0.42)] backdrop-blur-md transition-colors hover:border-primary/55 hover:bg-background/82 disabled:cursor-default"
                       dir="rtl"
-                      initial={{ opacity: 0, y: 30, rotate: i === 0 ? 0.8 : -0.8, scale: 0.96 }}
+                      initial={{ opacity: 0, y: 28, scale: 0.97 }}
                       animate={
                         isSelected
                           ? {
-                              opacity: [1, 1, 0],
-                              y: [0, -30, -220],
-                              scale: [1, 1.04, 0.72],
-                              borderRadius: ["18px", "22px", "999px"],
-                              rotate: i === 0 ? [-0.3, 0.8, -5] : [0.3, -0.8, 5],
-                              filter: ["brightness(1)", "brightness(1.18)", "brightness(1.25)"],
+                              opacity: [1, 1, 0.96],
+                              y: [0, -18, -74],
+                              scale: [1, 1.025, 0.96],
+                              x: i === 0 ? [0, 16, 28] : [0, -16, -28],
+                              filter: ["brightness(1)", "brightness(1.12)", "brightness(1.08)"],
                             }
                           : isDeferred
                             ? {
                                 opacity: 0,
-                                x: i === 0 ? -150 : 150,
-                                y: 32,
-                                scale: 0.86,
-                                rotate: i === 0 ? -7 : 7,
-                                filter: "grayscale(0.8) blur(2px)",
+                                x: i === 0 ? -96 : 96,
+                                y: 22,
+                                scale: 0.92,
+                                filter: "grayscale(0.75) blur(2px)",
                               }
-                            : { opacity: 1, y: 0, x: 0, scale: 1, rotate: i === 0 ? -0.25 : 0.25, filter: "brightness(1)" }
+                            : { opacity: 1, y: 0, x: 0, scale: 1, filter: "brightness(1)" }
                       }
-                      transition={{ delay: selectedChoiceId ? 0 : i * 0.08, duration: selectedChoiceId ? 0.62 : 0.48, ease: [0.16, 1, 0.3, 1] }}
-                      whileHover={!selectedChoiceId ? { scale: 1.018, y: -4, rotate: 0 } : undefined}
+                      transition={{ delay: selectedChoiceId ? 0 : i * 0.07, duration: selectedChoiceId ? 0.52 : 0.42, ease: [0.16, 1, 0.3, 1] }}
+                      whileHover={!selectedChoiceId ? { scale: 1.012, y: -3 } : undefined}
                       whileTap={!selectedChoiceId ? { scale: 0.98 } : undefined}
                       exit={{ opacity: 0, y: -24, transition: { duration: 0.2 } }}
                     >
-                      <div className="absolute inset-0 rounded-[18px] bg-gradient-to-br from-[#f4deb0]/45 via-[#b69452]/16 to-transparent opacity-80" />
-                      <div className="absolute inset-[1px] rounded-[17px] bg-[linear-gradient(145deg,rgba(39,34,29,0.96),rgba(16,14,13,0.94)_58%,rgba(52,42,26,0.88))]" />
-                      <div className="absolute inset-[1px] rounded-[17px] bg-[radial-gradient(circle_at_15%_10%,rgba(244,222,176,0.13),transparent_34%),linear-gradient(90deg,rgba(214,183,106,0.16)_0,transparent_2px,transparent_calc(100%-2px),rgba(214,183,106,0.12)_100%)]" />
-                      <div className="absolute inset-x-5 top-0 h-px bg-gradient-to-l from-transparent via-[#f4deb0]/65 to-transparent" />
-                      <div className="absolute inset-x-8 bottom-0 h-px bg-gradient-to-l from-transparent via-[#8f723d]/45 to-transparent" />
-                      <div className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                        <div className="absolute -right-14 -top-24 h-48 w-48 rounded-full bg-[#f4deb0]/12 blur-3xl" />
-                        <div className="absolute -bottom-16 left-8 h-40 w-40 rounded-full bg-[#d6b76a]/12 blur-3xl" />
-                        <motion.div
-                          className="absolute inset-y-0 -left-1/3 w-1/3 rotate-12 bg-gradient-to-r from-transparent via-[#f7e4b5]/22 to-transparent"
-                          animate={{ x: ["0%", "380%"] }}
-                          transition={{ duration: 2.4, repeat: Infinity, repeatDelay: 1.5, ease: "easeInOut" }}
-                        />
-                      </div>
+                      <span className="absolute inset-y-3 right-0 w-1 rounded-l-full bg-primary/65 shadow-[0_0_16px_hsl(var(--primary)/0.45)]" />
+                      <span className="absolute inset-x-4 top-0 h-px bg-gradient-to-l from-transparent via-primary/55 to-transparent" />
+                      <span className="absolute bottom-0 left-0 h-px w-2/3 bg-gradient-to-r from-accent/60 to-transparent" />
+                      <motion.span
+                        className="absolute inset-y-0 -left-1/3 w-1/3 rotate-12 bg-gradient-to-r from-transparent via-white/12 to-transparent opacity-0 group-hover:opacity-100"
+                        animate={{ x: ["0%", "380%"] }}
+                        transition={{ duration: 2.2, repeat: Infinity, repeatDelay: 1.8, ease: "easeInOut" }}
+                      />
 
-                      <div className="relative z-10 flex min-h-[140px] items-center justify-center px-5 py-5 sm:px-6">
-                        <p className="text-center text-[15px] font-bold leading-8 text-[#f7f0df] transition-colors group-hover:text-white sm:text-right md:text-base">
+                      <div className="relative z-10 flex min-h-[84px] items-center justify-center px-2 py-2 sm:px-3">
+                        <p className="break-words text-center text-[14px] font-bold leading-7 text-foreground transition-colors group-hover:text-white sm:text-right sm:text-[15px] md:text-base">
                           {renderGenderText(option.text, g)}
                         </p>
                       </div>
@@ -425,48 +515,76 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
         )}
       </AnimatePresence>
 
-      {/* Question voice phase — analyst is "speaking" the chosen question */}
+      {/* Asking phase - the selected question becomes an in-scene player line. */}
       <AnimatePresence>
-        {phase === "questionVoice" && selectedChoiceText && (
+        {phase === "askingQuestion" && activeQuestion && (
           <motion.div
-            key="question-voice"
-            className="fixed inset-0 z-[60] flex items-center justify-center bg-background/70 backdrop-blur-sm px-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={enterDialoguePhase}
+            key="asking-question"
+            className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] flex justify-center px-3 pb-4 pt-28 sm:pb-6"
+            initial={{ opacity: 0, y: 22 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 18 }}
+            transition={{ duration: 0.36, ease: [0.16, 1, 0.3, 1] }}
           >
             <motion.div
-              className="relative max-w-xl w-full rounded-3xl border-2 border-[#f2d992]/70 bg-gradient-to-br from-[#27221d]/95 to-[#100e0d]/95 p-8 shadow-[0_0_60px_rgba(244,222,176,0.25)]"
+              className="pointer-events-auto w-full max-w-3xl"
               dir="rtl"
-              initial={{ scale: 0.9, y: 20 }}
+              initial={{ scale: 0.97 }}
               animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ type: "spring", damping: 18 }}
-              onClick={(e) => e.stopPropagation()}
+              exit={{ scale: 0.98, opacity: 0 }}
+              transition={{ type: "spring", damping: 20, stiffness: 220 }}
             >
-              {/* Animated voice waves */}
-              <div className="flex items-center justify-center gap-1.5 mb-5">
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <motion.span
-                    key={i}
-                    className="w-1.5 rounded-full bg-[#f4deb0]"
-                    animate={{ height: ["8px", "22px", "8px"] }}
-                    transition={{ duration: 0.9, repeat: Infinity, delay: i * 0.12, ease: "easeInOut" }}
+              <div className="flex items-end gap-3 sm:gap-4">
+                <motion.div
+                  className="relative shrink-0"
+                  initial={{ opacity: 0, scale: 0.84, y: 18 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: 12 }}
+                  transition={{ type: "spring", damping: 16 }}
+                >
+                  <AnimatedCharacter
+                    characterId="detective"
+                    size="md"
+                    isActive
+                    isSpeaking
+                    mood="neutral"
+                    showName={false}
+                    entrance="zoom"
+                    imageOverride={g === "female" ? saraImg : analystImg}
                   />
-                ))}
+                </motion.div>
+
+                <motion.div
+                  layoutId={`question-choice-${activeQuestion.option.id}`}
+                  className="relative flex-1 overflow-hidden rounded-lg border border-amber-300/35 bg-background/82 p-4 pl-12 shadow-[0_20px_52px_rgba(0,0,0,0.48)] backdrop-blur-md sm:p-5 sm:pl-14"
+                >
+                  <span className="absolute -right-2 bottom-7 hidden h-4 w-4 rotate-45 border-b border-r border-amber-300/35 bg-background/82 sm:block" />
+                  <span className="absolute inset-x-4 top-0 h-px bg-gradient-to-l from-transparent via-amber-200/70 to-transparent" />
+
+                  <p className="max-h-[34vh] overflow-y-auto break-words pr-1 text-right text-[15px] font-bold leading-8 text-foreground sm:text-base">
+                    {activeQuestion.text}
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={() => commitQuestionToDialogue()}
+                    className="absolute left-3 top-3 flex h-8 w-8 items-center justify-center rounded-lg border border-white/15 bg-white/10 text-amber-100 transition-colors hover:bg-white/15 hover:text-white"
+                    aria-label="تخطي"
+                    title="تخطي"
+                  >
+                    <SkipForward className="h-4 w-4 rotate-180" />
+                  </button>
+
+                  <div className="absolute inset-x-0 bottom-0 h-1 bg-white/10">
+                    <motion.div
+                      className="absolute bottom-0 right-0 h-full bg-gradient-to-l from-primary via-amber-300 to-teal-300"
+                      initial={{ width: "4%" }}
+                      animate={{ width: `${Math.max(4, Math.min(questionProgress, 1) * 100)}%` }}
+                      transition={{ duration: 0.12, ease: "linear" }}
+                    />
+                  </div>
+                </motion.div>
               </div>
-
-              <p className="text-center text-[17px] font-bold leading-9 text-[#f7f0df] mb-6">
-                {selectedChoiceText}
-              </p>
-
-              <button
-                onClick={enterDialoguePhase}
-                className="block mx-auto px-5 py-2 rounded-full border border-[#f2d992]/50 bg-white/5 text-[#f2d992] text-xs font-bold hover:bg-white/10 transition-colors"
-              >
-                تخطي
-              </button>
             </motion.div>
           </motion.div>
         )}
