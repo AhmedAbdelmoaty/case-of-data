@@ -17,6 +17,7 @@ import {
 } from "@/lib/pf-case/framing-board";
 import type { CaseOutcome } from "@/lib/pf-case/case-tree";
 import { EVIDENCE, type EvidenceData } from "@/lib/pf-case/evidence-catalog";
+import type { GenderText } from "@/lib/genderText";
 
 interface SavedNote {
   id: string;
@@ -41,8 +42,8 @@ export interface PFGameState extends GameState {
 }
 
 interface ChoiceResult {
-  questionText: string;
-  responseText: string;
+  questionText: GenderText;
+  responseText: GenderText;
   evidence?: EvidenceData;
   noteId?: string;
   noteText?: string;
