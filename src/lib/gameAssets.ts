@@ -39,6 +39,12 @@ import mansourPhoneImg from "@/assets/photos/mansour-picking-phone.webp";
 import analystRelaxingMaleImg from "@/assets/photos/analyst-relaxing-male.webp";
 import analystRelaxingFemaleImg from "@/assets/photos/analyst-relaxing-female.webp";
 import mansourAvatarImg from "@/assets/photos/mansour-avatar-circle.webp";
+import femaleStrongMascot from "@/assets/results/result-mascot-female-strong.png";
+import femaleMediumMascot from "@/assets/results/result-mascot-female-medium.png";
+import femaleWeakMascot from "@/assets/results/result-mascot-female-weak.png";
+import maleStrongMascot from "@/assets/results/result-mascot-male-strong.png";
+import maleMediumMascot from "@/assets/results/result-mascot-male-medium.png";
+import maleWeakMascot from "@/assets/results/result-mascot-male-weak.png";
 import { MANSOUR_INTRO_DIALOGUES, HISHAM_GREETING } from "@/data/pf-case";
 import {
   MANSOUR_CALL_MEDIUM,
@@ -71,6 +77,14 @@ export interface GameAssets {
   images: string[];
   audio: string[];
 }
+
+const ALL_SRC_ASSET_URLS = Object.values(
+  import.meta.glob("../assets/**/*.{png,webp,jpg,jpeg,svg}", {
+    eager: true,
+    query: "?url",
+    import: "default",
+  }),
+) as string[];
 
 const SCENE_AUDIO = {
   hallway: "/sounds/ambience_office_hallway_footsteps.mp3",
@@ -234,3 +248,95 @@ export const getWarmupAssets = (gender: Gender): GameAssets =>
       ...lineAudio(MANSOUR_INTRO_DIALOGUES.slice(0, 2), gender),
     ],
   });
+
+export const getAllGameAssets = (): GameAssets => {
+  const allScreens: GameScreenId[] = [
+    "company-briefing",
+    "travel",
+    "velaro-street",
+    "arrival",
+    "inquiry",
+    "reflection",
+    "framing",
+    "email-send",
+    "mansour-receives",
+    "incoming-call",
+    "phone-call",
+    "result",
+  ];
+
+  const screenAssets = allScreens.flatMap((screen) => [
+    getScreenAssets(screen, "male", "strong"),
+    getScreenAssets(screen, "male", "medium"),
+    getScreenAssets(screen, "male", "weak"),
+    getScreenAssets(screen, "female", "strong"),
+    getScreenAssets(screen, "female", "medium"),
+    getScreenAssets(screen, "female", "weak"),
+  ]);
+
+  return unique({
+    images: [
+      analystImg,
+      saraImg,
+      mansourImg,
+      heshamImg,
+      nouraImg,
+      karimImg,
+      detectiveImg,
+      prismBuildingImg,
+      prismHallwayImg,
+      prismKnockMaleImg,
+      prismKnockFemaleImg,
+      mansourWelcomeMaleImg,
+      mansourWelcomeFemaleImg,
+      mansourSeatedMaleImg,
+      mansourSeatedFemaleImg,
+      cityDriveLuxuryMaleImg,
+      cityDriveLuxuryFemaleImg,
+      velaroStreetImg,
+      velaroStorefrontImg,
+      velaroEnteringMaleImg,
+      velaroEnteringFemaleImg,
+      velaroInteriorWideImg,
+      hishamGreetingMaleImg,
+      hishamGreetingFemaleImg,
+      hishamOfficeSeatedMaleImg,
+      hishamOfficeSeatedFemaleImg,
+      hishamHandingReportMaleImg,
+      hishamHandingReportFemaleImg,
+      velaroCheckoutBusyImg,
+      velaroWomensSectionImg,
+      velaroMensSectionImg,
+      analystReflectingMaleImg,
+      analystReflectingFemaleImg,
+      framingBoardDeskImg,
+      analystLaptopMaleImg,
+      analystLaptopFemaleImg,
+      mansourReadingImg,
+      mansourPhoneImg,
+      analystRelaxingMaleImg,
+      analystRelaxingFemaleImg,
+      mansourAvatarImg,
+      femaleStrongMascot,
+      femaleMediumMascot,
+      femaleWeakMascot,
+      maleStrongMascot,
+      maleMediumMascot,
+      maleWeakMascot,
+      ...ALL_SRC_ASSET_URLS,
+      ...screenAssets.flatMap((assets) => assets.images),
+    ],
+    audio: [
+      ...Object.values(SCENE_AUDIO),
+      ...ALL_ANALYST_VOICEOVER,
+      ...ALL_HESHAM_VOICEOVER,
+      ...lineAudio(MANSOUR_INTRO_DIALOGUES, "male"),
+      ...lineAudio(MANSOUR_INTRO_DIALOGUES, "female"),
+      ...lineAudio(HISHAM_GREETING, "male"),
+      ...lineAudio(HISHAM_GREETING, "female"),
+      ...callAudio("male"),
+      ...callAudio("female"),
+      ...screenAssets.flatMap((assets) => assets.audio),
+    ],
+  });
+};

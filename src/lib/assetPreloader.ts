@@ -8,17 +8,23 @@ type PreloadOptions = {
   images?: Array<string | undefined | null>;
   audio?: Array<string | undefined | null>;
   timeoutMs?: number;
+  concurrency?: number;
   onProgress?: (progress: AssetProgress) => void;
 };
 
 const imageCache = new Map<string, Promise<void>>();
 const audioCache = new Map<string, HTMLAudioElement>();
 const audioReadyCache = new Map<string, Promise<HTMLAudioElement>>();
+const fetchCache = new Map<string, Promise<void>>();
 
 const normalizeAssets = (items: Array<string | undefined | null> = []) =>
   [...new Set(items.filter((item): item is string => Boolean(item)))];
 
-const withTimeout = <T,>(promise: Promise<T>, timeoutMs: number): Promise<T> => {
+const withTimeout = <T,>(promise: Promise<T>, timeoutMs?: number): Promise<T> => {
+  if (!timeoutMs || timeoutMs <= 0) {
+    return promise.catch(() => undefined as T);
+  }
+
   return new Promise((resolve) => {
     const timer = window.setTimeout(() => resolve(undefined as T), timeoutMs);
     promise
@@ -26,6 +32,24 @@ const withTimeout = <T,>(promise: Promise<T>, timeoutMs: number): Promise<T> => 
       .catch(() => resolve(undefined as T))
       .finally(() => window.clearTimeout(timer));
   });
+};
+
+const preloadFetch = (src: string, timeoutMs?: number): Promise<void> => {
+  const cached = fetchCache.get(src);
+  if (cached) return cached;
+
+  const task = withTimeout(
+    fetch(src, { cache: "force-cache" })
+      .then((response) => {
+        if (!response.ok) return;
+        return response.blob();
+      })
+      .then(() => undefined),
+    timeoutMs,
+  );
+
+  fetchCache.set(src, task);
+  return task;
 };
 
 export const preloadImage = (src: string, timeoutMs = 4500): Promise<void> => {
@@ -70,7 +94,7 @@ export const preloadAudio = (src: string, timeoutMs = 3500): Promise<HTMLAudioEl
 
   const audio = getPreloadedAudio(src);
   const task = withTimeout(
-    new Promise<HTMLAudioElement>((resolve) => {
+    preloadFetch(src, timeoutMs).then(() => new Promise<HTMLAudioElement>((resolve) => {
       if (audio.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
         resolve(audio);
         return;
@@ -96,7 +120,7 @@ export const preloadAudio = (src: string, timeoutMs = 3500): Promise<HTMLAudioEl
       } catch {
         done();
       }
-    }),
+    })),
     timeoutMs,
   );
 
@@ -108,6 +132,7 @@ export const preloadAssets = async ({
   images = [],
   audio = [],
   timeoutMs,
+  concurrency = 6,
   onProgress,
 }: PreloadOptions): Promise<void> => {
   const imageList = normalizeAssets(images);
@@ -122,8 +147,15 @@ export const preloadAssets = async ({
   onProgress?.({ loaded, total });
   if (!total) return;
 
+  let cursor = 0;
+  const workerCount = Math.max(1, Math.min(concurrency, total));
+
   await Promise.all(
-    tasks.map(async (asset) => {
+    Array.from({ length: workerCount }).map(async () => {
+      while (cursor < tasks.length) {
+        const asset = tasks[cursor];
+        cursor += 1;
+
       if (asset.type === "image") {
         await preloadImage(asset.src, timeoutMs);
       } else {
@@ -131,6 +163,7 @@ export const preloadAssets = async ({
       }
       loaded += 1;
       onProgress?.({ loaded, total, current: asset.src });
+      }
     }),
   );
 };

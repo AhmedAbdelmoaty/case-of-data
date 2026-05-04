@@ -12,16 +12,10 @@ import { MansourReceivesEmailScreen } from "@/components/game/screens/MansourRec
 import { IncomingCallScreen } from "@/components/game/screens/IncomingCallScreen";
 import { PhoneCallDebriefScreen } from "@/components/game/screens/PhoneCallDebriefScreen";
 import { ResultScreen } from "@/components/game/screens/ResultScreen";
-import { SoundProvider } from "@/hooks/useSoundEffects";
-import { MusicProvider } from "@/hooks/useBackgroundMusic";
 import { PlayerSettingsPanel } from "@/components/game/PlayerSettingsPanel";
 import { PFGameProvider, usePFGame } from "@/contexts/PFGameContext";
 import { ScreenTransition } from "@/components/game/ScreenTransition";
 import { ProgressTimeline } from "@/components/game/ProgressTimeline";
-import { AssetLoadingOverlay } from "@/components/game/AssetLoadingOverlay";
-import { getScreenAssets, getWarmupAssets, type GameScreenId } from "@/lib/gameAssets";
-import { preloadAssets } from "@/lib/assetPreloader";
-import { useAuth } from "@/contexts/AuthContext";
 
 type Screen =
   | "company-briefing"
@@ -40,7 +34,6 @@ type Screen =
 
 const GameContent = () => {
   const { resetGame, state: pfState, consumeRestartFlag } = usePFGame();
-  const { profile } = useAuth();
 
   const storageKey = `pf-game-screen-guest`;
 
@@ -51,79 +44,6 @@ const GameContent = () => {
   });
 
   const [transitioning, setTransitioning] = useState(false);
-  const [assetLoading, setAssetLoading] = useState(true);
-  const [assetProgress, setAssetProgress] = useState(0);
-  const gender = (profile?.gender || "male") as "male" | "female";
-
-  const preloadScreen = useCallback(
-    async (screen: Screen, foreground = true) => {
-      const assets = getScreenAssets(
-        screen as GameScreenId,
-        gender,
-        pfState.outcome,
-      );
-      if (foreground) {
-        setAssetProgress(0);
-        setAssetLoading(true);
-      }
-      await preloadAssets({
-        ...assets,
-        timeoutMs: foreground ? 4200 : 2400,
-        onProgress: foreground
-          ? ({ loaded, total }) => setAssetProgress(total ? loaded / total : 1)
-          : undefined,
-      });
-      if (foreground) {
-        setAssetProgress(1);
-        setAssetLoading(false);
-      }
-    },
-    [gender, pfState.outcome],
-  );
-
-  useEffect(() => {
-    let cancelled = false;
-    setAssetLoading(true);
-    preloadAssets({
-      ...getWarmupAssets(gender),
-      timeoutMs: 4200,
-      onProgress: ({ loaded, total }) => {
-        if (!cancelled) setAssetProgress(total ? loaded / total : 1);
-      },
-    })
-      .then(() => preloadScreen(currentScreen, false))
-      .finally(() => {
-        if (!cancelled) {
-          setAssetProgress(1);
-          setAssetLoading(false);
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-    // Run once for the first playable screen; later transitions handle themselves.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    const order: Screen[] = [
-      "company-briefing",
-      "travel",
-      "velaro-street",
-      "arrival",
-      "inquiry",
-      "reflection",
-      "framing",
-      "email-send",
-      "mansour-receives",
-      "incoming-call",
-      "phone-call",
-      "result",
-    ];
-    const idx = order.indexOf(currentScreen === "replay-briefing" ? "company-briefing" : currentScreen);
-    const next = order[idx + 1];
-    if (next) preloadScreen(next, false).catch(() => {});
-  }, [currentScreen, preloadScreen]);
 
   useEffect(() => {
     if (currentScreen !== "replay-briefing") {
@@ -137,10 +57,8 @@ const GameContent = () => {
       consumeRestartFlag();
       setTransitioning(true);
       setTimeout(() => {
-        preloadScreen("arrival").finally(() => {
-          setCurrentScreen("arrival");
-          setTimeout(() => setTransitioning(false), 100);
-        });
+        setCurrentScreen("arrival");
+        setTimeout(() => setTransitioning(false), 100);
       }, 400);
     }
   }, [pfState.restartFromBeginning, consumeRestartFlag]);
@@ -159,12 +77,10 @@ const GameContent = () => {
           localStorage.removeItem("pf-game-submitted");
         }
 
-        preloadScreen(screen).finally(() => {
-          setCurrentScreen(screen);
-          setTimeout(() => {
-            setTransitioning(false);
-          }, 100);
-        });
+        setCurrentScreen(screen);
+        setTimeout(() => {
+          setTransitioning(false);
+        }, 100);
       }, 400);
     },
     [resetGame, storageKey]
@@ -202,7 +118,6 @@ const GameContent = () => {
   return (
     <div className="min-h-screen bg-background">
       <ScreenTransition isActive={transitioning} />
-      <AssetLoadingOverlay visible={assetLoading} progress={assetProgress} />
 
       {showTimeline && <ProgressTimeline currentScreen={currentScreen} />}
 

@@ -9,7 +9,7 @@ interface AssetLoadingOverlayProps {
 export const AssetLoadingOverlay = ({
   visible,
   progress,
-  label = "جاري تجهيز المشهد",
+  label = "Loading",
 }: AssetLoadingOverlayProps) => {
   const pct = Math.max(6, Math.min(100, Math.round(progress * 100)));
 
