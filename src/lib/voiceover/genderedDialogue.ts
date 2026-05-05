@@ -30,6 +30,36 @@ const ANALYST_FEMALE_AUDIO_OVERRIDES: Readonly<Record<string, string>> = {
     "/voiceover/analyst_female/analyst_a_team_performance.wav",
 };
 
+const ANALYST_FEMALE_AUDIO_AVAILABLE: ReadonlySet<string> = new Set<string>([
+  "/voiceover/analyst_female/analyst_arrival_hisham_01_greeting_female.wav",
+  "/voiceover/analyst_female/analyst_arrival_hisham_02_calm_start_female.wav",
+  "/voiceover/analyst_female/analyst_a_conclusion_female.wav",
+  "/voiceover/analyst_female/analyst_a_team_conversion_female.wav",
+  "/voiceover/analyst_female/analyst_a_team_performance.wav",
+  "/voiceover/analyst_female/analyst_a_team_training_female.wav",
+  "/voiceover/analyst_female/analyst_c_conclusion_female.wav",
+  "/voiceover/analyst_female/analyst_c_customer_price_feedback_female.wav",
+  "/voiceover/analyst_female/analyst_c_price_response_female.wav",
+  "/voiceover/analyst_female/analyst_d_active_campaign_female.wav",
+  "/voiceover/analyst_female/analyst_d_conclusion_female.wav",
+  "/voiceover/analyst_female/analyst_d_marketing_report_female.wav",
+  "/voiceover/analyst_female/analyst_d_new_vs_returning_female.wav",
+  "/voiceover/analyst_female/analyst_ending_medium_response_female.wav",
+  "/voiceover/analyst_female/analyst_ending_strong_response_female.wav",
+  "/voiceover/analyst_female/analyst_ending_weak_response_female.wav",
+  "/voiceover/analyst_female/analyst_intro_with_mansour_01_accept_task_female.wav",
+  "/voiceover/analyst_female/analyst_s1_correct_open_problem_female.wav",
+  "/voiceover/analyst_female/analyst_s1_wrong_sales_team_entry_female.wav",
+  "/voiceover/analyst_female/analyst_s2_correct_baseline_female.wav",
+  "/voiceover/analyst_female/analyst_s2_wrong_sales_report_entry_female.wav",
+  "/voiceover/analyst_female/analyst_s3_correct_ask_report_female.wav",
+  "/voiceover/analyst_female/analyst_s3_wrong_competitors_entry_female.wav",
+  "/voiceover/analyst_female/analyst_s4_correct_three_years_female.wav",
+  "/voiceover/analyst_female/analyst_s4_wrong_competitor_offers_entry_female.wav",
+  "/voiceover/analyst_female/analyst_s5_correct_breakdown_female.wav",
+  "/voiceover/analyst_female/analyst_s5_wrong_marketing_entry_female.wav",
+]);
+
 const toFemaleCandidate = (maleSrc?: string): string | undefined => {
   if (!maleSrc || !maleSrc.endsWith(".wav")) return undefined;
   if (maleSrc.endsWith("_female.wav")) return maleSrc;
@@ -37,8 +67,14 @@ const toFemaleCandidate = (maleSrc?: string): string | undefined => {
 };
 
 const toAnalystFemaleCandidate = (maleSrc: string): string => {
-  return ANALYST_FEMALE_AUDIO_OVERRIDES[maleSrc]
-    ?? maleSrc.replace("/voiceover/analyst_male/", "/voiceover/analyst_female/").replace(/\.wav$/, "_female.wav");
+  const override = ANALYST_FEMALE_AUDIO_OVERRIDES[maleSrc];
+  if (override) return override;
+
+  const candidate = maleSrc
+    .replace("/voiceover/analyst_male/", "/voiceover/analyst_female/")
+    .replace(/\.wav$/, "_female.wav");
+
+  return ANALYST_FEMALE_AUDIO_AVAILABLE.has(candidate) ? candidate : maleSrc;
 };
 
 export const getVoiceoverSrc = (

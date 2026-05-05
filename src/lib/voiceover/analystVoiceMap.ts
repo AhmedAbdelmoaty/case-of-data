@@ -24,7 +24,7 @@ const RAW_MALE_MAP: Record<string, string> = {
     "/voiceover/analyst_male/analyst_intro_with_mansour_01_accept_task.wav",
 
   // ---------- Hisham greeting ----------
-  "أهلاً بيك يا أستاذ هشام. أستاذ منصور قالي إن حضرتك عاوز تتكلم في موضوع شاغلك.":
+  "شكرا جدا يا أستاذ هشام. أستاذ منصور قالي إن حضرتك عاوز تتكلم في موضوع شاغلك.":
     "/voiceover/analyst_male/analyst_arrival_hisham_01_greeting.wav",
   "متشغلش بالك. خلينا نهدى ونفهم سوا. هسألك كام سؤال، وانت قولي اللي عندك.":
     "/voiceover/analyst_male/analyst_arrival_hisham_02_calm_start.wav",
@@ -34,11 +34,11 @@ const RAW_MALE_MAP: Record<string, string> = {
     "/voiceover/analyst_male/analyst_s1_correct_open_problem.wav",
   "طب خلينا نقف هنا. لما بتقول المبيعات أقل من المتوقع، ممكن تقولي قلت بنسبة قد ايه وحضرتك بتقارن بإيه؟":
     "/voiceover/analyst_male/analyst_s2_correct_baseline.wav",
-  "تمام. طب ممكن أشوف الأرقام دي على ورق؟ هل فيه تقرير بيأكد الكلام ده؟":
+  "طب ممكن أشوف تقارير المبيعات الخاصة بالسنتين؟":
     "/voiceover/analyst_male/analyst_s3_correct_ask_report.wav",
   "حضرتك بتقارن بسنة واحدة بس. ممكن نشوف مبيعات فبراير لآخر 3 سنين؟ عشان نعرف هل سنة 2025 كانت طبيعية ولا لأ؟":
     "/voiceover/analyst_male/analyst_s4_correct_three_years.wav",
-  "حضرتك عندك تقرير بيوضح المبيعات دي ماشية إزاي؟ يعني نوعية البيع، تفاصيله، مش بس رقم إجمالي؟":
+  "ممكن أشوف تقرير تفصيلي للمبيعات مش بس رقم اجمالي؟":
     "/voiceover/analyst_male/analyst_s5_correct_breakdown.wav",
 
   // ---------- Spine S1–S5 (wrong entry) ----------
@@ -50,7 +50,7 @@ const RAW_MALE_MAP: Record<string, string> = {
     "/voiceover/analyst_male/analyst_s3_wrong_competitors_entry.wav",
   "إيه طبيعة العروض اللي بيقدمها المنافسين دلوقتي؟":
     "/voiceover/analyst_male/analyst_s4_wrong_competitor_offers_entry.wav",
-  "طب ممكن نبص على أداء الحملات الإعلانية الأخيرة؟":
+  "طب ممكن نبص على أداء الحملات الإعلانية الأخيرة؟ لأن انا شاكك ان هي السبب.":
     "/voiceover/analyst_male/analyst_s5_wrong_marketing_entry.wav",
 
   // ---------- Track A — sales team ----------
@@ -74,7 +74,7 @@ const RAW_MALE_MAP: Record<string, string> = {
   // ---------- Track D — marketing / demand ----------
   "هل في أي حملة تنشيط أو ترويج كانت شغالة الشهر ده؟":
     "/voiceover/analyst_male/analyst_d_active_campaign.wav",
-  "طب الشراء خلال الشهر ده جاي أكتر من عملاء جدد ولا من الزباين الدائمين؟":
+  "طب البيع الشهر ده جاي أكتر من الإعلانات الأونلاين، ولا من زيارات المحل؟":
     "/voiceover/analyst_male/analyst_d_new_vs_returning.wav",
   "ممكن نبص على ملخص أداء التسويق السنة دي مقارنة بالسنة اللي فاتت؟":
     "/voiceover/analyst_male/analyst_d_marketing_report.wav",
