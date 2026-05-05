@@ -82,10 +82,8 @@ const RAW_MALE_MAP: Record<string, string> = {
     "/voiceover/analyst_male/analyst_d_conclusion.wav",
 
   // ---------- Mansour final call (debrief) ----------
-  "ده شرف ليّا يا أستاذ منصور.":
+  "الفضل كله يرجع لدبلومة تحليل البيانات من IMP.":
     "/voiceover/analyst_male/analyst_ending_strong_response.wav",
-  "حضرتك معاك حق… أنا استعجلت.":
-    "/voiceover/analyst_male/analyst_ending_weak_response.wav",
 };
 
 const NORMALIZED_MAP: Map<string, string> = new Map(
