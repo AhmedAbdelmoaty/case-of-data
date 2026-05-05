@@ -71,7 +71,7 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
     }
   }, [phase, playSound]);
 
-  const dialogues = HISHAM_GREETING.map((line) => {
+  const dialogues = useMemo(() => HISHAM_GREETING.map((line) => {
     const adjusted = applyGenderToLine(line, g);
     return {
       characterId: adjusted.characterId,
@@ -79,7 +79,7 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
       mood: mapMood(adjusted.mood),
       audioSrc: adjusted.audioSrc,
     };
-  });
+  }), [g]);
 
   // Dialogue background swaps from greeting → office after 2 lines
   const dialogueBg = dialogueIndex < 2 ? greetingImg : officeImg;
