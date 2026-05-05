@@ -33,25 +33,23 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <MusicProvider>
-            <SoundProvider>
-              <Routes>
-                {/* Player routes — no login required */}
-                <Route path="/setup" element={<Setup />} />
-                <Route path="/" element={
-                  <RequireProfile>
-                    <Index />
-                  </RequireProfile>
-                } />
+          <SoundProvider>
+            <Routes>
+              {/* Player routes — no login required */}
+              <Route path="/setup" element={<Setup />} />
+              <Route path="/" element={
+                <RequireProfile>
+                  <Index />
+                </RequireProfile>
+              } />
 
-                {/* Hidden admin routes */}
-                <Route path="/admin/login" element={<AdminLogin />} />
-                <Route path="/admin/board-9k2x" element={<AdminBoard />} />
+              {/* Hidden admin routes */}
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin/board-9k2x" element={<AdminBoard />} />
 
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </SoundProvider>
-          </MusicProvider>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </SoundProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
