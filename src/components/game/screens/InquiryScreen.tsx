@@ -426,7 +426,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
               </div>
       
               <h2 className="mb-4 text-xl font-bold text-foreground">
-                قبل ما تبدأ
+                قبل ما تبدأ تحليل البيانات
               </h2>
       
               <p className="mb-6 text-sm leading-7 text-muted-foreground">
