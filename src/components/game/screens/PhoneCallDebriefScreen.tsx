@@ -45,20 +45,10 @@ const formatTime = (s: number) => {
 export const PhoneCallDebriefScreen = ({ onComplete }: PhoneCallDebriefScreenProps) => {
   const { state } = usePFGame();
   const { profile } = useAuth();
-  const { isMusicEnabled, toggleMusic } = useMusic();
   const [dialogueIndex, setDialogueIndex] = useState(0);
   const [seconds, setSeconds] = useState(0);
 
   useSceneAmbience(null);
-
-  useEffect(() => {
-    const wasEnabled = isMusicEnabled;
-    if (wasEnabled) toggleMusic();
-    return () => {
-      if (wasEnabled) toggleMusic();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const g = (profile?.gender || "male") as "male" | "female";
   const playerName = profile?.display_name || "محلل";
