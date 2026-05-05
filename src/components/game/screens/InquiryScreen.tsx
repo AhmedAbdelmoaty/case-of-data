@@ -201,6 +201,10 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
   const handlePick = useCallback(
     (option: typeof choices[number]) => {
       if (selectedChoiceId || phase !== "choosing") return;
+      if (selectionTimerRef.current) {
+        window.clearTimeout(selectionTimerRef.current);
+        selectionTimerRef.current = null;
+      }
       setSelectedChoiceId(option.id);
       setActiveQuestion({
         option,
@@ -305,10 +309,46 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
   }, [state.isComplete, onComplete]);
 
   useEffect(() => {
-    if (state.isComplete && phase === "choosing") {
+    if (state.isComplete && phase !== "dialogue") {
       onComplete();
     }
   }, [state.isComplete, phase, onComplete]);
+
+  useEffect(() => {
+    if (state.isComplete) return;
+
+    if (phase === "preQuestions" && state.questionsUsed > 0) {
+      setPhase("choosing");
+      return;
+    }
+
+    if (phase === "askingQuestion" && !activeQuestion) {
+      setSelectedChoiceId(null);
+      setQuestionProgress(0);
+      setPhase("choosing");
+      return;
+    }
+
+    if (phase === "dialogue" && currentLines.length === 0) {
+      setSelectedChoiceId(null);
+      setActiveQuestion(null);
+      setQuestionProgress(0);
+      setPhase("choosing");
+      return;
+    }
+
+    if (phase === "choosing" && choices.length === 0) {
+      onComplete();
+    }
+  }, [
+    activeQuestion,
+    choices.length,
+    currentLines.length,
+    onComplete,
+    phase,
+    state.isComplete,
+    state.questionsUsed,
+  ]);
 
   const progressDots = Array.from({ length: TOTAL_QUESTION_BUDGET }, (_, i) => i);
 

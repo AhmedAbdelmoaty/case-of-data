@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSceneAmbience } from "@/hooks/useSceneAudio";
 
 import { EnhancedDialogue } from "../EnhancedDialogue";
+import { ImpLogoReveal } from "../ImpLogoReveal";
 import {
   MANSOUR_CALL_STRONG,
   MANSOUR_CALL_WEAK,
@@ -150,6 +151,15 @@ export const PhoneCallDebriefScreen = ({ onComplete }: PhoneCallDebriefScreenPro
         onIndexChange={setDialogueIndex}
         playerName={playerName}
         playerGender={g}
+        renderOverlay={({ currentIndex, currentDialogue }) => {
+          const isFinalStrongImpLine =
+            tier === "strong" &&
+            currentIndex === dialogues.length - 1 &&
+            currentDialogue?.characterId === "detective" &&
+            currentDialogue.text.includes("IMP");
+
+          return isFinalStrongImpLine ? <ImpLogoReveal key="imp-logo-reveal" /> : null;
+        }}
       />
     </div>
   );

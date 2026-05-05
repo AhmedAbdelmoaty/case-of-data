@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookmarkPlus, Check, X, ChevronRight, FileText, StickyNote } from "lucide-react";
@@ -32,6 +32,11 @@ interface EnhancedDialogueProps {
   savedNoteIds?: string[];
   playerName?: string;
   playerGender?: "male" | "female";
+  renderOverlay?: (context: {
+    currentIndex: number;
+    isTyping: boolean;
+    currentDialogue?: DialogueLine;
+  }) => ReactNode;
 }
 
 type FlyingCollectible = {
@@ -79,6 +84,7 @@ export const EnhancedDialogue = ({
   savedNoteIds = [],
   playerName,
   playerGender,
+  renderOverlay,
 }: EnhancedDialogueProps) => {
   const [internalIndex, setInternalIndex] = useState(0);
   const [displayedText, setDisplayedText] = useState("");
@@ -444,6 +450,7 @@ export const EnhancedDialogue = ({
   const animCharId = validCharacterIds.includes(currentDialogue.characterId as CharacterId)
     ? (currentDialogue.characterId as CharacterId)
     : "detective";
+  const overlayLayer = renderOverlay?.({ currentIndex, isTyping, currentDialogue });
 
   const collectibleLayer = (
     <AnimatePresence>
@@ -532,6 +539,7 @@ export const EnhancedDialogue = ({
 
   return (
     <>
+    <AnimatePresence>{overlayLayer}</AnimatePresence>
     {typeof document !== "undefined" ? createPortal(collectibleLayer, document.body) : collectibleLayer}
     {typeof document !== "undefined" ? createPortal(reportModalLayer, document.body) : reportModalLayer}
     <AnimatePresence>
