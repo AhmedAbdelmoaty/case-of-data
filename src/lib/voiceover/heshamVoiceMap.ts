@@ -85,7 +85,7 @@ const RAW_MAP: Record<string, string> = {
     `${HESHAM_VOICE_BASE}/hisham_track_c_03_conclusion.wav`,
 
   // ---------------- TRACK D — Marketing ----------------
-  "لأ يا فندم، مفيش حملة تنشيط مخصصة اتعملت الشهر ده. بس في إعلانات عادية شغالة طول الوقت بميزانية أقل. السنة اللي فاتت كان فيه حملة موسمية اتعملت.":
+  "لأ يا فندم، مفيش حملة تنشيط مخصصة اتعملت الشهر ده. بس في إعلانات عادية شغالة طول الوقت بميزانية أقل.":
     `${HESHAM_VOICE_BASE}/hisham_track_d_01_active_campaign.wav`,
   "الأونلاين أهدى شوية… بس لسه في بيع جاي منه، وكمان في ناس بتيجي المحل.":
     `${HESHAM_VOICE_BASE}/hisham_track_d_02_new_vs_returning.wav`,

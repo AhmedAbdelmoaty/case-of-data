@@ -46,6 +46,7 @@ const GameContent = () => {
   });
 
   const [transitioning, setTransitioning] = useState(false);
+  const [resetVersion, setResetVersion] = useState(0);
 
   useEffect(() => {
     if (currentScreen !== "replay-briefing") {
@@ -72,6 +73,7 @@ const GameContent = () => {
       setTimeout(() => {
         if (options?.reset) {
           resetGame();
+          setResetVersion((version) => version + 1);
         }
 
         if (options?.clearStorage) {
@@ -131,63 +133,65 @@ const GameContent = () => {
         />
       )}
 
-      {currentScreen === "company-briefing" && (
-        <CompanyBriefingScreen onComplete={() => handleNavigate("travel")} />
-      )}
+      <div key={`${currentScreen}-${resetVersion}`}>
+        {currentScreen === "company-briefing" && (
+          <CompanyBriefingScreen onComplete={() => handleNavigate("travel")} />
+        )}
 
-      {currentScreen === "replay-briefing" && (
-        <CompanyBriefingScreen
-          onComplete={() => {
-            const saved = localStorage.getItem(storageKey) as Screen | null;
-            setCurrentScreen(saved && saved !== "replay-briefing" ? saved : "company-briefing");
-          }}
-          isReviewMode
-        />
-      )}
+        {currentScreen === "replay-briefing" && (
+          <CompanyBriefingScreen
+            onComplete={() => {
+              const saved = localStorage.getItem(storageKey) as Screen | null;
+              setCurrentScreen(saved && saved !== "replay-briefing" ? saved : "company-briefing");
+            }}
+            isReviewMode
+          />
+        )}
 
-      {currentScreen === "travel" && (
-        <TravelScreen onComplete={() => handleNavigate("velaro-street")} />
-      )}
+        {currentScreen === "travel" && (
+          <TravelScreen onComplete={() => handleNavigate("velaro-street")} />
+        )}
 
-      {currentScreen === "velaro-street" && (
-        <VelaroStreetScreen onComplete={() => handleNavigate("arrival")} />
-      )}
+        {currentScreen === "velaro-street" && (
+          <VelaroStreetScreen onComplete={() => handleNavigate("arrival")} />
+        )}
 
-      {currentScreen === "arrival" && (
-        <ArrivalScreen onComplete={() => handleNavigate("inquiry")} />
-      )}
+        {currentScreen === "arrival" && (
+          <ArrivalScreen onComplete={() => handleNavigate("inquiry")} />
+        )}
 
-      {currentScreen === "inquiry" && (
-        <InquiryScreen onComplete={() => handleNavigate("reflection")} />
-      )}
+        {currentScreen === "inquiry" && (
+          <InquiryScreen onComplete={() => handleNavigate("reflection")} />
+        )}
 
-      {currentScreen === "reflection" && (
-        <ReflectionTransition onComplete={() => handleNavigate("framing")} />
-      )}
+        {currentScreen === "reflection" && (
+          <ReflectionTransition onComplete={() => handleNavigate("framing")} />
+        )}
 
-      {currentScreen === "framing" && (
-        <FramingScreen onComplete={() => handleNavigate("email-send")} />
-      )}
+        {currentScreen === "framing" && (
+          <FramingScreen onComplete={() => handleNavigate("email-send")} />
+        )}
 
-      {currentScreen === "email-send" && (
-        <EmailSendScreen onComplete={() => handleNavigate("mansour-receives")} />
-      )}
+        {currentScreen === "email-send" && (
+          <EmailSendScreen onComplete={() => handleNavigate("mansour-receives")} />
+        )}
 
-      {currentScreen === "mansour-receives" && (
-        <MansourReceivesEmailScreen onComplete={() => handleNavigate("incoming-call")} />
-      )}
+        {currentScreen === "mansour-receives" && (
+          <MansourReceivesEmailScreen onComplete={() => handleNavigate("incoming-call")} />
+        )}
 
-      {currentScreen === "incoming-call" && (
-        <IncomingCallScreen onAnswer={() => handleNavigate("phone-call")} />
-      )}
+        {currentScreen === "incoming-call" && (
+          <IncomingCallScreen onAnswer={() => handleNavigate("phone-call")} />
+        )}
 
-      {currentScreen === "phone-call" && (
-        <PhoneCallDebriefScreen onComplete={() => handleNavigate("result")} />
-      )}
+        {currentScreen === "phone-call" && (
+          <PhoneCallDebriefScreen onComplete={() => handleNavigate("result")} />
+        )}
 
-      {currentScreen === "result" && (
-        <ResultScreen onNavigate={handleNavigate} />
-      )}
+        {currentScreen === "result" && (
+          <ResultScreen onNavigate={handleNavigate} />
+        )}
+      </div>
     </div>
   );
 };
