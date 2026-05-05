@@ -63,7 +63,7 @@ const characterNames: Record<string, { ar: string; en: string }> = {
   khaled: { ar: "خالد", en: "Khaled" },
   noura: { ar: "نورة", en: "Noura" },
   umFahd: { ar: "أميرة", en: "Amira" },
-  mansour: { ar: "أ. منصور", en: "A. Mansour" },
+  mansour: { ar: "أ. منصور", en: "مديرك المباشر" },
 };
 
 export const EnhancedDialogue = ({
@@ -87,8 +87,12 @@ export const EnhancedDialogue = ({
   const [reportOpen, setReportOpen] = useState(false);
   const [collectibles, setCollectibles] = useState<FlyingCollectible[]>([]);
   const [isCollecting, setIsCollecting] = useState(false);
+  const [autoSignal, setAutoSignal] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioCacheRef = useRef<Map<string, HTMLAudioElement>>(new Map());
+  const autoAdvanceTimerRef = useRef<number | null>(null);
+  const typingDoneRef = useRef(false);
+  const audioDoneRef = useRef(false);
   const collectibleIdRef = useRef(0);
   const collectionStartedRef = useRef(false);
   const collectionTimersRef = useRef<number[]>([]);
@@ -104,6 +108,12 @@ export const EnhancedDialogue = ({
       audioRef.current = null;
     }
   };
+
+  const clearAutoAdvanceTimer = useCallback(() => {
+    if (!autoAdvanceTimerRef.current) return;
+    window.clearTimeout(autoAdvanceTimerRef.current);
+    autoAdvanceTimerRef.current = null;
+  }, []);
 
   const getCachedAudio = (src: string): HTMLAudioElement => {
     let a = audioCacheRef.current.get(src);
@@ -182,6 +192,8 @@ export const EnhancedDialogue = ({
     if (!currentDialogue) return;
     setDisplayedText(currentDialogue.text);
     setIsTyping(false);
+    typingDoneRef.current = true;
+    setAutoSignal((s) => s + 1);
     beginCollection();
   }, [beginCollection, currentDialogue]);
 
@@ -209,6 +221,7 @@ export const EnhancedDialogue = ({
     if (!isActive) {
       stopAudio();
       clearCollectionTimers();
+      clearAutoAdvanceTimer();
       setInternalIndex(0);
       setDisplayedText("");
       setIsTyping(false);
@@ -216,7 +229,7 @@ export const EnhancedDialogue = ({
       setCollectibles([]);
       setIsCollecting(false);
     }
-  }, [clearCollectionTimers, isActive]);
+  }, [clearAutoAdvanceTimer, clearCollectionTimers, isActive]);
 
   // Preload all voice-over audio for the current dialogue list so playback is instant
   useEffect(() => {
@@ -230,12 +243,13 @@ export const EnhancedDialogue = ({
   useEffect(() => {
     return () => {
       stopAudio();
+      clearAutoAdvanceTimer();
       // Also pause every cached audio just in case
       audioCacheRef.current.forEach((a) => {
         try { a.pause(); a.currentTime = 0; } catch { /* noop */ }
       });
     };
-  }, []);
+  }, [clearAutoAdvanceTimer]);
 
   // Typing effect
   useEffect(() => {
@@ -243,6 +257,9 @@ export const EnhancedDialogue = ({
 
     stopAudio();
     clearCollectionTimers();
+    clearAutoAdvanceTimer();
+    typingDoneRef.current = false;
+    audioDoneRef.current = !currentDialogue.audioSrc;
     collectionStartedRef.current = false;
     remainingCollectiblesRef.current = 0;
     committedCollectiblesRef.current.clear();
@@ -258,9 +275,27 @@ export const EnhancedDialogue = ({
         const audio = getCachedAudio(currentDialogue.audioSrc);
         try { audio.currentTime = 0; } catch {/* noop */}
         audioRef.current = audio;
+        audio.onended = () => {
+          audioDoneRef.current = true;
+          setAutoSignal((s) => s + 1);
+        };
+        audio.onerror = () => {
+          audioDoneRef.current = true;
+          setAutoSignal((s) => s + 1);
+        };
         const p = audio.play();
-        if (p && typeof p.catch === "function") p.catch(() => {/* silent */});
-      } catch {/* silent fallback */}
+        if (p && typeof p.catch === "function") {
+          p.catch(() => {
+            audioDoneRef.current = true;
+            setAutoSignal((s) => s + 1);
+          });
+        }
+      } catch {
+        audioDoneRef.current = true;
+        setAutoSignal((s) => s + 1);
+      }
+    } else {
+      audioDoneRef.current = true;
     }
 
     // Preload next dialogue's audio so it's ready instantly
@@ -285,13 +320,15 @@ export const EnhancedDialogue = ({
     return () => {
       clearInterval(typingInterval);
       clearCollectionTimers();
+      clearAutoAdvanceTimer();
     };
-  }, [clearCollectionTimers, currentIndex, isActive, currentDialogue, finishTyping]);
+  }, [clearAutoAdvanceTimer, clearCollectionTimers, currentIndex, isActive, currentDialogue, finishTyping]);
 
   const handleClose = () => {
     if (isCollecting) {
       collectCurrentFindingsNow();
     }
+    clearAutoAdvanceTimer();
     stopAudio();
     if (onClose) {
       onClose();
@@ -301,6 +338,7 @@ export const EnhancedDialogue = ({
   };
 
   const handleNext = () => {
+    clearAutoAdvanceTimer();
     if (isTyping) {
       finishTyping();
       return;
@@ -331,6 +369,7 @@ export const EnhancedDialogue = ({
     if (isCollecting) {
       collectCurrentFindingsNow();
     }
+    clearAutoAdvanceTimer();
     if (currentIndex > 0) {
       stopAudio();
       setCurrentIndex(currentIndex - 1);
@@ -343,16 +382,54 @@ export const EnhancedDialogue = ({
     }
   };
 
-  // Keyboard navigation: ← back, →/Space forward
+  useEffect(() => {
+    if (!isActive || !currentDialogue) return;
+    if (!typingDoneRef.current || !audioDoneRef.current) return;
+    if (reportOpen) {
+      clearAutoAdvanceTimer();
+      return;
+    }
+
+    clearAutoAdvanceTimer();
+    const hasCollectibles = !!(
+      (currentDialogue.isSaveable && currentDialogue.saveId && currentDialogue.saveText) ||
+      currentDialogue.inlineEvidence
+    );
+    const delay = hasCollectibles ? 2300 : 650;
+
+    autoAdvanceTimerRef.current = window.setTimeout(() => {
+      if (hasCollectibles) {
+        collectCurrentFindingsNow();
+      }
+      stopAudio();
+      if (currentIndex < dialogues.length - 1) {
+        setCurrentIndex(currentIndex + 1);
+      } else {
+        onComplete?.();
+      }
+    }, delay);
+
+    return clearAutoAdvanceTimer;
+  }, [
+    autoSignal,
+    clearAutoAdvanceTimer,
+    collectCurrentFindingsNow,
+    currentDialogue,
+    currentIndex,
+    dialogues.length,
+    isActive,
+    onComplete,
+    reportOpen,
+    setCurrentIndex,
+  ]);
+
+  // Keyboard navigation: back only. Dialogue advances automatically after voice-over.
   useEffect(() => {
     if (!isActive) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") {
         e.preventDefault();
         handlePrevious();
-      } else if (e.key === "ArrowRight" || e.key === " ") {
-        e.preventDefault();
-        handleNext();
       }
     };
     window.addEventListener("keydown", onKey);
@@ -485,8 +562,7 @@ export const EnhancedDialogue = ({
         </motion.div>
 
         <motion.div
-          className={`mx-4 mb-4 rounded-xl border backdrop-blur-md cursor-pointer bg-gradient-to-r ${colors.bg} ${colors.border} p-6 relative`}
-          onClick={handleNext}
+          className={`mx-4 mb-4 rounded-xl border backdrop-blur-md bg-gradient-to-r ${colors.bg} ${colors.border} p-6 relative`}
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.99 }}
           layoutId="dialogue-box"
@@ -508,9 +584,11 @@ export const EnhancedDialogue = ({
             <h4 className={`font-bold text-lg ${colors.name}`}>
               {resolvedNames.ar}
             </h4>
-            <span className="text-muted-foreground text-sm">
-              ({resolvedNames.en})
-            </span>
+            {!isDetective && (
+              <span className="text-muted-foreground text-sm">
+                ({resolvedNames.en})
+              </span>
+            )}
           </motion.div>
 
           <p className="text-foreground text-lg leading-relaxed" dir="rtl">
@@ -585,14 +663,6 @@ export const EnhancedDialogue = ({
                     {currentIndex + 1} / {dialogues.length}
                   </span>
                 </div>
-                <motion.span
-                  className="text-sm text-primary flex items-center gap-2"
-                  animate={{ x: [0, 5, 0] }}
-                  transition={{ duration: 1, repeat: Infinity }}
-                >
-                  اضغط للاستمرار
-                  <span>▶</span>
-                </motion.span>
               </motion.div>
             )}
           </AnimatePresence>

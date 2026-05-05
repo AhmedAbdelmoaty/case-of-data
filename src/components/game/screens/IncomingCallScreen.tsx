@@ -58,7 +58,7 @@ export const IncomingCallScreen = ({ onAnswer }: IncomingCallScreenProps) => {
               <div className="absolute inset-0 rounded-full bg-emerald-500/25 animate-ping" />
               <img
                 src={mansourAvatar}
-                alt="A. Mansour"
+                alt="أ. منصور"
                 className="relative w-28 h-28 rounded-full object-cover border-4 border-emerald-500/60"
               />
             </motion.div>

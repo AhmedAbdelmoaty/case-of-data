@@ -84,8 +84,6 @@ const RAW_MALE_MAP: Record<string, string> = {
   // ---------- Mansour final call (debrief) ----------
   "ده شرف ليّا يا أستاذ منصور.":
     "/voiceover/analyst_male/analyst_ending_strong_response.wav",
-  "أيوه، حسيت إن لسه فيه جزء ناقص.":
-    "/voiceover/analyst_male/analyst_ending_medium_response.wav",
   "حضرتك معاك حق… أنا استعجلت.":
     "/voiceover/analyst_male/analyst_ending_weak_response.wav",
 };

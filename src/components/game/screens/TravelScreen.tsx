@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSound } from "@/hooks/useSoundEffects";
@@ -18,9 +18,6 @@ const MONOLOGUES = [
   { text: "وصلنا تقريباً... ركّز.", at: 5500, dur: 1500 },
 ];
 
-// Realistic street-side scenery only
-const AMBIENT_EMOJIS = ["🏙️", "🌆", "🚦", "🏢", "🚖", "🏛️"];
-
 export const TravelScreen = ({ onComplete }: TravelScreenProps) => {
   const { profile } = useAuth();
   const { playSound } = useSound();
@@ -29,21 +26,6 @@ export const TravelScreen = ({ onComplete }: TravelScreenProps) => {
   useSceneAmbience("car_traffic");
 
   const driveImg = profile?.gender === "female" ? cityDriveLuxuryFemaleImg : cityDriveLuxuryMaleImg;
-
-  // Faster floating scenery — gives a real sense of speed
-  const floatingEmojis = useMemo(
-    () =>
-      Array.from({ length: 7 }).map((_, i) => ({
-        id: i,
-        emoji: AMBIENT_EMOJIS[i % AMBIENT_EMOJIS.length],
-        top: 10 + i * 11,
-        delay: i * 0.9,
-        duration: 3 + Math.random() * 1.2,
-        size: 24 + Math.random() * 10,
-        opacity: 0.5,
-      })),
-    []
-  );
 
   useEffect(() => {
     const t = setTimeout(onComplete, TOTAL_DURATION);
@@ -105,32 +87,6 @@ export const TravelScreen = ({ onComplete }: TravelScreenProps) => {
         ))}
       </div>
 
-      {/* Subtle floating realistic scenery */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {floatingEmojis.map((e) => (
-          <motion.span
-            key={e.id}
-            className="absolute"
-            style={{
-              top: `${e.top}%`,
-              fontSize: e.size,
-              opacity: e.opacity,
-              filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.4))",
-            }}
-            initial={{ x: "110vw" }}
-            animate={{ x: "-15vw" }}
-            transition={{
-              duration: e.duration,
-              delay: e.delay,
-              repeat: Infinity,
-              ease: "linear",
-            }}
-          >
-            {e.emoji}
-          </motion.span>
-        ))}
-      </div>
-
       {/* Foreground UI — minimal */}
       <div className="relative z-30 flex flex-col items-center justify-end min-h-screen text-center px-4 pb-16">
         {/* Simple small caption */}
@@ -150,7 +106,7 @@ export const TravelScreen = ({ onComplete }: TravelScreenProps) => {
             {currentMonologue && (
               <motion.p
                 key={currentMonologue}
-                className="text-muted-foreground text-xs italic"
+                className="text-muted-foreground text-sm italic sm:text-base"
                 dir="rtl"
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}

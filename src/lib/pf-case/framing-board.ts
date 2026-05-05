@@ -63,7 +63,7 @@ const CLIENT_VIEW: Record<string, FramingChoice> = {
 const TRUE_FRAME: Record<string, FramingChoice> = {
   tf_misleading_baseline: {
     id: "tf_misleading_baseline",
-    text: "المقارنة نفسها مش متينة — بيقارن بسنة فيها أوردر شركات استثنائي، فالمرجع متضخّم ومفيش ضعف مبيعات حقيقي.",
+    text: "المقارنة نفسها مش متينة — بيقارن بسنة فيها تحويلات استثنائية من فروع أخرى، فالمرجع متضخّم ومفيش ضعف مبيعات حقيقي.",
     trackTag: "correct",
   },
   tf_internal_gap: {
@@ -91,7 +91,7 @@ const TRUE_FRAME: Record<string, FramingChoice> = {
 const NEXT_DECISION: Record<string, FramingChoice> = {
   nd_revalidate_baseline: {
     id: "nd_revalidate_baseline",
-    text: "نراجع المقارنة الأول ونشيل الأوردر الاستثنائي قبل أي قرار.",
+    text: "نراجع المقارنة الأول ونعزل التحويلات الاستثنائية من الفروع الأخرى قبل أي قرار.",
     trackTag: "correct",
   },
   nd_training: {
@@ -122,7 +122,7 @@ export const CORRECT_FRAMING = {
   next_decision: "nd_revalidate_baseline",
 } as const;
 
-export const TOTAL_FRAMING_SECTIONS = 3;
+export const TOTAL_FRAMING_SECTIONS = 2;
 
 // ---------- Shuffle helper (deterministic) ----------
 
@@ -209,18 +209,13 @@ export function buildFramingSections(opts: BuildFramingOpts): FramingSection[] {
 
   return [
     {
-      id: "client_view",
-      title: "1. هشام الشريف شايف المشكلة إزاي؟",
-      options: seededShuffle(cvOptions, shuffleSeed + 11),
-    },
-    {
       id: "true_frame",
-      title: "2. التفسير الأدق للمشكلة",
+      title: "1. التفسير الأدق للمشكلة",
       options: seededShuffle(tfOptions, shuffleSeed + 22),
     },
     {
       id: "next_decision",
-      title: "3. القرار التالي اللي تنصح بيه",
+      title: "2. القرار التالي اللي تنصح بيه",
       options: seededShuffle(ndOptions, shuffleSeed + 33),
     },
   ];
@@ -235,7 +230,6 @@ export const FRAMING_SECTIONS: FramingSection[] = buildFramingSections({
 
 export function countCorrectFraming(selection: FramingSelection): number {
   let n = 0;
-  if (selection.client_view === CORRECT_FRAMING.client_view) n++;
   if (selection.true_frame === CORRECT_FRAMING.true_frame) n++;
   if (selection.next_decision === CORRECT_FRAMING.next_decision) n++;
   return n;

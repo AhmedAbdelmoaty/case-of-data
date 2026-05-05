@@ -12,14 +12,6 @@ export const MANSOUR_CALL_STRONG: DialogueLine[] = [
   { characterId: "mansour", text: genderLine([v("وكمل", "وكمّلي"), " اللي ", v("إنت بتعمله", "إنتي بتعمليه"), " — ", v("خليك ماشي", "خليكي ماشية"), " على منهج IMP في التحليل، ده اللي فرق ", v("معاك", "معاكي"), " النهارده. سلام."]), mood: "happy", audioSrc: "/voiceover/mansour/mansour_call_strong_04.wav" },
 ];
 
-export const MANSOUR_CALL_MEDIUM: DialogueLine[] = [
-  { characterId: "mansour", text: genderLine(["خلّينا نتكلم بصراحة شغلك كويس بس مش كويس بالشكل اللي كنت متوقعه منك. ", v("مسكت", "مسكتي"), " إن سنة 2025 كانت استثنائية، وده تمام، لكن ", v("محسمتش", "محسمتيش"), " الموضوع لآخره."]), mood: "neutral", audioSrc: "/voiceover/mansour/mansour_call_medium_01.wav" },
-  { characterId: "detective", text: "أيوه، حسيت إن لسه فيه جزء ناقص.", mood: "concerned", audioSrc: "/voiceover/analyst_male/analyst_ending_medium_response.wav" },
-  { characterId: "mansour", text: genderLine(["بالظبط. كان لازم ", v("تربط", "تربطي"), " بوضوح إن المقارنة الغلط كانت هتودي العميل لقرار غلط. الـ Problem Framing مش بس إنك ", v("تشوف", "تشوفي"), " الحقيقة، ده إنك ", v("توصّلها", "توصّليها"), " بحسم عشان العميل يغيّر اتجاهه."]), mood: "serious", audioSrc: "/voiceover/mansour/mansour_call_medium_02.wav" },
-  { characterId: "mansour", text: genderLine([v("هديك", "هديكي"), " تقييم متوسط، مش هخصم منك كتير. بس ", v("خد", "خدي"), " بالك المرة الجاية."]), mood: "neutral", audioSrc: "/voiceover/mansour/mansour_call_medium_03.wav" },
-  { characterId: "mansour", text: genderLine(["نصيحة مني ", v("ذاكر", "ذاكري"), " دبلومة تحليل البيانات من IMP، هتساعدك جدًا في تنمية مهاراتك التحليلية، وازاي ", v("تفهم", "تفهمي"), " المشكلة بشكل صحيح."]), mood: "neutral", audioSrc: "/voiceover/mansour/mansour_call_medium_04.wav" },
-];
-
 export const MANSOUR_CALL_WEAK: DialogueLine[] = [
   { characterId: "mansour", text: genderLine([" التقرير ده مش اللي كنت متوقعه منك خالص. ", v("إنت دخلت", "إنتي دخلتي"), " على الحل قبل ما ", v("تتأكد", "تتأكدي"), " إن في مشكلة أصلًا!"]), mood: "disappointed", audioSrc: "/voiceover/mansour/mansour_call_weak_01.wav" },
   { characterId: "detective", text: "حضرتك معاك حق… أنا استعجلت.", mood: "concerned", audioSrc: "/voiceover/analyst_male/analyst_ending_weak_response.wav" },

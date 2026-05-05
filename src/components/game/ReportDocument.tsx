@@ -155,7 +155,7 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
                 />
                 <Legend wrapperStyle={{ fontSize: 11, color: "hsl(20 14% 18%)" }} />
                 <Bar dataKey="individuals" name="أفراد" stackId="a" fill={COLORS.primary} isAnimationActive animationBegin={180} animationDuration={900} animationEasing="ease-out" />
-                <Bar dataKey="corporate" name="شركات" stackId="a" fill={COLORS.accent} radius={[6, 6, 0, 0]} isAnimationActive animationBegin={280} animationDuration={900} animationEasing="ease-out" />
+                <Bar dataKey="corporate" name="تحويلات من فروع أخرى" stackId="a" fill={COLORS.accent} radius={[6, 6, 0, 0]} isAnimationActive animationBegin={280} animationDuration={900} animationEasing="ease-out" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -181,7 +181,7 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
                 <Bar dataKey="individuals" name="أفراد" fill={COLORS.primary} radius={[6, 6, 0, 0]} isAnimationActive animationBegin={180} animationDuration={900} animationEasing="ease-out">
                   <LabelList dataKey="individuals" position="top" formatter={fmt} style={{ fontSize: 10, fontWeight: 700, fill: "hsl(20 14% 18%)" }} />
                 </Bar>
-                <Bar dataKey="corporate" name="شركات" fill={COLORS.accent} radius={[6, 6, 0, 0]} isAnimationActive animationBegin={280} animationDuration={900} animationEasing="ease-out">
+                <Bar dataKey="corporate" name="تحويلات من فروع أخرى" fill={COLORS.accent} radius={[6, 6, 0, 0]} isAnimationActive animationBegin={280} animationDuration={900} animationEasing="ease-out">
                   <LabelList dataKey="corporate" position="top" formatter={fmt} style={{ fontSize: 10, fontWeight: 700, fill: "hsl(20 14% 18%)" }} />
                 </Bar>
               </BarChart>

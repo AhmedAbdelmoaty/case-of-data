@@ -28,9 +28,9 @@ export type NoteType =
 
 export type NoteWeight = "strong_clue" | "useful_clue" | "weak_clue" | "misleading_clue";
 
-export type FramingQuality = "strong" | "medium" | "weak";
+export type FramingQuality = "strong" | "weak";
 
-export type OutcomeType = "strong" | "medium" | "weak";
+export type OutcomeType = "strong" | "weak";
 
 export interface DialogueLine {
   characterId: string;

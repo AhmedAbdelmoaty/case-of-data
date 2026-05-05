@@ -89,7 +89,7 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     caption: "مبيعات شهر فبراير أخر 3 سنوات مقسمة حسب نوعية المبيعات.",
     footnotes: [
       "الأرقام بالألف جنيه مصري، صافي مبيعات بعد المرتجعات.",
-      "ملاحظة المحاسبة: في فبراير 2025 جالنا أوردر شركات استثنائي (حوالي 290 ألف).",
+      "ملاحظة المحاسبة: في فبراير 2025 دخلت تحويلات استثنائية من فروع أخرى (حوالي 290 ألف).",
     ],
     valueSuffix: "K",
     rows: [
@@ -99,7 +99,7 @@ export const EVIDENCE: Record<string, EvidenceData> = {
     ],
     series: [
       { key: "individuals", label: "أفراد" },
-      { key: "corporate", label: "شركات" },
+      { key: "corporate", label: "تحويلات من فروع أخرى" },
     ],
     yMax: 500,
     yTicks: [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500],

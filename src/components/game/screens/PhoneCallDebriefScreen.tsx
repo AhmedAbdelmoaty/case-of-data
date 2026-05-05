@@ -8,7 +8,6 @@ import { useMusic } from "@/hooks/useBackgroundMusic";
 import { EnhancedDialogue } from "../EnhancedDialogue";
 import {
   MANSOUR_CALL_STRONG,
-  MANSOUR_CALL_MEDIUM,
   MANSOUR_CALL_WEAK,
 } from "@/lib/pf-case/mansour-call-scripts";
 import {
@@ -63,14 +62,10 @@ export const PhoneCallDebriefScreen = ({ onComplete }: PhoneCallDebriefScreenPro
 
   const g = (profile?.gender || "male") as "male" | "female";
   const playerName = profile?.display_name || "محلل";
-  const tier: CallTier = (state.outcome || "medium") as CallTier;
+  const tier: CallTier = (state.outcome || "weak") as CallTier;
 
   const sourceLines = useMemo(() => {
-    return tier === "strong"
-      ? MANSOUR_CALL_STRONG
-      : tier === "weak"
-      ? MANSOUR_CALL_WEAK
-      : MANSOUR_CALL_MEDIUM;
+    return tier === "strong" ? MANSOUR_CALL_STRONG : MANSOUR_CALL_WEAK;
   }, [tier]);
 
   const dialogues = useMemo(

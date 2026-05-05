@@ -1,7 +1,5 @@
 import mansourStrongA from "@/assets/scenes/mansour-call-strong-a.webp";
 import mansourStrongB from "@/assets/scenes/mansour-call-strong-b.webp";
-import mansourMediumA from "@/assets/scenes/mansour-call-medium-a.webp";
-import mansourMediumB from "@/assets/scenes/mansour-call-medium-b.webp";
 import mansourWeakA from "@/assets/scenes/mansour-call-weak-a.webp";
 import mansourWeakB from "@/assets/scenes/mansour-call-weak-b.webp";
 
@@ -10,12 +8,11 @@ import analystFemale from "@/assets/photos/analyst-on-phone-female.webp";
 import analystMaleWeak from "@/assets/photos/analyst-on-phone-male-weak.webp";
 import analystFemaleWeak from "@/assets/photos/analyst-on-phone-female-weak.webp";
 
-export type CallTier = "strong" | "medium" | "weak";
+export type CallTier = "strong" | "weak";
 export type Gender = "male" | "female";
 
 const MANSOUR_IMAGES: Record<CallTier, [string, string]> = {
   strong: [mansourStrongA, mansourStrongB],
-  medium: [mansourMediumA, mansourMediumB],
   weak: [mansourWeakA, mansourWeakB],
 };
 

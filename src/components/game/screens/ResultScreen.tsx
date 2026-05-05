@@ -8,10 +8,8 @@ import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import type { CaseOutcome } from "@/lib/pf-case/case-tree";
 import femaleStrongMascot from "@/assets/results/result-mascot-female-strong.png";
-import femaleMediumMascot from "@/assets/results/result-mascot-female-medium.png";
 import femaleWeakMascot from "@/assets/results/result-mascot-female-weak.png";
 import maleStrongMascot from "@/assets/results/result-mascot-male-strong.png";
-import maleMediumMascot from "@/assets/results/result-mascot-male-medium.png";
 import maleWeakMascot from "@/assets/results/result-mascot-male-weak.png";
 
 interface ResultScreenProps {
@@ -39,27 +37,6 @@ const RESULT_VIEW = {
     chipOn: "bg-[#ecfccb] text-[#365314] border-[#84cc16]/45",
     chipOff: "bg-white/50 text-[#8a7a5b] border-white/70",
     confetti: ["#f59e0b", "#06b6d4", "#22c55e", "#ef4444", "#a855f7"],
-  },
-  medium: {
-    badge: "✨ أداء جيد",
-    title: { male: "حلّك ماشي صح", female: "حلّك ماشي صح" },
-    feedback: {
-      male: "أداؤك جيد، بس محتاج ترتب الأسئلة والاستنتاج بثقة أكتر.",
-      female: "أداؤك جيد، بس محتاجة ترتبي الأسئلة والاستنتاج بثقة أكتر.",
-    },
-    mascot: { male: maleMediumMascot, female: femaleMediumMascot },
-    stars: 2,
-    sound: "successChime",
-    page: "bg-[linear-gradient(135deg,#bae6fd_0%,#ede9fe_52%,#f8fafc_100%)]",
-    stage: "border-[#93c5fd] bg-white/90 shadow-[#60a5fa]/25",
-    titleColor: "text-[#233876]",
-    badgeStyle: "border-[#8b5cf6]/25 bg-white/72 text-[#4c1d95]",
-    starOn: "bg-[#facc15] text-[#713f12] shadow-[#facc15]/30",
-    starOff: "bg-white/58 text-[#b8b4ca]",
-    button: "bg-[#4f46e5] text-white shadow-[#6366f1]/35 hover:bg-[#4338ca]",
-    chipOn: "bg-[#dbeafe] text-[#1e3a8a] border-[#60a5fa]/45",
-    chipOff: "bg-white/52 text-[#74708a] border-white/70",
-    confetti: ["#38bdf8", "#a78bfa", "#facc15", "#94a3b8", "#22c55e"],
   },
   weak: {
     badge: "💡 جرّب تاني",
@@ -115,7 +92,7 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
 
   const playerName = profile?.first_name || profile?.display_name || "محلل";
   const playerGender = (profile?.gender || "male") as "male" | "female";
-  const outcome = (state.outcome || "medium") as CaseOutcome;
+  const outcome = (state.outcome || "weak") as CaseOutcome;
   const view = RESULT_VIEW[outcome];
   const mascot = view.mascot[playerGender];
   const title = view.title[playerGender];
@@ -136,7 +113,7 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
       !state.trackEntered &&
       state.history.length >= 5 &&
       state.history.every((h) => h.choice === "correct");
-    const qualified = fullSpine && (state.framingCorrectCount ?? 0) >= 2;
+    const qualified = fullSpine && (state.framingCorrectCount ?? 0) === 2;
     const startedAt = state.gameStartedAt ?? Date.now();
     const duration_ms = Date.now() - startedAt;
 
@@ -172,7 +149,6 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
 
   const litChipCount = useMemo(() => {
     if (outcome === "strong") return 3;
-    if (outcome === "medium") return 2;
     return 1;
   }, [outcome]);
 

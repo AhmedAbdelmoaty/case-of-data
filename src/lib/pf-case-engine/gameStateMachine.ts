@@ -339,10 +339,8 @@ export function evaluate(
     state.history.length >= 5 &&
     state.history.every((h) => h.choice === "correct");
 
-  let outcome: CaseOutcome;
-  if (wentFullSpine && correctCount === 3) outcome = "strong";
-  else if (!state.trackEntered && correctCount >= 2) outcome = "medium";
-  else outcome = "weak";
+  const outcome: CaseOutcome =
+    wentFullSpine && correctCount === 2 ? "strong" : "weak";
 
   return { outcome, correctCount };
 }

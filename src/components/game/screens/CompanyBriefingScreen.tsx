@@ -4,7 +4,7 @@ import { useSceneOneShot, playSceneOneShot } from "@/hooks/useSceneAudio";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { EnhancedDialogue } from "../EnhancedDialogue";
-import { Rocket, GraduationCap, DoorOpen } from "lucide-react";
+import { ChartNoAxesColumnIncreasing, DoorOpen } from "lucide-react";
 import analystImg from "@/assets/characters/analyst.png";
 import saraImg from "@/assets/characters/sara.png";
 import prismBuildingImg from "@/assets/scenes/prism-building-exterior.webp";
@@ -170,13 +170,6 @@ export const CompanyBriefingScreen = ({
 
         <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-4">
           <motion.div className="space-y-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <motion.p className="text-4xl" animate={{ x: [0, -5, 5, -3, 3, 0] }} transition={{ duration: 0.4, delay: 0.3 }}>🚪</motion.p>
-            <motion.p className="text-foreground text-lg font-bold" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} dir="rtl">
-              طق طق طق...
-            </motion.p>
-            <motion.p className="text-accent text-base font-bold" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.8 }} dir="rtl">
-              "اتفضل!"
-            </motion.p>
             <motion.button
               onClick={() => {
                 try {
@@ -187,7 +180,7 @@ export const CompanyBriefingScreen = ({
               className="mt-4 px-8 py-3 rounded-xl bg-card/65 border border-border text-foreground font-bold hover:bg-card/80 transition-all"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 2.4 }}
+              transition={{ delay: 1.2 }}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
             >
@@ -214,9 +207,9 @@ export const CompanyBriefingScreen = ({
             </motion.div>
 
             <motion.div className="p-6 rounded-xl bg-card/75 border border-border space-y-4" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.4 }}>
-              <GraduationCap className="w-8 h-8 text-accent mx-auto" />
+              <ChartNoAxesColumnIncreasing className="w-8 h-8 text-accent mx-auto" />
               <p className="text-foreground text-lg font-bold leading-relaxed" dir="rtl">
-                قدامك عميل داخل على قرار، ودورك الأول إنك تفهم الصورة صح قبل أي اقتراح.
+                دورك كمحلل بيانات تساعد العميل على اتخاذ القرار الصحيح
               </p>
             </motion.div>
 
@@ -232,8 +225,7 @@ export const CompanyBriefingScreen = ({
             >
               <motion.div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" animate={{ x: ["-200%", "200%"] }} transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }} />
               <span className="relative z-10 flex items-center justify-center gap-2 text-white">
-                <Rocket className="w-5 h-5" />
-                يلا نروح VELARO!
+                يلا نروح للعميل
               </span>
             </motion.button>
           </motion.div>

@@ -27,7 +27,6 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
 
   const allSelected = useMemo(
     () =>
-      !!state.framing.client_view &&
       !!state.framing.true_frame &&
       !!state.framing.next_decision,
     [state.framing]
