@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Settings, X, User, LogOut, RotateCcw, Building2, Volume2, VolumeX, Music, Music2 } from "lucide-react";
+import { Settings, X, User, RotateCcw, Building2, Volume2, VolumeX } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSound } from "@/hooks/useSoundEffects";
-import { useMusic } from "@/hooks/useBackgroundMusic";
 import analystImg from "@/assets/characters/analyst.png";
 import saraImg from "@/assets/characters/sara.png";
 
@@ -13,9 +12,8 @@ interface PlayerSettingsPanelProps {
 }
 
 export const PlayerSettingsPanel = ({ onReplayBriefing, onResetProgress }: PlayerSettingsPanelProps) => {
-  const { profile, signOut, updateProfile } = useAuth();
+  const { profile, updateProfile } = useAuth();
   const { isSoundEnabled, setIsSoundEnabled, playSound } = useSound();
-  const { isMusicEnabled, toggleMusic, volume, setVolume } = useMusic();
   const [isOpen, setIsOpen] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editFirstName, setEditFirstName] = useState(profile?.first_name || "");
