@@ -4,7 +4,7 @@ import { Phone } from "lucide-react";
 import { usePFGame } from "@/contexts/PFGameContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSceneAmbience } from "@/hooks/useSceneAudio";
-import { useMusic } from "@/hooks/useBackgroundMusic";
+
 import { EnhancedDialogue } from "../EnhancedDialogue";
 import {
   MANSOUR_CALL_STRONG,
