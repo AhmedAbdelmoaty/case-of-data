@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, DoorOpen } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
