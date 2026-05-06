@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import analystImg from "@/assets/characters/analyst.png";
-import saraImg from "@/assets/characters/sara.png";
+import analystImg from "@/assets/characters/analyst.webp";
+import saraImg from "@/assets/characters/sara.webp";
 
 const Setup = () => {
   const [firstName, setFirstName] = useState("");

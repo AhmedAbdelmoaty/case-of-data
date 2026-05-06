@@ -16,25 +16,25 @@ export const HISHAM_GREETING: DialogueLine[] = [
       ".",
     ]),
     mood: "happy",
-    audioSrc: "/voiceover/hesham/hisham_arrival_01_welcome.wav",
+    audioSrc: "/voiceover/hesham/hisham_arrival_01_welcome.mp3",
   },
   {
     characterId: "detective",
     text: "شكرا جدا يا أستاذ هشام. أستاذ منصور قالي إن حضرتك عاوز تتكلم في موضوع شاغلك.",
     mood: "neutral",
-    audioSrc: "/voiceover/analyst_male/analyst_arrival_hisham_01_greeting.wav",
+    audioSrc: "/voiceover/analyst_male/analyst_arrival_hisham_01_greeting.mp3",
   },
   {
     characterId: "hisham",
     text: "والله يا فندم… الشهر اللي فات ده حاسس إن في حاجة في الشغل مش ماشية. الحركة موجودة، بس فيه حاجة ناقصة.",
     mood: "concerned",
-    audioSrc: "/voiceover/hesham/hisham_arrival_02_problem_feeling.wav",
+    audioSrc: "/voiceover/hesham/hisham_arrival_02_problem_feeling.mp3",
   },
   {
     characterId: "detective",
     text: "متشغلش بالك. خلينا نهدى ونفهم سوا. هسألك كام سؤال، وانت قولي اللي عندك.",
     mood: "confident",
-    audioSrc: "/voiceover/analyst_male/analyst_arrival_hisham_02_calm_start.wav",
+    audioSrc: "/voiceover/analyst_male/analyst_arrival_hisham_02_calm_start.mp3",
   },
 ];
 
@@ -43,31 +43,31 @@ export const MANSOUR_INTRO_DIALOGUES: DialogueLine[] = [
     characterId: "mansour",
     text: genderLine(["أهلاً، ", v("اتفضل", "اتفضلي"), " ", v("اقعد", "اقعدي"), ". عندنا استشارة جديدة محتاجة تركيز."]),
     mood: "neutral",
-    audioSrc: "/voiceover/mansour/mansour_intro_office_01.wav",
+    audioSrc: "/voiceover/mansour/mansour_intro_office_01.mp3",
   },
   {
     characterId: "mansour",
     text: "عميل قديم لشركتنا، اسمه هشام الشريف، صاحب براند ملابس كبير. كلمنا وبيقول إن عنده مشكلة في الشغل الفترة دي.",
     mood: "neutral",
-    audioSrc: "/voiceover/mansour/mansour_intro_office_02.wav",
+    audioSrc: "/voiceover/mansour/mansour_intro_office_02.mp3",
   },
   {
     characterId: "mansour",
     text: genderLine(["عايزك ", v("تروح", "تروحي"), " ", v("تقعد", "تقعدي"), " معاه وتوريني مهاراتك التحليلية."]),
     mood: "serious",
-    audioSrc: "/voiceover/mansour/mansour_intro_office_03.wav",
+    audioSrc: "/voiceover/mansour/mansour_intro_office_03.mp3",
   },
   {
     characterId: "detective",
     text: "تمام يا أستاذ منصور، هروح وأحاول أفهم الصورة كاملة.",
     mood: "neutral",
-    audioSrc: "/voiceover/analyst_male/analyst_intro_with_mansour_01_accept_task.wav",
+    audioSrc: "/voiceover/analyst_male/analyst_intro_with_mansour_01_accept_task.mp3",
   },
   {
     characterId: "mansour",
     text: genderLine(["تمام، يلا بالتوفيق. ", v("خلّص", "خلّصي"), " و", v("ابعتلي", "ابعتيلي"), " تقرير كامل باللي ", v("وصلتله", "وصلتيله"), "."]),
     mood: "neutral",
-    audioSrc: "/voiceover/mansour/mansour_intro_office_04.wav",
+    audioSrc: "/voiceover/mansour/mansour_intro_office_04.mp3",
   },
 ];
 

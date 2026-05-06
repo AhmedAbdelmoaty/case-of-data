@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import impLogo from "@/assets/brand/imp-logo.png";
+import impLogo from "@/assets/brand/imp-logo.webp";
 
 const sparks = Array.from({ length: 18 }, (_, index) => ({
   id: index,

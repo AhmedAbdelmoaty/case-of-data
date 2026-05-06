@@ -7,10 +7,10 @@ import { useSound } from "@/hooks/useSoundEffects";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import type { CaseOutcome } from "@/lib/pf-case/case-tree";
-import femaleStrongMascot from "@/assets/results/result-mascot-female-strong.png";
-import femaleWeakMascot from "@/assets/results/result-mascot-female-weak.png";
-import maleStrongMascot from "@/assets/results/result-mascot-male-strong.png";
-import maleWeakMascot from "@/assets/results/result-mascot-male-weak.png";
+import femaleStrongMascot from "@/assets/results/result-mascot-female-strong.webp";
+import femaleWeakMascot from "@/assets/results/result-mascot-female-weak.webp";
+import maleStrongMascot from "@/assets/results/result-mascot-male-strong.webp";
+import maleWeakMascot from "@/assets/results/result-mascot-male-weak.webp";
 
 interface ResultScreenProps {
   onNavigate: (screen: string) => void;

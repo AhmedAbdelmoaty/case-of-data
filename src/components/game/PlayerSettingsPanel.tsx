@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Settings, X, User, RotateCcw, Building2, Volume2, VolumeX } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSound } from "@/hooks/useSoundEffects";
-import analystImg from "@/assets/characters/analyst.png";
-import saraImg from "@/assets/characters/sara.png";
+import analystImg from "@/assets/characters/analyst.webp";
+import saraImg from "@/assets/characters/sara.webp";
 
 interface PlayerSettingsPanelProps {
   onReplayBriefing: () => void;

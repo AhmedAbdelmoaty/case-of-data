@@ -5,8 +5,8 @@ import { BookmarkPlus, Check, X, ChevronRight, FileText, StickyNote } from "luci
 import { AnimatedCharacter, type CharacterId } from "./AnimatedCharacter";
 import { ReportDocument } from "./ReportDocument";
 import type { EvidenceData } from "@/lib/pf-case/evidence-catalog";
-import analystImg from "@/assets/characters/analyst.png";
-import saraImg from "@/assets/characters/sara.png";
+import analystImg from "@/assets/characters/analyst.webp";
+import saraImg from "@/assets/characters/sara.webp";
 
 interface DialogueLine {
   characterId: string;
