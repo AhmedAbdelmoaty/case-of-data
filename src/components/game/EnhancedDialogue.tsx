@@ -575,14 +575,6 @@ export const EnhancedDialogue = ({
           whileTap={{ scale: 0.99 }}
           layoutId="dialogue-box"
         >
-          {/* Close button - top right */}
-          <button
-            onClick={(e) => { e.stopPropagation(); handleClose(); }}
-            className="absolute top-3 left-3 p-1.5 rounded-lg hover:bg-white/10 text-white/60 hover:text-white/90 transition-colors z-10"
-          >
-            <X className="w-5 h-5" />
-          </button>
-
           <motion.div
             className="flex items-center gap-3 mb-3"
             key={currentDialogue.characterId}
