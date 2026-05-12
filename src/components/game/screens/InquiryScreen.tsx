@@ -15,6 +15,7 @@ import { getHeshamVoice } from "@/lib/voiceover/heshamVoiceMap";
 import { getVoiceoverSrc } from "@/lib/voiceover/genderedDialogue";
 import { getAnalystVoice } from "@/lib/voiceover/analystVoiceMap";
 import { renderGenderText } from "@/lib/genderText";
+import { playVoice } from "@/lib/assetPreloader";
 import analystImg from "@/assets/characters/analyst.webp";
 import saraImg from "@/assets/characters/sara.webp";
 import velaroInteriorWideImg from "@/assets/scenes/velaro-interior-wide.webp";
