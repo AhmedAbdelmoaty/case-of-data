@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { SoundProvider } from "@/hooks/useSoundEffects";
+import { BootLoader } from "@/components/game/BootLoader";
 import Index from "./pages/Index";
 import Setup from "./pages/Setup";
 import AdminLogin from "./pages/AdminLogin";
@@ -34,21 +35,23 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <SoundProvider>
-            <Routes>
-              {/* Player routes — no login required */}
-              <Route path="/setup" element={<Setup />} />
-              <Route path="/" element={
-                <RequireProfile>
-                  <Index />
-                </RequireProfile>
-              } />
+            <BootLoader>
+              <Routes>
+                {/* Player routes — no login required */}
+                <Route path="/setup" element={<Setup />} />
+                <Route path="/" element={
+                  <RequireProfile>
+                    <Index />
+                  </RequireProfile>
+                } />
 
-              {/* Hidden admin routes */}
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin/board-9k2x" element={<AdminBoard />} />
+                {/* Hidden admin routes */}
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin/board-9k2x" element={<AdminBoard />} />
 
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BootLoader>
           </SoundProvider>
         </AuthProvider>
       </BrowserRouter>

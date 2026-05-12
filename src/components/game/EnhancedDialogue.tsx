@@ -7,6 +7,7 @@ import { ReportDocument } from "./ReportDocument";
 import type { EvidenceData } from "@/lib/pf-case/evidence-catalog";
 import analystImg from "@/assets/characters/analyst.webp";
 import saraImg from "@/assets/characters/sara.webp";
+import { getAudio } from "@/lib/assetPreloader";
 
 interface DialogueLine {
   characterId: string;
@@ -124,10 +125,9 @@ export const EnhancedDialogue = ({
   const getCachedAudio = (src: string): HTMLAudioElement => {
     let a = audioCacheRef.current.get(src);
     if (!a) {
-      a = new Audio();
-      a.preload = "auto";
-      a.src = src;
-      try { a.load(); } catch {/* noop */}
+      // Route through the unified pipeline so the cache is shared
+      // with the boot preloader and the rest of the game.
+      a = getAudio(src);
       audioCacheRef.current.set(src, a);
     }
     return a;
@@ -275,26 +275,39 @@ export const EnhancedDialogue = ({
     setCollectibles([]);
     setIsCollecting(false);
 
+    // Watchdog: no matter what happens with audio, unlock the gate after a
+    // bounded time so the dialogue can never freeze waiting on a media event.
+    const text = currentDialogue.text;
+    const expectedAudioMs = Math.max(text.length * 90 + 1500, 4000);
+    const watchdogMs = Math.min(expectedAudioMs * 2, 14000);
+    const watchdog = window.setTimeout(() => {
+      if (!audioDoneRef.current) {
+        audioDoneRef.current = true;
+        setAutoSignal((s) => s + 1);
+      }
+    }, watchdogMs);
+
     // Play voice over if available — use cached/preloaded audio for instant start
     if (currentDialogue.audioSrc) {
       try {
         const audio = getCachedAudio(currentDialogue.audioSrc);
         try { audio.currentTime = 0; } catch {/* noop */}
         audioRef.current = audio;
-        audio.onended = () => {
+        const markDone = () => {
+          if (audioDoneRef.current) return;
           audioDoneRef.current = true;
           setAutoSignal((s) => s + 1);
         };
-        audio.onerror = () => {
-          audioDoneRef.current = true;
-          setAutoSignal((s) => s + 1);
+        audio.onended = markDone;
+        audio.onerror = markDone;
+        audio.onabort = markDone;
+        audio.onstalled = () => {
+          // Stalled networks: give a brief grace then unblock the dialogue.
+          window.setTimeout(markDone, 1500);
         };
         const p = audio.play();
         if (p && typeof p.catch === "function") {
-          p.catch(() => {
-            audioDoneRef.current = true;
-            setAutoSignal((s) => s + 1);
-          });
+          p.catch(markDone);
         }
       } catch {
         audioDoneRef.current = true;
@@ -311,7 +324,6 @@ export const EnhancedDialogue = ({
     }
 
     let charIndex = 0;
-    const text = currentDialogue.text;
 
     const typingInterval = setInterval(() => {
       if (charIndex < text.length) {
@@ -327,6 +339,7 @@ export const EnhancedDialogue = ({
       clearInterval(typingInterval);
       clearCollectionTimers();
       clearAutoAdvanceTimer();
+      window.clearTimeout(watchdog);
     };
   }, [clearAutoAdvanceTimer, clearCollectionTimers, currentIndex, isActive, currentDialogue, finishTyping]);
 

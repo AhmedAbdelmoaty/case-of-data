@@ -15,6 +15,7 @@ import { getHeshamVoice } from "@/lib/voiceover/heshamVoiceMap";
 import { getVoiceoverSrc } from "@/lib/voiceover/genderedDialogue";
 import { getAnalystVoice } from "@/lib/voiceover/analystVoiceMap";
 import { renderGenderText } from "@/lib/genderText";
+import { playVoice } from "@/lib/assetPreloader";
 import analystImg from "@/assets/characters/analyst.webp";
 import saraImg from "@/assets/characters/sara.webp";
 import velaroInteriorWideImg from "@/assets/scenes/velaro-interior-wide.webp";
@@ -229,6 +230,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
 
     let cancelled = false;
     let progressTimer: number | null = null;
+    let voiceHandle: { audio: HTMLAudioElement; stop: () => void } | null = null;
 
     clearQuestionFallbackTimer();
     stopQuestionAudio();
@@ -238,13 +240,15 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
       if (!cancelled) commitQuestionToDialogue(activeQuestion.option);
     };
 
-    const startFallback = () => {
+    // Hard fallback so the question phase NEVER hangs, even if audio
+    // is missing, blocked, stalled, or never fires an event.
+    const startFallback = (ms: number = QUESTION_FALLBACK_MS) => {
       clearQuestionFallbackTimer();
-      questionFallbackTimerRef.current = window.setTimeout(finish, QUESTION_FALLBACK_MS);
+      questionFallbackTimerRef.current = window.setTimeout(finish, ms);
     };
 
     progressTimer = window.setInterval(() => {
-      const audio = questionAudioRef.current;
+      const audio = voiceHandle?.audio;
       if (audio && Number.isFinite(audio.duration) && audio.duration > 0) {
         setQuestionProgress(Math.min(audio.currentTime / audio.duration, 0.96));
         return;
@@ -254,31 +258,28 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
 
     if (!activeQuestion.audioSrc) {
       startFallback();
-      return () => {
-        cancelled = true;
-        if (progressTimer) window.clearInterval(progressTimer);
-        clearQuestionFallbackTimer();
-      };
-    }
-
-    try {
-      const audio = new Audio(activeQuestion.audioSrc);
-      audio.preload = "auto";
-      questionAudioRef.current = audio;
-      audio.onended = finish;
-      audio.onerror = finish;
-      const p = audio.play();
-      if (p && typeof p.catch === "function") {
-        p.catch(startFallback);
+    } else {
+      // Use the unified audio pipeline. playVoice() always resolves
+      // (on ended / error / abort / stalled / safety timeout) — it can
+      // never leave the question phase stuck.
+      try {
+        // Lazy import via require-style is unnecessary; static import is fine.
+        const handle = playVoice(activeQuestion.audioSrc, 12000);
+        voiceHandle = handle;
+        questionAudioRef.current = handle.audio;
+        handle.done.then(() => { if (!cancelled) finish(); });
+        // Also arm a defensive long fallback in case playVoice itself misbehaves.
+        startFallback(13000);
+      } catch {
+        startFallback();
       }
-    } catch {
-      startFallback();
     }
 
     return () => {
       cancelled = true;
       if (progressTimer) window.clearInterval(progressTimer);
       clearQuestionFallbackTimer();
+      if (voiceHandle) voiceHandle.stop();
     };
   }, [
     activeQuestion,
