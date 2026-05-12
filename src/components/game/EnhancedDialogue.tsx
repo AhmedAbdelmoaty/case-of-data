@@ -98,6 +98,7 @@ export const EnhancedDialogue = ({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioCacheRef = useRef<Map<string, HTMLAudioElement>>(new Map());
   const autoAdvanceTimerRef = useRef<number | null>(null);
+  const audioLineTokenRef = useRef(0);
   const typingDoneRef = useRef(false);
   const audioDoneRef = useRef(false);
   const collectibleIdRef = useRef(0);
@@ -261,6 +262,27 @@ export const EnhancedDialogue = ({
   useEffect(() => {
     if (!isActive || !currentDialogue) return;
 
+    const lineToken = audioLineTokenRef.current + 1;
+    audioLineTokenRef.current = lineToken;
+    let audioSafetyTimer: number | null = null;
+    let stalledGraceTimer: number | null = null;
+    let progressWatchTimer: number | null = null;
+
+    const clearAudioTimers = () => {
+      if (audioSafetyTimer !== null) {
+        window.clearTimeout(audioSafetyTimer);
+        audioSafetyTimer = null;
+      }
+      if (stalledGraceTimer !== null) {
+        window.clearTimeout(stalledGraceTimer);
+        stalledGraceTimer = null;
+      }
+      if (progressWatchTimer !== null) {
+        window.clearInterval(progressWatchTimer);
+        progressWatchTimer = null;
+      }
+    };
+
     stopAudio();
     clearCollectionTimers();
     clearAutoAdvanceTimer();
@@ -275,17 +297,13 @@ export const EnhancedDialogue = ({
     setCollectibles([]);
     setIsCollecting(false);
 
-    // Watchdog: no matter what happens with audio, unlock the gate after a
-    // bounded time so the dialogue can never freeze waiting on a media event.
     const text = currentDialogue.text;
-    const expectedAudioMs = Math.max(text.length * 90 + 1500, 4000);
-    const watchdogMs = Math.min(expectedAudioMs * 2, 14000);
-    const watchdog = window.setTimeout(() => {
-      if (!audioDoneRef.current) {
-        audioDoneRef.current = true;
-        setAutoSignal((s) => s + 1);
-      }
-    }, watchdogMs);
+    const markAudioDone = () => {
+      if (audioLineTokenRef.current !== lineToken || audioDoneRef.current) return;
+      audioDoneRef.current = true;
+      clearAudioTimers();
+      setAutoSignal((s) => s + 1);
+    };
 
     // Play voice over if available — use cached/preloaded audio for instant start
     if (currentDialogue.audioSrc) {
@@ -293,21 +311,49 @@ export const EnhancedDialogue = ({
         const audio = getCachedAudio(currentDialogue.audioSrc);
         try { audio.currentTime = 0; } catch {/* noop */}
         audioRef.current = audio;
-        const markDone = () => {
-          if (audioDoneRef.current) return;
-          audioDoneRef.current = true;
-          setAutoSignal((s) => s + 1);
-        };
-        audio.onended = markDone;
-        audio.onerror = markDone;
-        audio.onabort = markDone;
+        let lastProgressTime = Date.now();
+        let lastCurrentTime = 0;
+        const estimatedCeilingMs = Math.max(text.length * 180 + 12000, 30000);
+
+        audio.onended = markAudioDone;
+        audio.onerror = markAudioDone;
+        audio.onabort = markAudioDone;
         audio.onstalled = () => {
-          // Stalled networks: give a brief grace then unblock the dialogue.
-          window.setTimeout(markDone, 1500);
+          if (stalledGraceTimer !== null) window.clearTimeout(stalledGraceTimer);
+          stalledGraceTimer = window.setTimeout(() => {
+            if (audioLineTokenRef.current !== lineToken || audioDoneRef.current) return;
+            const hasRecovered = audio.currentTime > lastCurrentTime + 0.05 || audio.ended;
+            if (hasRecovered) return;
+            markAudioDone();
+          }, 8000);
         };
+        audioSafetyTimer = window.setTimeout(markAudioDone, estimatedCeilingMs);
+        progressWatchTimer = window.setInterval(() => {
+          if (audioLineTokenRef.current !== lineToken || audioDoneRef.current) {
+            clearAudioTimers();
+            return;
+          }
+          if (audio.ended) {
+            markAudioDone();
+            return;
+          }
+          if (audio.currentTime > lastCurrentTime + 0.05) {
+            lastCurrentTime = audio.currentTime;
+            lastProgressTime = Date.now();
+            if (stalledGraceTimer !== null) {
+              window.clearTimeout(stalledGraceTimer);
+              stalledGraceTimer = null;
+            }
+            return;
+          }
+          if (!audio.paused && Date.now() - lastProgressTime > 12000) {
+            markAudioDone();
+          }
+        }, 1000);
+
         const p = audio.play();
         if (p && typeof p.catch === "function") {
-          p.catch(markDone);
+          p.catch(markAudioDone);
         }
       } catch {
         audioDoneRef.current = true;
@@ -336,10 +382,11 @@ export const EnhancedDialogue = ({
     }, 30);
 
     return () => {
+      audioLineTokenRef.current += 1;
       clearInterval(typingInterval);
       clearCollectionTimers();
       clearAutoAdvanceTimer();
-      window.clearTimeout(watchdog);
+      clearAudioTimers();
     };
   }, [clearAutoAdvanceTimer, clearCollectionTimers, currentIndex, isActive, currentDialogue, finishTyping]);
 

@@ -35,24 +35,26 @@ export const preloadAudio = (src: string, timeoutMs: number = 4000): Promise<voi
 
   const p = new Promise<void>((resolve) => {
     const el = getAudio(src);
-    if (el.readyState >= 3) {
+    if (el.readyState >= 4) {
       resolve();
       return;
     }
     let done = false;
-    const finish = () => {
+    const finish = (cacheReady: boolean = true) => {
       if (done) return;
       done = true;
       window.clearTimeout(timer);
-      el.removeEventListener("canplaythrough", finish);
-      el.removeEventListener("loadeddata", finish);
-      el.removeEventListener("error", finish);
+      el.removeEventListener("canplaythrough", onReady);
+      el.removeEventListener("error", fail);
+      if (!cacheReady) audioReady.delete(src);
       resolve();
     };
-    const timer = window.setTimeout(finish, timeoutMs);
-    el.addEventListener("canplaythrough", finish, { once: true });
-    el.addEventListener("loadeddata", finish, { once: true });
-    el.addEventListener("error", finish, { once: true });
+    const onReady = () => finish(true);
+    const fail = () => finish(false);
+    const timeout = () => finish(el.readyState >= 4);
+    const timer = window.setTimeout(timeout, timeoutMs);
+    el.addEventListener("canplaythrough", onReady, { once: true });
+    el.addEventListener("error", fail, { once: true });
     try { el.load(); } catch { /* noop */ }
   });
 
@@ -79,16 +81,28 @@ export const playVoice = (src: string, safetyTimeoutMs: number = 12000): PlayVoi
   try { audio.currentTime = 0; } catch { /* noop */ }
 
   let settled = false;
-  let timer: number | null = null;
+  let stalledTimer: number | null = null;
+  let progressTimer: number | null = null;
+  let ceilingTimer: number | null = null;
+  let lastProgressTime = Date.now();
+  let lastCurrentTime = 0;
 
   const cleanup = () => {
     audio.removeEventListener("ended", onEnd);
     audio.removeEventListener("error", onEnd);
     audio.removeEventListener("abort", onEnd);
     audio.removeEventListener("stalled", onStalled);
-    if (timer !== null) {
-      window.clearTimeout(timer);
-      timer = null;
+    if (stalledTimer !== null) {
+      window.clearTimeout(stalledTimer);
+      stalledTimer = null;
+    }
+    if (progressTimer !== null) {
+      window.clearInterval(progressTimer);
+      progressTimer = null;
+    }
+    if (ceilingTimer !== null) {
+      window.clearTimeout(ceilingTimer);
+      ceilingTimer = null;
     }
   };
 
@@ -99,11 +113,14 @@ export const playVoice = (src: string, safetyTimeoutMs: number = 12000): PlayVoi
     resolveDone();
   };
 
-  // "stalled" can fire on flaky networks before any data arrives — give it
-  // a short grace then bail rather than hanging the dialogue forever.
+  // Stalled networks get a real grace period so slow audio is not cut short.
   const onStalled = () => {
-    if (timer !== null) window.clearTimeout(timer);
-    timer = window.setTimeout(onEnd, 1500);
+    if (stalledTimer !== null) window.clearTimeout(stalledTimer);
+    stalledTimer = window.setTimeout(() => {
+      const hasRecovered = audio.currentTime > lastCurrentTime + 0.05 || audio.ended;
+      if (hasRecovered) return;
+      onEnd();
+    }, 8000);
   };
 
   let resolveDone!: () => void;
@@ -114,8 +131,27 @@ export const playVoice = (src: string, safetyTimeoutMs: number = 12000): PlayVoi
   audio.addEventListener("abort", onEnd, { once: true });
   audio.addEventListener("stalled", onStalled);
 
-  // Hard safety net so a missing event never freezes the game.
-  timer = window.setTimeout(onEnd, safetyTimeoutMs);
+  progressTimer = window.setInterval(() => {
+    if (settled) return;
+    if (audio.ended) {
+      onEnd();
+      return;
+    }
+    if (audio.currentTime > lastCurrentTime + 0.05) {
+      lastCurrentTime = audio.currentTime;
+      lastProgressTime = Date.now();
+      if (stalledTimer !== null) {
+        window.clearTimeout(stalledTimer);
+        stalledTimer = null;
+      }
+      return;
+    }
+    if (!audio.paused && Date.now() - lastProgressTime > safetyTimeoutMs) {
+      onEnd();
+    }
+  }, 1000);
+
+  ceilingTimer = window.setTimeout(onEnd, Math.max(safetyTimeoutMs * 3, 30000));
 
   try {
     const p = audio.play();
