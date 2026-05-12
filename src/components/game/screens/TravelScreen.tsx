@@ -123,7 +123,7 @@ export const TravelScreen = ({ onComplete }: TravelScreenProps) => {
         <div className="mt-4 w-48">
           <div className="w-full h-1 bg-muted/30 rounded-full overflow-hidden">
             <motion.div
-              className="h-full bg-gradient-to-r from-primary to-accent rounded-full"
+              className="h-full bg-primary rounded-full"
               initial={{ width: "0%" }}
               animate={{ width: "100%" }}
               transition={{ duration: TOTAL_DURATION / 1000, ease: "linear" }}

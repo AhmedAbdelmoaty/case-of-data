@@ -206,17 +206,16 @@ export const CompanyBriefingScreen = ({
               <img src={avatarImg} alt={name} className="w-full h-full object-cover" />
             </motion.div>
 
-            <motion.div className="p-6 rounded-xl bg-card/75 border border-border space-y-4" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.4 }}>
-              <ChartNoAxesColumnIncreasing className="w-8 h-8 text-accent mx-auto" />
-              <p className="text-foreground text-lg font-bold leading-relaxed" dir="rtl">
+            <motion.div className="imp-panel p-6 rounded-xl space-y-4" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.4 }}>
+              <ChartNoAxesColumnIncreasing className="w-8 h-8 text-primary mx-auto" />
+              <p className="text-[#171717] text-lg font-black leading-relaxed" dir="rtl">
                 دورك كمحلل بيانات تساعد العميل على اتخاذ القرار الصحيح
               </p>
             </motion.div>
 
             <motion.button
               onClick={onComplete}
-              className="relative px-8 py-4 rounded-xl text-lg font-bold overflow-hidden group w-full"
-              style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))" }}
+              className="imp-action relative px-8 py-4 rounded-xl text-lg font-black overflow-hidden group w-full"
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.7 }}

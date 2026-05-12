@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { preloadAudio, preloadImage, runWithConcurrency, warmAudioUnlock } from "@/lib/assetPreloader";
 import { SCREEN_ASSETS } from "@/lib/pf-case/asset-manifest";
+import impLogo from "@/assets/brand/imp-logo.webp";
 
 interface BootLoaderProps {
   children: React.ReactNode;
@@ -90,19 +91,21 @@ export const BootLoader = ({ children }: BootLoaderProps) => {
   const pct = Math.round(progress * 100);
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-6">
-      <div className="w-full max-w-sm flex flex-col items-center gap-6">
+    <div className="relative min-h-screen bg-[#f7f2e8] flex items-center justify-center overflow-hidden px-6">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,hsl(var(--primary)/0.18),transparent_42%)]" />
+      <div className="imp-panel w-full max-w-sm overflow-hidden rounded-3xl">
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center"
+          className="imp-panel-header px-6 py-5 text-center"
         >
-          <p className="text-muted-foreground text-xs tracking-[0.35em] uppercase">Loading</p>
+          <img src={impLogo} alt="IMP" className="mx-auto mb-3 h-12 w-auto rounded-md bg-white px-2 py-1" />
+          <p className="text-white/80 text-xs tracking-[0.35em] uppercase">Loading</p>
         </motion.div>
 
-        <div className="w-full h-2 rounded-full bg-card/60 overflow-hidden border border-border">
+        <div className="m-6 h-2 overflow-hidden rounded-full border border-black/15 bg-black/10">
           <motion.div
-            className="h-full bg-gradient-to-r from-primary to-accent"
+            className="h-full bg-primary"
             initial={{ width: 0 }}
             animate={{ width: `${pct}%` }}
             transition={{ duration: 0.3 }}

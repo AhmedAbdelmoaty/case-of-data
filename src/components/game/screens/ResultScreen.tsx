@@ -11,6 +11,7 @@ import femaleStrongMascot from "@/assets/results/result-mascot-female-strong.web
 import femaleWeakMascot from "@/assets/results/result-mascot-female-weak.webp";
 import maleStrongMascot from "@/assets/results/result-mascot-male-strong.webp";
 import maleWeakMascot from "@/assets/results/result-mascot-male-weak.webp";
+import impLogo from "@/assets/brand/imp-logo.webp";
 
 interface ResultScreenProps {
   onNavigate: (screen: string) => void;
@@ -27,16 +28,16 @@ const RESULT_VIEW = {
     mascot: { male: maleStrongMascot, female: femaleStrongMascot },
     stars: 3,
     sound: "fanfare",
-    page: "bg-[linear-gradient(135deg,#6ee7f9_0%,#d9f99d_45%,#fde68a_100%)]",
-    stage: "border-[#fbbf24] bg-[#fffdf2]/92 shadow-[#f59e0b]/30",
-    titleColor: "text-[#12524c]",
-    badgeStyle: "border-[#f59e0b]/35 bg-white/75 text-[#8a4b00]",
-    starOn: "bg-[#ffd447] text-[#7c3d00] shadow-[#f59e0b]/35",
-    starOff: "bg-white/55 text-[#d9b56f]",
-    button: "bg-[#12b981] text-white shadow-[#10b981]/35 hover:bg-[#0ea674]",
-    chipOn: "bg-[#ecfccb] text-[#365314] border-[#84cc16]/45",
-    chipOff: "bg-white/50 text-[#8a7a5b] border-white/70",
-    confetti: ["#f59e0b", "#06b6d4", "#22c55e", "#ef4444", "#a855f7"],
+    page: "bg-[radial-gradient(circle_at_50%_30%,rgba(166,30,37,.18),transparent_42%),linear-gradient(135deg,#f7f2e8_0%,#fff_54%,#f4e2e3_100%)]",
+    stage: "border-[#A61E25]/80 bg-white/96 shadow-[#A61E25]/25",
+    titleColor: "text-[#151515]",
+    badgeStyle: "border-[#A61E25]/35 bg-white/80 text-[#A61E25]",
+    starOn: "bg-[#A61E25] text-white shadow-[#A61E25]/35",
+    starOff: "bg-white/60 text-[#b8aa9c]",
+    button: "bg-[#A61E25] text-white shadow-[#A61E25]/35 hover:bg-[#8f1820]",
+    chipOn: "bg-[#A61E25]/10 text-[#A61E25] border-[#A61E25]/35",
+    chipOff: "bg-white/60 text-[#6f635c] border-white/70",
+    confetti: ["#A61E25", "#ffffff", "#111111", "#d7c28a", "#7d141a"],
   },
   weak: {
     badge: "💡 جرّب تاني",
@@ -48,16 +49,16 @@ const RESULT_VIEW = {
     mascot: { male: maleWeakMascot, female: femaleWeakMascot },
     stars: 1,
     sound: "sparkle",
-    page: "bg-[linear-gradient(135deg,#ffedd5_0%,#fef3c7_48%,#dcfce7_100%)]",
-    stage: "border-[#fb923c] bg-[#fffaf0]/92 shadow-[#fb923c]/25",
-    titleColor: "text-[#7c2d12]",
-    badgeStyle: "border-[#fb923c]/30 bg-white/75 text-[#9a3412]",
-    starOn: "bg-[#fb923c] text-white shadow-[#fb923c]/28",
-    starOff: "bg-white/58 text-[#d8a77d]",
-    button: "bg-[#f97316] text-white shadow-[#fb923c]/35 hover:bg-[#ea580c]",
-    chipOn: "bg-[#ffedd5] text-[#9a3412] border-[#fb923c]/45",
-    chipOff: "bg-white/52 text-[#9b765d] border-white/70",
-    confetti: ["#fb923c", "#facc15", "#22c55e", "#38bdf8", "#f472b6"],
+    page: "bg-[radial-gradient(circle_at_50%_30%,rgba(166,30,37,.13),transparent_42%),linear-gradient(135deg,#f7f2e8_0%,#fff_58%,#eadedf_100%)]",
+    stage: "border-[#111111]/80 bg-white/95 shadow-[#A61E25]/20",
+    titleColor: "text-[#A61E25]",
+    badgeStyle: "border-[#111111]/15 bg-[#111111]/90 text-white",
+    starOn: "bg-[#A61E25] text-white shadow-[#A61E25]/25",
+    starOff: "bg-[#f1eadf] text-[#b9ada1]",
+    button: "bg-[#111111] text-white shadow-[#111111]/25 hover:bg-[#A61E25]",
+    chipOn: "bg-[#A61E25]/10 text-[#A61E25] border-[#A61E25]/35",
+    chipOff: "bg-[#f5efe7] text-[#786b64] border-[#dfd2c6]",
+    confetti: ["#A61E25", "#111111", "#d7c28a", "#ffffff"],
   },
 } as const;
 
@@ -154,8 +155,8 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
 
   return (
     <div className={cn("relative h-[100dvh] overflow-hidden text-[#172033]", view.page)} dir="rtl">
-      <div className="pointer-events-none absolute inset-0 opacity-45 [background-image:linear-gradient(90deg,rgba(255,255,255,.32)_1px,transparent_1px),linear-gradient(rgba(255,255,255,.28)_1px,transparent_1px)] [background-size:42px_42px]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(255,255,255,.76),rgba(255,255,255,.2)_42%,transparent_68%)]" />
+      <div className="pointer-events-none absolute inset-0 opacity-25 [background-image:linear-gradient(90deg,rgba(166,30,37,.28)_1px,transparent_1px),linear-gradient(rgba(17,17,17,.22)_1px,transparent_1px)] [background-size:42px_42px]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(255,255,255,.72),rgba(255,255,255,.18)_40%,transparent_68%)]" />
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         {outcome !== "weak" &&
@@ -184,11 +185,16 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
       <main className="relative z-10 flex h-full items-center justify-center px-3 py-3 sm:px-5 sm:py-4">
         <section
           className={cn(
-            "grid h-full max-h-[820px] w-full max-w-6xl grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden border-4 p-3 shadow-2xl sm:p-5",
+            "relative grid h-full max-h-[820px] w-full max-w-6xl grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden border-4 p-3 shadow-2xl sm:p-5",
             view.stage
           )}
           style={{ borderRadius: "28px" }}
         >
+          <img
+            src={impLogo}
+            alt="IMP"
+            className="absolute left-3 top-3 z-10 h-9 w-auto rounded-md bg-white/90 px-2 py-1 shadow-md sm:left-5 sm:top-5 sm:h-11"
+          />
           <motion.div
             className={cn(
               "mx-auto inline-flex h-11 items-center gap-2 rounded-2xl border px-5 text-sm font-black shadow-lg backdrop-blur-sm sm:h-12 sm:text-base",
@@ -201,7 +207,7 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
           >
             <span>{view.badge}</span>
             <span className="h-5 w-px bg-current/20" />
-            <span className="text-[#4b5563]">يا {playerName}</span>
+            <span className="text-current/75">يا {playerName}</span>
           </motion.div>
 
           <div className="grid min-h-0 grid-cols-1 items-center gap-2 lg:grid-cols-[1.08fr_0.92fr] lg:gap-8">
@@ -281,7 +287,7 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
               </motion.h1>
 
               <motion.p
-                className="mt-2 max-w-[520px] text-balance text-[clamp(.95rem,1.8vw,1.25rem)] font-black leading-7 text-[#475569] sm:mt-3"
+                className="mt-2 max-w-[520px] text-balance text-[clamp(.95rem,1.8vw,1.25rem)] font-black leading-7 text-[#4b5563] sm:mt-3"
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.88, duration: 0.38 }}
@@ -310,7 +316,7 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
 
               {outcome === "weak" && (
                 <motion.div
-                  className="mt-2 inline-flex items-center gap-2 rounded-full bg-white/65 px-4 py-2 text-sm font-black text-[#92400e] shadow-md sm:mt-4"
+                  className="mt-2 inline-flex items-center gap-2 rounded-full bg-[#A61E25]/10 px-4 py-2 text-sm font-black text-[#A61E25] shadow-md sm:mt-4"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: [1, 1.04, 1] }}
                   transition={{

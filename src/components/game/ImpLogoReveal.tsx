@@ -19,14 +19,14 @@ export const ImpLogoReveal = () => {
       aria-hidden="true"
     >
       <motion.div
-        className="absolute inset-0 bg-background/38 backdrop-blur-[1px]"
+        className="absolute inset-0 bg-white/22 backdrop-blur-[1px]"
         initial={{ opacity: 0 }}
         animate={{ opacity: [0, 1, 0.72] }}
         transition={{ duration: 1.1, times: [0, 0.35, 1] }}
       />
 
       <motion.div
-        className="absolute left-1/2 top-[57vh] h-1 w-[48vw] max-w-[620px] origin-left -translate-x-1/2 -rotate-[18deg] overflow-hidden rounded-full bg-gradient-to-r from-transparent via-red-500/75 to-amber-300/90 shadow-[0_0_22px_rgba(239,68,68,0.45)]"
+        className="absolute left-1/2 top-[57vh] h-1 w-[48vw] max-w-[620px] origin-left -translate-x-1/2 -rotate-[18deg] overflow-hidden rounded-full bg-gradient-to-r from-transparent via-[#A61E25]/85 to-white/80 shadow-[0_0_24px_rgba(166,30,37,0.42)]"
         initial={{ scaleX: 0, opacity: 0 }}
         animate={{ scaleX: [0, 1, 0.92], opacity: [0, 1, 0] }}
         transition={{ duration: 1.05, ease: [0.16, 1, 0.3, 1] }}
@@ -42,7 +42,7 @@ export const ImpLogoReveal = () => {
         {sparks.map((spark) => (
           <motion.span
             key={spark.id}
-            className="absolute h-1.5 w-1.5 rounded-[2px] bg-amber-200 shadow-[0_0_12px_rgba(252,211,77,0.85)]"
+            className="absolute h-1.5 w-1.5 rounded-[2px] bg-white shadow-[0_0_12px_rgba(166,30,37,0.75)]"
             initial={{ x: 0, y: 0, opacity: 0, scale: 0.35, rotate: 0 }}
             animate={{
               x: spark.x,
@@ -56,14 +56,14 @@ export const ImpLogoReveal = () => {
         ))}
 
         <motion.div
-          className="absolute h-[118%] w-[118%] rounded-full border border-red-300/30"
+          className="absolute h-[118%] w-[118%] rounded-full border border-[#A61E25]/35"
           initial={{ opacity: 0, scale: 0.42, rotate: -12 }}
           animate={{ opacity: [0, 0.95, 0], scale: [0.42, 1.18, 1.34], rotate: 12 }}
           transition={{ duration: 1.55, ease: [0.16, 1, 0.3, 1] }}
         />
 
         <motion.div
-          className="relative w-full overflow-hidden rounded-[34px] border border-white/45 bg-white/95 px-5 py-4 shadow-[0_22px_80px_rgba(0,0,0,0.42),0_0_42px_rgba(185,28,28,0.46)] sm:px-7 sm:py-5"
+          className="relative w-full overflow-hidden rounded-[28px] border-2 border-[#A61E25]/45 bg-white px-5 py-4 shadow-[0_24px_80px_rgba(0,0,0,0.34),0_0_34px_rgba(166,30,37,0.32)] sm:px-7 sm:py-5"
           initial={{ opacity: 0, scale: 0.28, y: 36, rotate: -7, filter: "blur(10px)" }}
           animate={{
             opacity: 1,
@@ -82,17 +82,17 @@ export const ImpLogoReveal = () => {
             transition={{ duration: 0.92, delay: 0.42, ease: "easeOut" }}
           />
           <motion.div
-            className="absolute inset-0 rounded-[34px] border-2 border-red-700/0"
+            className="absolute inset-0 rounded-[28px] border-2 border-[#A61E25]/0"
             animate={{
               borderColor: [
-                "rgba(185,28,28,0)",
-                "rgba(185,28,28,0.58)",
-                "rgba(185,28,28,0.08)",
+                "rgba(166,30,37,0)",
+                "rgba(166,30,37,0.62)",
+                "rgba(166,30,37,0.12)",
               ],
               boxShadow: [
-                "0 0 0 rgba(185,28,28,0)",
-                "0 0 34px rgba(185,28,28,0.42)",
-                "0 0 12px rgba(185,28,28,0.16)",
+                "0 0 0 rgba(166,30,37,0)",
+                "0 0 32px rgba(166,30,37,0.42)",
+                "0 0 12px rgba(166,30,37,0.14)",
               ],
             }}
             transition={{ duration: 1.4, delay: 0.18 }}

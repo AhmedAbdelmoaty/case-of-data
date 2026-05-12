@@ -56,7 +56,7 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
       dir="rtl"
       style={{
         background:
-          "linear-gradient(180deg, hsl(45 38% 96%) 0%, hsl(42 32% 92%) 100%)",
+          "linear-gradient(180deg, hsl(var(--imp-paper)) 0%, hsl(42 32% 91%) 100%)",
         color: "hsl(20 14% 18%)",
         fontFamily: "inherit",
       }}
@@ -119,7 +119,7 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
                 <YAxis tick={{ fontSize: 10, fill: "hsl(20 14% 18%)" }} {...yAxisProps} />
                 <Tooltip
                   contentStyle={{
-                    background: "hsl(45 38% 96%)",
+                    background: "hsl(var(--imp-paper))",
                     border: "1px solid hsl(20 14% 18% / 0.3)",
                     fontSize: 12,
                     color: "hsl(20 14% 18%)",
@@ -146,7 +146,7 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
                 <YAxis tick={{ fontSize: 10, fill: "hsl(20 14% 18%)" }} {...yAxisProps} />
                 <Tooltip
                   contentStyle={{
-                    background: "hsl(45 38% 96%)",
+                    background: "hsl(var(--imp-paper))",
                     border: "1px solid hsl(20 14% 18% / 0.3)",
                     fontSize: 12,
                     color: "hsl(20 14% 18%)",
@@ -170,7 +170,7 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
                 <YAxis tick={{ fontSize: 10, fill: "hsl(20 14% 18%)" }} {...yAxisProps} />
                 <Tooltip
                   contentStyle={{
-                    background: "hsl(45 38% 96%)",
+                    background: "hsl(var(--imp-paper))",
                     border: "1px solid hsl(20 14% 18% / 0.3)",
                     fontSize: 12,
                     color: "hsl(20 14% 18%)",
@@ -198,7 +198,7 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
                 <YAxis tick={{ fontSize: 10, fill: "hsl(20 14% 18%)" }} {...yAxisProps} />
                 <Tooltip
                   contentStyle={{
-                    background: "hsl(45 38% 96%)",
+                    background: "hsl(var(--imp-paper))",
                     border: "1px solid hsl(20 14% 18% / 0.3)",
                     fontSize: 12,
                     color: "hsl(20 14% 18%)",
@@ -272,8 +272,8 @@ export const ReportDocument = ({ evidence, compact = false }: ReportDocumentProp
           animate={{ opacity: 1, scale: 1, rotate: -6 }}
           transition={{ delay: 0.38, type: "spring", damping: 10, stiffness: 220 }}
           style={{
-            borderColor: "hsl(0 60% 40% / 0.7)",
-            color: "hsl(0 60% 40% / 0.85)",
+            borderColor: "hsl(var(--imp-red) / 0.72)",
+            color: "hsl(var(--imp-red) / 0.88)",
           }}
         >
           <Stamp className="w-3 h-3 mb-0.5" />

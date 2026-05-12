@@ -75,46 +75,46 @@ export const EmailSendScreen = ({ onComplete }: EmailSendScreenProps) => {
 
         {/* Email mockup */}
         <motion.div
-          className="w-full max-w-md rounded-2xl border border-border bg-card/90 backdrop-blur-md shadow-2xl overflow-hidden"
+          className="imp-panel w-full max-w-md overflow-hidden rounded-2xl"
           initial={{ opacity: 0, y: 30, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ delay: 0.6, type: "spring", damping: 18 }}
         >
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-muted/30">
-            <Mail className="w-4 h-4 text-primary" />
-            <span className="text-xs text-muted-foreground font-mono">رسالة جديدة</span>
+          <div className="imp-panel-header flex items-center gap-2 px-4 py-3">
+            <Mail className="w-4 h-4 text-white" />
+            <span className="text-xs text-white/80 font-mono">رسالة جديدة</span>
           </div>
 
           <div className="p-4 space-y-3 text-sm" dir="rtl">
             <div className="flex gap-2 border-b border-border/40 pb-2">
-              <span className="text-muted-foreground w-14 shrink-0">إلى:</span>
-              <span className="text-foreground font-mono text-xs">ahmed.mansour@prism-consulting.com</span>
+              <span className="text-[#666] w-14 shrink-0">إلى:</span>
+              <span className="text-[#171717] font-mono text-xs">ahmed.mansour@prism-consulting.com</span>
             </div>
             <div className="flex gap-2 border-b border-border/40 pb-2">
-              <span className="text-muted-foreground w-14 shrink-0">من:</span>
-              <span className="text-foreground font-mono text-xs">
+              <span className="text-[#666] w-14 shrink-0">من:</span>
+              <span className="text-[#171717] font-mono text-xs">
                 {playerName.toLowerCase().replace(/\s+/g, ".")}@prism-consulting.com
               </span>
             </div>
             <div className="flex gap-2 border-b border-border/40 pb-2">
-              <span className="text-muted-foreground w-14 shrink-0">الموضوع:</span>
-              <span className="text-foreground font-bold text-xs">تقرير قضية VELARO</span>
+              <span className="text-[#666] w-14 shrink-0">الموضوع:</span>
+              <span className="text-[#171717] font-black text-xs">تقرير قضية VELARO</span>
             </div>
-            <div className="pt-2 text-foreground/80 text-xs leading-relaxed">
+            <div className="pt-2 text-[#343434] text-xs leading-relaxed">
               <p>أستاذ منصور،</p>
               <p className="mt-2">
                 مرفق تقرير قضية VELARO مع تفسير المشكلة كاملاً، نتائج المقابلة مع أستاذ هشام الشريف، والتوصية النهائية.
               </p>
               <p className="mt-2">في انتظار ملاحظاتك.</p>
-              <p className="mt-2 text-muted-foreground">📎 VELARO_Framing_Report.pdf</p>
+              <p className="mt-2 text-primary font-black">📎 VELARO_Framing_Report.pdf</p>
             </div>
           </div>
 
-          <div className="px-4 py-3 border-t border-border bg-muted/20 flex justify-end">
+          <div className="px-4 py-3 border-t border-black/10 bg-[#f7f2e8] flex justify-end">
             <motion.button
               onClick={handleSend}
               disabled={sending || sent}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 transition-all disabled:opacity-60"
+              className="imp-action flex items-center gap-2 px-6 py-2.5 rounded-lg font-black text-sm transition-all disabled:opacity-60"
               whileHover={!sending && !sent ? { scale: 1.04 } : {}}
               whileTap={!sending && !sent ? { scale: 0.96 } : {}}
             >

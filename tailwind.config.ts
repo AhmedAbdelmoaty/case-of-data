@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'Segoe UI', 'sans-serif'],
-        display: ['Cairo', 'Inter', 'sans-serif'],
+        sans: ['Cairo', 'Poppins', 'Segoe UI', 'sans-serif'],
+        display: ['Poppins', 'Cairo', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",

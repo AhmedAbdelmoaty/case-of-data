@@ -59,7 +59,7 @@ export const ReflectionTransition = ({ onComplete }: ReflectionTransitionProps) 
       <div className="relative z-10 flex h-full items-center justify-center px-3 py-3">
         <motion.div
           dir="rtl"
-          className="flex w-full max-w-2xl flex-col rounded-2xl border border-primary/30 bg-card/90 p-4 shadow-[0_0_50px_hsl(var(--primary)/0.18)]"
+          className="imp-panel flex w-full max-w-2xl flex-col overflow-hidden rounded-2xl"
           style={{ maxHeight: "calc(100vh - 1.5rem)", willChange: "transform, opacity" }}
           initial={{ opacity: 0, y: 16, scale: 0.97 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -71,7 +71,7 @@ export const ReflectionTransition = ({ onComplete }: ReflectionTransitionProps) 
         >
           {/* Header */}
           <motion.div
-            className="mb-3 text-right"
+            className="imp-panel-header mb-3 px-4 py-3 text-right"
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: CARD_DELAY + 0.05, duration: 0.25 }}
@@ -82,17 +82,17 @@ export const ReflectionTransition = ({ onComplete }: ReflectionTransitionProps) 
               animate={{ width: 56 }}
               transition={{ delay: CARD_DELAY + 0.1, duration: 0.35 }}
             />
-            <h2 className="text-xl font-bold text-foreground md:text-2xl">
+            <h2 className="text-xl font-black text-white md:text-2xl">
               راجع ما جمعته
             </h2>
-            <p className="mt-1 text-xs leading-6 text-muted-foreground md:text-sm">
+            <p className="mt-1 text-xs leading-6 text-white/75 md:text-sm">
               راجع ملاحظاتك وتقاريرك قبل ما تكتب التقرير.
             </p>
           </motion.div>
 
           {/* Tabs */}
           <motion.div
-            className="mb-3 flex gap-2 rounded-xl border border-border/60 bg-background/40 p-1"
+            className="mx-4 mb-3 flex gap-2 rounded-xl border border-black/10 bg-white p-1"
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: CARD_DELAY + 0.1, duration: 0.25 }}
@@ -102,7 +102,7 @@ export const ReflectionTransition = ({ onComplete }: ReflectionTransitionProps) 
               className={`relative flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-bold transition-colors md:text-sm ${
                 activeTab === "notes"
                   ? "text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-[#555] hover:text-primary"
               }`}
             >
               {activeTab === "notes" && (
@@ -123,7 +123,7 @@ export const ReflectionTransition = ({ onComplete }: ReflectionTransitionProps) 
               className={`relative flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-bold transition-colors md:text-sm ${
                 activeTab === "reports"
                   ? "text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-[#555] hover:text-primary"
               }`}
             >
               {activeTab === "reports" && (
@@ -142,7 +142,7 @@ export const ReflectionTransition = ({ onComplete }: ReflectionTransitionProps) 
           </motion.div>
 
           {/* Content area */}
-          <div className="min-h-0 flex-1 overflow-y-auto pr-1 [scrollbar-width:thin]">
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 pr-5 [scrollbar-width:thin]">
             <AnimatePresence mode="wait">
               {activeTab === "notes" ? (
                 <motion.div
@@ -154,14 +154,14 @@ export const ReflectionTransition = ({ onComplete }: ReflectionTransitionProps) 
                   transition={{ duration: 0.15 }}
                 >
                   {notes.length === 0 ? (
-                    <div className="col-span-full rounded-xl border border-border/60 bg-background/30 p-3 text-center text-xs text-muted-foreground">
+                    <div className="col-span-full rounded-xl border border-black/15 bg-white p-3 text-center text-xs text-[#666]">
                       مفيش ملاحظات محفوظة.
                     </div>
                   ) : (
                     notes.map((note, index) => (
                       <motion.div
                         key={`${note.id}-${index}`}
-                        className="group rounded-xl border border-border/60 bg-background/45 p-2.5 text-right shadow-sm transition-colors hover:border-primary/50 hover:shadow-[0_0_16px_hsl(var(--primary)/0.18)]"
+                        className="group rounded-xl border border-black/15 bg-white p-2.5 text-right shadow-sm transition-colors hover:border-primary hover:bg-[#fff7f7]"
                         style={{ willChange: "transform, opacity" }}
                         initial={{ opacity: 0, y: 12, scale: 0.96 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -173,7 +173,7 @@ export const ReflectionTransition = ({ onComplete }: ReflectionTransitionProps) 
                       >
                         <div className="flex items-start gap-2">
                           <span className="mt-0.5 text-sm">✍️</span>
-                          <p className="text-xs leading-6 text-foreground">{note.text}</p>
+                          <p className="text-xs font-bold leading-6 text-[#171717]">{note.text}</p>
                         </div>
                       </motion.div>
                     ))
@@ -189,7 +189,7 @@ export const ReflectionTransition = ({ onComplete }: ReflectionTransitionProps) 
                   transition={{ duration: 0.15 }}
                 >
                   {reports.length === 0 ? (
-                    <div className="col-span-full rounded-xl border border-border/60 bg-background/30 p-3 text-center text-xs text-muted-foreground">
+                    <div className="col-span-full rounded-xl border border-black/15 bg-white p-3 text-center text-xs text-[#666]">
                       مفيش تقارير ظهرت.
                     </div>
                   ) : (
@@ -197,7 +197,7 @@ export const ReflectionTransition = ({ onComplete }: ReflectionTransitionProps) 
                       <motion.button
                         key={report.id}
                         onClick={() => setOpenReportId(report.id)}
-                        className="group rounded-xl border border-border/60 bg-background/45 p-2.5 text-right shadow-sm transition-colors hover:border-primary/60 hover:bg-background/65 hover:shadow-[0_0_18px_hsl(var(--primary)/0.22)]"
+                        className="group rounded-xl border border-black/15 bg-white p-2.5 text-right shadow-sm transition-colors hover:border-primary hover:bg-[#fff7f7]"
                         style={{ willChange: "transform, opacity" }}
                         initial={{ opacity: 0, y: 12, scale: 0.96 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -213,10 +213,10 @@ export const ReflectionTransition = ({ onComplete }: ReflectionTransitionProps) 
                             <FileText className="h-3.5 w-3.5 text-primary" />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="text-xs font-bold leading-5 text-foreground line-clamp-2">
+                            <p className="text-xs font-black leading-5 text-[#171717] line-clamp-2">
                               {report.title}
                             </p>
-                            <p className="mt-0.5 text-[10px] text-muted-foreground line-clamp-1">
+                            <p className="mt-0.5 text-[10px] text-[#666] line-clamp-1">
                               {report.issuer || "تقرير"}
                               {report.reportDate ? ` • ${report.reportDate}` : ""}
                             </p>
@@ -233,7 +233,7 @@ export const ReflectionTransition = ({ onComplete }: ReflectionTransitionProps) 
           {/* CTA */}
           <motion.button
             onClick={onComplete}
-            className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/30 transition-transform hover:scale-[1.01] active:scale-[0.98]"
+            className="imp-action mx-4 mb-4 mt-3 flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-black transition-transform hover:scale-[1.01] active:scale-[0.98]"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: ITEMS_DELAY + 0.25, duration: 0.3 }}

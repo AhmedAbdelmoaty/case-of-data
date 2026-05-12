@@ -158,17 +158,17 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
             </div>
 
             <motion.div
-              className="w-full max-w-xl bg-card/90 backdrop-blur-md rounded-2xl border border-border shadow-2xl p-5"
+              className="imp-panel w-full max-w-xl overflow-hidden rounded-2xl"
               initial={{ scale: 0.92, y: 20, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.96, y: -10, opacity: 0 }}
               transition={{ type: "spring", damping: 18, stiffness: 200 }}
             >
-              <div className="mb-4 text-right" dir="rtl">
-                <h2 className="text-foreground font-bold text-base">{currentSection.title}</h2>
+              <div className="imp-panel-header px-5 py-3 text-right" dir="rtl">
+                <h2 className="text-base font-black">{currentSection.title}</h2>
               </div>
 
-              <div className="space-y-2.5">
+              <div className="space-y-2.5 p-5">
                 {currentSection.options.map((option, optionIndex) => {
                   const selected = state.framing[currentSection.id] === option.id;
                   return (
@@ -177,8 +177,8 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
                       onClick={() => handleSelect(currentSection.id, option.id)}
                       className={`w-full p-3 rounded-xl border text-right transition-all ${
                         selected
-                          ? "bg-primary/15 border-primary/60 ring-2 ring-primary/30"
-                          : "bg-background/40 border-border hover:border-primary/40 hover:bg-background/55"
+                          ? "bg-[#fff4f4] border-primary ring-2 ring-primary/20"
+                          : "bg-white border-black/15 hover:border-primary hover:bg-[#fff7f7]"
                       }`}
                       dir="rtl"
                       initial={{ opacity: 0, x: 24 }}
@@ -190,12 +190,12 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
                       <div className="flex items-start gap-3">
                         <div
                           className={`w-5 h-5 rounded-full border mt-0.5 shrink-0 flex items-center justify-center ${
-                            selected ? "border-primary bg-primary/20" : "border-muted-foreground/40"
+                            selected ? "border-primary bg-primary text-white" : "border-black/30 bg-white"
                           }`}
                         >
-                          {selected && <CheckCircle2 className="w-3.5 h-3.5 text-primary" />}
+                          {selected && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
                         </div>
-                        <p className="text-foreground text-sm leading-relaxed flex-1">{option.text}</p>
+                        <p className="text-[#171717] text-sm font-bold leading-relaxed flex-1">{option.text}</p>
                       </div>
                     </motion.button>
                   );
@@ -227,19 +227,19 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
             exit={{ opacity: 0 }}
           >
             <motion.div
-              className="w-full max-w-xl bg-card/95 backdrop-blur-md rounded-2xl border border-border shadow-2xl p-5"
+              className="imp-panel w-full max-w-xl overflow-hidden rounded-2xl"
               initial={{ scale: 0.9, y: 30, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
               transition={{ type: "spring", damping: 20 }}
               dir="rtl"
             >
-              <div className="text-center mb-4">
+              <div className="imp-panel-header text-center px-5 py-4">
                 <div className="text-3xl mb-2">📋</div>
-                <h3 className="text-foreground font-bold text-base">ملخّص التقرير</h3>
-                <p className="text-muted-foreground text-xs mt-1">راجع الاختيارات قبل ما تعتمدها</p>
+                <h3 className="font-black text-base text-white">ملخّص التقرير</h3>
+                <p className="text-white/75 text-xs mt-1">راجع الاختيارات قبل ما تعتمدها</p>
               </div>
 
-              <div className="space-y-2.5 mb-5">
+              <div className="space-y-2.5 p-5 pb-0">
                 {framingSections.map((section) => {
                   const selectedOption = section.options.find(
                     (o) => o.id === state.framing[section.id]
@@ -247,10 +247,10 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
                   return (
                     <div
                       key={section.id}
-                      className="p-3 rounded-xl bg-background/45 border border-border"
+                      className="p-3 rounded-xl bg-white border border-black/15"
                     >
-                      <p className="text-xs text-primary font-bold mb-1">{section.title}</p>
-                      <p className="text-sm text-foreground leading-relaxed">
+                      <p className="text-xs text-primary font-black mb-1">{section.title}</p>
+                      <p className="text-sm text-[#171717] font-bold leading-relaxed">
                         {selectedOption?.text}
                       </p>
                     </div>
@@ -258,23 +258,20 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
                 })}
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex gap-2 p-5">
                 <button
                   onClick={() => {
                     setStage("sections");
                     setActiveSectionIdx(0);
                   }}
-                  className="px-4 py-2.5 rounded-xl bg-muted text-muted-foreground hover:bg-muted/70 text-sm font-medium"
+                  className="imp-outline px-4 py-2.5 rounded-xl text-sm font-bold hover:border-primary hover:text-primary"
                   disabled={confirmed}
                 >
                   مراجعة
                 </button>
                 <motion.button
                   onClick={handleConfirm}
-                  className="flex-1 py-2.5 rounded-xl font-bold text-sm text-primary-foreground flex items-center justify-center gap-2"
-                  style={{
-                    background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))",
-                  }}
+                  className="imp-action flex-1 py-2.5 rounded-xl font-black text-sm flex items-center justify-center gap-2"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   disabled={confirmed}

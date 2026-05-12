@@ -376,15 +376,15 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
           <motion.button
             key="restart-btn"
             onClick={() => setShowRestartConfirm(true)}
-            className="fixed top-4 left-4 z-[55] flex items-center gap-2 px-4 py-2.5 rounded-full border-2 border-amber-400/60 bg-gradient-to-r from-amber-500/25 to-orange-500/25 backdrop-blur-md text-amber-200 font-bold text-xs shadow-lg shadow-amber-500/30 hover:shadow-amber-500/60 hover:scale-105 transition-all"
+            className="fixed top-4 left-4 z-[55] flex items-center gap-2 rounded-full border border-black/15 bg-white px-4 py-2.5 text-xs font-black text-[#171717] shadow-lg shadow-black/20 transition-all hover:scale-105 hover:border-primary hover:text-primary"
             initial={{ opacity: 0, y: -10 }}
             animate={{
               opacity: 1,
               y: 0,
               boxShadow: [
-                "0 4px 14px hsl(38 92% 50% / 0.25)",
-                "0 4px 22px hsl(38 92% 50% / 0.55)",
-                "0 4px 14px hsl(38 92% 50% / 0.25)",
+                "0 4px 14px hsl(var(--primary) / 0.22)",
+                "0 4px 22px hsl(var(--primary) / 0.48)",
+                "0 4px 14px hsl(var(--primary) / 0.22)",
               ],
             }}
             exit={{ opacity: 0, y: -10 }}
@@ -412,7 +412,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
             onClick={() => setShowRestartConfirm(false)}
           >
             <motion.div
-              className="max-w-sm w-full bg-card border border-amber-400/40 rounded-2xl p-5 shadow-2xl"
+              className="imp-panel max-w-sm w-full rounded-2xl p-5 shadow-2xl"
               dir="rtl"
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
@@ -420,23 +420,23 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="w-5 h-5 text-amber-400" />
-                <h3 className="text-base font-bold text-foreground">اطلب محادثة جديدة من البداية؟</h3>
+                <Sparkles className="w-5 h-5 text-primary" />
+                <h3 className="text-base font-black text-[#171717]">اطلب محادثة جديدة من البداية؟</h3>
               </div>
-              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+              <p className="text-sm text-[#343434] leading-relaxed mb-4">
                 هترجع تاني لمشهد دخولك المحل ومحادثة الترحيب مع أ. هشام، وكل الملاحظات والتقارير اللي جمعتها هتتمسح. متبقّى لك{" "}
-                <span className="text-amber-400 font-bold">{2 - state.restartCount}</span> محاولة.
+                <span className="text-primary font-bold">{2 - state.restartCount}</span> محاولة.
               </p>
               <div className="flex gap-2">
                 <button
                   onClick={() => setShowRestartConfirm(false)}
-                  className="flex-1 px-4 py-2 rounded-lg bg-muted text-muted-foreground hover:bg-muted/70 transition-colors text-sm font-medium"
+                  className="imp-outline flex-1 rounded-lg px-4 py-2 text-sm font-bold transition-colors hover:border-primary hover:text-primary"
                 >
                   لا، كمل
                 </button>
                 <button
                   onClick={handleConfirmRestart}
-                  className="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:opacity-90 transition-opacity text-sm font-bold"
+                  className="imp-action flex-1 rounded-lg px-4 py-2 text-sm font-black transition-colors"
                 >
                   أيوه، ابدأ من الأول
                 </button>
@@ -455,31 +455,35 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
             exit={{ opacity: 0 }}
           >
             <motion.div
-              className="max-w-md w-full rounded-3xl border border-primary/25 bg-card/90 backdrop-blur-md p-6 text-center shadow-[0_0_40px_hsl(var(--primary)/0.16)]"
+              className="imp-panel max-w-md w-full overflow-hidden rounded-3xl text-center"
               dir="rtl"
               initial={{ opacity: 0, y: 24, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 16, scale: 0.98 }}
               transition={{ duration: 0.35 }}
             >
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 border border-primary/25">
-                <Sparkles className="h-5 w-5 text-primary" />
+              <div className="imp-panel-header px-6 py-4">
+              <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-white/15 border border-white/35">
+                <Sparkles className="h-5 w-5 text-white" />
               </div>
       
-              <h2 className="mb-4 text-xl font-bold text-foreground">
+              <h2 className="text-xl font-black text-white">
                 قبل ما تبدأ تحليل البيانات
               </h2>
+              </div>
       
-              <p className="mb-6 text-sm leading-7 text-muted-foreground">
+              <div className="p-6">
+              <p className="mb-6 text-sm leading-7 text-[#343434]">
                 اختار أسئلتك بعناية؛ كل إجابة هتضيف جزءًا من الصورة، وبعدها هتكتب تقريرك بناءً على اللي وصلت له.
               </p>
       
               <button
                 onClick={() => setPhase("choosing")}
-                className="w-full rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] hover:shadow-primary/35 active:scale-[0.98]"
+                className="imp-action w-full rounded-xl px-5 py-3 text-sm font-black transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
                 ابدأ الأسئلة
               </button>
+              </div>
             </motion.div>
           </motion.div>
         )}
@@ -506,7 +510,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
                       layoutId={`question-choice-${option.id}`}
                       onClick={() => handlePick(option)}
                       disabled={!!selectedChoiceId}
-                      className="group relative min-h-[116px] overflow-hidden rounded-lg border border-white/15 bg-background/72 p-4 text-right shadow-[0_18px_44px_rgba(0,0,0,0.42)] backdrop-blur-md transition-colors hover:border-primary/55 hover:bg-background/82 disabled:cursor-default"
+                      className={`imp-choice-card group relative min-h-[124px] overflow-hidden rounded-[18px] p-0 text-right backdrop-blur-md transition-all disabled:cursor-default ${isSelected ? "imp-choice-card-selected" : ""}`}
                       dir="rtl"
                       initial={{ opacity: 0, y: 28, scale: 0.97 }}
                       animate={
@@ -533,17 +537,15 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
                       whileTap={!selectedChoiceId ? { scale: 0.98 } : undefined}
                       exit={{ opacity: 0, y: -24, transition: { duration: 0.2 } }}
                     >
-                      <span className="absolute inset-y-3 right-0 w-1 rounded-l-full bg-primary/65 shadow-[0_0_16px_hsl(var(--primary)/0.45)]" />
-                      <span className="absolute inset-x-4 top-0 h-px bg-gradient-to-l from-transparent via-primary/55 to-transparent" />
-                      <span className="absolute bottom-0 left-0 h-px w-2/3 bg-gradient-to-r from-accent/60 to-transparent" />
-                      <motion.span
-                        className="absolute inset-y-0 -left-1/3 w-1/3 rotate-12 bg-gradient-to-r from-transparent via-white/12 to-transparent opacity-0 group-hover:opacity-100"
-                        animate={{ x: ["0%", "380%"] }}
-                        transition={{ duration: 2.2, repeat: Infinity, repeatDelay: 1.8, ease: "easeInOut" }}
-                      />
+                      <span className="absolute inset-y-0 right-0 w-2 bg-primary" />
+                      <span className="absolute right-4 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-black text-white shadow-md">
+                        {i + 1}
+                      </span>
+                      <span className="absolute inset-x-0 bottom-0 h-1 bg-primary/10" />
+                      <span className="absolute bottom-0 right-0 h-1 w-1/3 bg-primary transition-all group-hover:w-full" />
 
-                      <div className="relative z-10 flex min-h-[84px] items-center justify-center px-2 py-2 sm:px-3">
-                        <p className="break-words text-center text-[14px] font-bold leading-7 text-foreground transition-colors group-hover:text-white sm:text-right sm:text-[15px] md:text-base">
+                      <div className="relative z-10 flex min-h-[112px] items-center justify-center px-5 py-5 pr-14 sm:px-6 sm:pr-16">
+                        <p className="break-words text-center text-[14px] font-black leading-7 text-[#171717] transition-colors group-hover:text-primary sm:text-right sm:text-[15px] md:text-base">
                           {renderGenderText(option.text, g)}
                         </p>
                       </div>
@@ -597,28 +599,28 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
 
                 <motion.div
                   layoutId={`question-choice-${activeQuestion.option.id}`}
-                  className="relative flex-1 overflow-hidden rounded-lg border border-amber-300/35 bg-background/82 p-4 pl-12 shadow-[0_20px_52px_rgba(0,0,0,0.48)] backdrop-blur-md sm:p-5 sm:pl-14"
+                  className="imp-panel relative flex-1 overflow-hidden rounded-[18px] p-4 pl-12 sm:p-5 sm:pl-14"
                 >
-                  <span className="absolute -right-2 bottom-7 hidden h-4 w-4 rotate-45 border-b border-r border-amber-300/35 bg-background/82 sm:block" />
-                  <span className="absolute inset-x-4 top-0 h-px bg-gradient-to-l from-transparent via-amber-200/70 to-transparent" />
+                  <span className="absolute -right-2 bottom-7 hidden h-4 w-4 rotate-45 border-b border-r border-black/15 bg-white sm:block" />
+                  <span className="absolute inset-y-0 right-0 w-2 bg-primary" />
 
-                  <p className="max-h-[34vh] overflow-y-auto break-words pr-1 text-right text-[15px] font-bold leading-8 text-foreground sm:text-base">
+                  <p className="max-h-[34vh] overflow-y-auto break-words pr-3 text-right text-[15px] font-black leading-8 text-[#171717] sm:text-base">
                     {activeQuestion.text}
                   </p>
 
                   <button
                     type="button"
                     onClick={() => commitQuestionToDialogue()}
-                    className="absolute left-3 top-3 flex h-8 w-8 items-center justify-center rounded-lg border border-white/15 bg-white/10 text-amber-100 transition-colors hover:bg-white/15 hover:text-white"
+                    className="absolute left-3 top-3 flex h-8 w-8 items-center justify-center rounded-lg border border-black/15 bg-white text-primary transition-colors hover:border-primary hover:bg-primary hover:text-white"
                     aria-label="تخطي"
                     title="تخطي"
                   >
                     <SkipForward className="h-4 w-4 rotate-180" />
                   </button>
 
-                  <div className="absolute inset-x-0 bottom-0 h-1 bg-white/10">
+                  <div className="absolute inset-x-0 bottom-0 h-1.5 bg-black/10">
                     <motion.div
-                      className="absolute bottom-0 right-0 h-full bg-gradient-to-l from-primary via-amber-300 to-teal-300"
+                      className="absolute bottom-0 right-0 h-full bg-primary"
                       initial={{ width: "4%" }}
                       animate={{ width: `${Math.max(4, Math.min(questionProgress, 1) * 100)}%` }}
                       transition={{ duration: 0.12, ease: "linear" }}

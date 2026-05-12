@@ -630,11 +630,12 @@ export const EnhancedDialogue = ({
         </motion.div>
 
         <motion.div
-          className={`mx-4 mb-4 rounded-xl border backdrop-blur-md bg-gradient-to-r ${colors.bg} ${colors.border} p-6 relative`}
+          className={`mx-4 mb-4 overflow-hidden rounded-[18px] border-2 border-white/55 backdrop-blur-md bg-gradient-to-r ${colors.bg} ${colors.border} p-6 pt-7 relative shadow-[0_22px_60px_rgba(0,0,0,0.42)]`}
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.99 }}
           layoutId="dialogue-box"
         >
+          <span className="absolute inset-x-0 top-0 h-2 bg-primary" />
           <motion.div
             className="flex items-center gap-3 mb-3"
             key={currentDialogue.characterId}
@@ -669,7 +670,7 @@ export const EnhancedDialogue = ({
                 e.stopPropagation();
                 setReportOpen(true);
               }}
-              className="mt-3 w-full rounded-xl border-2 border-primary/40 bg-primary/5 hover:bg-primary/15 hover:border-primary/70 hover:shadow-[0_0_24px_hsl(var(--primary)/0.25)] p-3 flex items-center justify-between gap-3 transition-all text-right group"
+              className="mt-3 w-full rounded-xl border border-white/70 bg-white p-3 flex items-center justify-between gap-3 text-right text-[#171717] shadow-lg shadow-black/20 transition-all hover:border-primary hover:bg-[#fff7f7] group"
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
@@ -681,10 +682,10 @@ export const EnhancedDialogue = ({
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <FileText className="w-5 h-5 text-primary shrink-0" />
                 <div className="flex flex-col min-w-0 text-right">
-                  <span className="text-[11px] text-muted-foreground">
+                  <span className="text-[11px] text-[#666]">
                     أ. هشام سلّمك تقرير — اضغط للفتح
                   </span>
-                  <span className="text-sm font-bold text-foreground truncate">
+                  <span className="text-sm font-black text-[#171717] truncate">
                     {currentDialogue.inlineEvidence.title}
                   </span>
                 </div>
@@ -712,7 +713,7 @@ export const EnhancedDialogue = ({
                         whileHover={{ scale: 1.08 }}
                         whileTap={{ scale: 0.92 }}
                         title="رجوع للجملة السابقة (←)"
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 hover:border-white/25 text-xs text-white/80 hover:text-white transition-all"
+                        className="flex items-center gap-1.5 rounded-lg border border-white/70 bg-white px-3 py-1.5 text-xs font-black text-[#171717] transition-all hover:border-primary hover:text-primary"
                       >
                         <ChevronRight className="w-3.5 h-3.5" />
                         <span>رجوع</span>
