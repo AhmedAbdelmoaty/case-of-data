@@ -18,6 +18,8 @@ import { PlayerSettingsPanel } from "@/components/game/PlayerSettingsPanel";
 import { PFGameProvider, usePFGame } from "@/contexts/PFGameContext";
 import { ScreenTransition } from "@/components/game/ScreenTransition";
 import { ProgressTimeline } from "@/components/game/ProgressTimeline";
+import { SCREEN_ASSETS, getNextScreen } from "@/lib/pf-case/asset-manifest";
+import { preloadImage, preloadAudio, runWithConcurrency } from "@/lib/assetPreloader";
 
 type Screen =
   | "company-briefing"
