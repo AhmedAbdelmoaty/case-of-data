@@ -7,6 +7,7 @@ import { ReportDocument } from "./ReportDocument";
 import type { EvidenceData } from "@/lib/pf-case/evidence-catalog";
 import analystImg from "@/assets/characters/analyst.webp";
 import saraImg from "@/assets/characters/sara.webp";
+import { getAudio } from "@/lib/assetPreloader";
 
 interface DialogueLine {
   characterId: string;
