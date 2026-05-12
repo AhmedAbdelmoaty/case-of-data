@@ -125,10 +125,9 @@ export const EnhancedDialogue = ({
   const getCachedAudio = (src: string): HTMLAudioElement => {
     let a = audioCacheRef.current.get(src);
     if (!a) {
-      a = new Audio();
-      a.preload = "auto";
-      a.src = src;
-      try { a.load(); } catch {/* noop */}
+      // Route through the unified pipeline so the cache is shared
+      // with the boot preloader and the rest of the game.
+      a = getAudio(src);
       audioCacheRef.current.set(src, a);
     }
     return a;
