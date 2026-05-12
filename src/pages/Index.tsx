@@ -56,6 +56,22 @@ const GameContent = () => {
     }
   }, [currentScreen, storageKey]);
 
+  // Just-in-time prefetch: while the player is on the current screen,
+  // start downloading the next screen's images and audio so transitions
+  // never show half-loaded media.
+  useEffect(() => {
+    if (currentScreen === "replay-briefing") return;
+    const next = getNextScreen(currentScreen as keyof typeof SCREEN_ASSETS);
+    if (!next) return;
+    const group = SCREEN_ASSETS[next];
+    if (!group) return;
+    const tasks = [
+      ...group.images.map((src) => () => preloadImage(src, 6000)),
+      ...group.audio.map((src) => () => preloadAudio(src, 6000)),
+    ];
+    runWithConcurrency(tasks, 4);
+  }, [currentScreen]);
+
   // Handle "restart from beginning" — navigate back to store-arrival scene
   useEffect(() => {
     if (pfState.restartFromBeginning) {
