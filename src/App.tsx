@@ -35,21 +35,23 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <SoundProvider>
-            <Routes>
-              {/* Player routes — no login required */}
-              <Route path="/setup" element={<Setup />} />
-              <Route path="/" element={
-                <RequireProfile>
-                  <Index />
-                </RequireProfile>
-              } />
+            <BootLoader>
+              <Routes>
+                {/* Player routes — no login required */}
+                <Route path="/setup" element={<Setup />} />
+                <Route path="/" element={
+                  <RequireProfile>
+                    <Index />
+                  </RequireProfile>
+                } />
 
-              {/* Hidden admin routes */}
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin/board-9k2x" element={<AdminBoard />} />
+                {/* Hidden admin routes */}
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin/board-9k2x" element={<AdminBoard />} />
 
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BootLoader>
           </SoundProvider>
         </AuthProvider>
       </BrowserRouter>
