@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { SoundProvider } from "@/hooks/useSoundEffects";
+import { BootLoader } from "@/components/game/BootLoader";
 import Index from "./pages/Index";
 import Setup from "./pages/Setup";
 import AdminLogin from "./pages/AdminLogin";
