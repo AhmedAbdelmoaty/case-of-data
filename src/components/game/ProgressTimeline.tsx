@@ -36,7 +36,7 @@ export const ProgressTimeline = ({ currentScreen }: ProgressTimelineProps) => {
 
   return (
     <motion.div
-      className="fixed top-0 left-0 right-0 z-40 px-2 py-1.5 bg-white/88 border-b border-black/10 text-[#171717] shadow-md shadow-black/10 backdrop-blur-md"
+      className="fixed top-0 left-0 right-0 z-40 px-2 py-1.5 bg-white/90 border-b border-black/10 text-[#171717] shadow-md shadow-black/10 backdrop-blur-md"
       initial={{ y: -40, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: 0.5 }}

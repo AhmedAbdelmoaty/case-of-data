@@ -124,7 +124,7 @@ export const ArrivalScreen = ({ onComplete }: ArrivalScreenProps) => {
           </motion.div>
 
           <motion.button
-            className="imp-action relative px-8 py-3 rounded-xl text-base font-black overflow-hidden group"
+            className="imp-action relative px-8 py-3 rounded-xl text-base font-bold overflow-hidden group"
             onClick={() => setPhase("entering")}
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}

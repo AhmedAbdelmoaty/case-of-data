@@ -525,7 +525,7 @@ export const EnhancedDialogue = ({
         return (
           <motion.div
             key={item.id}
-            className={`fixed z-[95] flex min-w-[132px] items-center gap-2 overflow-hidden rounded-[14px] border px-3.5 py-2.5 text-xs font-black shadow-2xl backdrop-blur-md ${tone}`}
+            className={`fixed z-[95] flex min-w-[132px] items-center gap-2 overflow-hidden rounded-[14px] border px-3.5 py-2.5 text-xs font-bold shadow-2xl backdrop-blur-md ${tone}`}
             style={{ left: "50vw", top: "72vh" }}
             dir="rtl"
             initial={{ opacity: 0, scale: 0.62, x: "-50%", y: 18, rotate: item.kind === "report" ? 5 : -5 }}
@@ -630,12 +630,11 @@ export const EnhancedDialogue = ({
         </motion.div>
 
         <motion.div
-          className={`mx-4 mb-4 overflow-hidden rounded-[18px] border-2 border-white/55 backdrop-blur-md bg-gradient-to-r ${colors.bg} ${colors.border} p-6 pt-7 relative shadow-[0_22px_60px_rgba(0,0,0,0.42)]`}
+          className={`mx-4 mb-4 overflow-hidden rounded-[18px] border-2 border-white/45 backdrop-blur-md bg-gradient-to-r ${colors.bg} ${colors.border} p-6 relative shadow-[0_22px_60px_rgba(0,0,0,0.42)]`}
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.99 }}
           layoutId="dialogue-box"
         >
-          <span className="absolute inset-x-0 top-0 h-2 bg-primary" />
           <motion.div
             className="flex items-center gap-3 mb-3"
             key={currentDialogue.characterId}
@@ -685,7 +684,7 @@ export const EnhancedDialogue = ({
                   <span className="text-[11px] text-[#666]">
                     أ. هشام سلّمك تقرير — اضغط للفتح
                   </span>
-                  <span className="text-sm font-black text-[#171717] truncate">
+                  <span className="text-sm font-bold text-[#171717] truncate">
                     {currentDialogue.inlineEvidence.title}
                   </span>
                 </div>
@@ -713,7 +712,7 @@ export const EnhancedDialogue = ({
                         whileHover={{ scale: 1.08 }}
                         whileTap={{ scale: 0.92 }}
                         title="رجوع للجملة السابقة (←)"
-                        className="flex items-center gap-1.5 rounded-lg border border-white/70 bg-white px-3 py-1.5 text-xs font-black text-[#171717] transition-all hover:border-primary hover:text-primary"
+                        className="flex items-center gap-1.5 rounded-lg border border-white/70 bg-white px-3 py-1.5 text-xs font-bold text-[#171717] transition-all hover:border-primary hover:text-primary"
                       >
                         <ChevronRight className="w-3.5 h-3.5" />
                         <span>رجوع</span>

@@ -137,7 +137,7 @@ export const PFNotebook = () => {
             >
               {/* Header */}
               <div className="imp-panel-header flex items-center justify-between p-4">
-                <h2 className="flex items-center gap-2 text-lg font-black text-white">
+                <h2 className="flex items-center gap-2 text-lg font-bold text-white">
                   <BookOpen className="w-5 h-5 text-white" />
                   📓 الدفتر
                 </h2>
@@ -213,7 +213,7 @@ export const PFNotebook = () => {
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
-                          <p className="text-xs text-primary mt-1 font-black">جولة {note.roundId}</p>
+                          <p className="text-xs text-primary mt-1 font-bold">جولة {note.roundId}</p>
                         </motion.div>
                       );
                     })
@@ -247,7 +247,7 @@ export const PFNotebook = () => {
                           <div className="flex items-start gap-2">
                             <FileText className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                             <div className="flex-1 min-w-0">
-                              <p className="text-[#171717] text-sm font-black leading-snug">{ev.title}</p>
+                              <p className="text-[#171717] text-sm font-bold leading-snug">{ev.title}</p>
                               <p className="text-xs text-[#666] mt-1">
                                 {ev.issuer || "تقرير"} {ev.reportDate ? `• ${ev.reportDate}` : ""}
                               </p>

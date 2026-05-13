@@ -376,7 +376,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
           <motion.button
             key="restart-btn"
             onClick={() => setShowRestartConfirm(true)}
-            className="fixed top-4 left-4 z-[55] flex items-center gap-2 rounded-full border border-black/15 bg-white px-4 py-2.5 text-xs font-black text-[#171717] shadow-lg shadow-black/20 transition-all hover:scale-105 hover:border-primary hover:text-primary"
+            className="fixed top-4 left-4 z-[55] flex items-center gap-2 rounded-full border border-black/15 bg-white px-4 py-2.5 text-xs font-bold text-[#171717] shadow-lg shadow-black/20 transition-all hover:scale-105 hover:border-primary hover:text-primary"
             initial={{ opacity: 0, y: -10 }}
             animate={{
               opacity: 1,
@@ -421,7 +421,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
             >
               <div className="flex items-center gap-2 mb-3">
                 <Sparkles className="w-5 h-5 text-primary" />
-                <h3 className="text-base font-black text-[#171717]">اطلب محادثة جديدة من البداية؟</h3>
+                <h3 className="text-base font-bold text-[#171717]">اطلب محادثة جديدة من البداية؟</h3>
               </div>
               <p className="text-sm text-[#343434] leading-relaxed mb-4">
                 هترجع تاني لمشهد دخولك المحل ومحادثة الترحيب مع أ. هشام، وكل الملاحظات والتقارير اللي جمعتها هتتمسح. متبقّى لك{" "}
@@ -436,7 +436,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
                 </button>
                 <button
                   onClick={handleConfirmRestart}
-                  className="imp-action flex-1 rounded-lg px-4 py-2 text-sm font-black transition-colors"
+                  className="imp-action flex-1 rounded-lg px-4 py-2 text-sm font-bold transition-colors"
                 >
                   أيوه، ابدأ من الأول
                 </button>
@@ -467,7 +467,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
                 <Sparkles className="h-5 w-5 text-white" />
               </div>
       
-              <h2 className="text-xl font-black text-white">
+              <h2 className="text-xl font-bold text-white">
                 قبل ما تبدأ تحليل البيانات
               </h2>
               </div>
@@ -479,7 +479,7 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
       
               <button
                 onClick={() => setPhase("choosing")}
-                className="imp-action w-full rounded-xl px-5 py-3 text-sm font-black transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="imp-action w-full rounded-xl px-5 py-3 text-sm font-bold transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
                 ابدأ الأسئلة
               </button>
@@ -537,15 +537,12 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
                       whileTap={!selectedChoiceId ? { scale: 0.98 } : undefined}
                       exit={{ opacity: 0, y: -24, transition: { duration: 0.2 } }}
                     >
-                      <span className="absolute inset-y-0 right-0 w-2 bg-primary" />
-                      <span className="absolute right-4 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-black text-white shadow-md">
-                        {i + 1}
-                      </span>
-                      <span className="absolute inset-x-0 bottom-0 h-1 bg-primary/10" />
-                      <span className="absolute bottom-0 right-0 h-1 w-1/3 bg-primary transition-all group-hover:w-full" />
+                      <span className="absolute inset-x-5 top-0 h-px bg-gradient-to-l from-transparent via-primary/55 to-transparent" />
+                      <span className="absolute bottom-0 right-5 h-1 w-16 rounded-t-full bg-primary/75 transition-all group-hover:w-[calc(100%-2.5rem)]" />
+                      <span className="absolute left-4 top-4 h-2.5 w-2.5 rounded-full bg-primary/70 shadow-[0_0_14px_hsl(var(--primary)/0.28)]" />
 
-                      <div className="relative z-10 flex min-h-[112px] items-center justify-center px-5 py-5 pr-14 sm:px-6 sm:pr-16">
-                        <p className="break-words text-center text-[14px] font-black leading-7 text-[#171717] transition-colors group-hover:text-primary sm:text-right sm:text-[15px] md:text-base">
+                      <div className="relative z-10 flex min-h-[112px] items-center justify-center px-6 py-5 sm:px-7">
+                        <p className="break-words text-center text-[14px] font-bold leading-7 text-[#171717] transition-colors group-hover:text-[#111] sm:text-right sm:text-[15px] md:text-base">
                           {renderGenderText(option.text, g)}
                         </p>
                       </div>
@@ -599,12 +596,13 @@ export const InquiryScreen = ({ onComplete }: InquiryScreenProps) => {
 
                 <motion.div
                   layoutId={`question-choice-${activeQuestion.option.id}`}
-                  className="imp-panel relative flex-1 overflow-hidden rounded-[18px] p-4 pl-12 sm:p-5 sm:pl-14"
+                  className="relative flex-1 overflow-hidden rounded-[18px] border border-white/80 bg-[#fffdf8]/95 p-4 pl-12 shadow-[0_18px_46px_rgba(0,0,0,0.28),inset_0_0_0_1px_rgba(17,17,17,0.08)] backdrop-blur-md sm:p-5 sm:pl-14"
                 >
-                  <span className="absolute -right-2 bottom-7 hidden h-4 w-4 rotate-45 border-b border-r border-black/15 bg-white sm:block" />
-                  <span className="absolute inset-y-0 right-0 w-2 bg-primary" />
+                  <span className="absolute -right-2 bottom-7 hidden h-4 w-4 rotate-45 border-b border-r border-white/80 bg-[#fffdf8] sm:block" />
+                  <span className="absolute inset-x-5 top-0 h-px bg-gradient-to-l from-transparent via-primary/60 to-transparent" />
+                  <span className="absolute bottom-0 right-5 h-1 w-28 rounded-t-full bg-primary/75" />
 
-                  <p className="max-h-[34vh] overflow-y-auto break-words pr-3 text-right text-[15px] font-black leading-8 text-[#171717] sm:text-base">
+                  <p className="max-h-[34vh] overflow-y-auto break-words pr-1 text-right text-[15px] font-bold leading-8 text-[#171717] sm:text-base">
                     {activeQuestion.text}
                   </p>
 

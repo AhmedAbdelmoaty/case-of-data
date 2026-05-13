@@ -208,14 +208,14 @@ export const CompanyBriefingScreen = ({
 
             <motion.div className="imp-panel p-6 rounded-xl space-y-4" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.4 }}>
               <ChartNoAxesColumnIncreasing className="w-8 h-8 text-primary mx-auto" />
-              <p className="text-[#171717] text-lg font-black leading-relaxed" dir="rtl">
+              <p className="text-[#171717] text-lg font-bold leading-relaxed" dir="rtl">
                 دورك كمحلل بيانات تساعد العميل على اتخاذ القرار الصحيح
               </p>
             </motion.div>
 
             <motion.button
               onClick={onComplete}
-              className="imp-action relative px-8 py-4 rounded-xl text-lg font-black overflow-hidden group w-full"
+              className="imp-action relative px-8 py-4 rounded-xl text-lg font-bold overflow-hidden group w-full"
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.7 }}

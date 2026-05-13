@@ -98,7 +98,7 @@ export const EmailSendScreen = ({ onComplete }: EmailSendScreenProps) => {
             </div>
             <div className="flex gap-2 border-b border-border/40 pb-2">
               <span className="text-[#666] w-14 shrink-0">الموضوع:</span>
-              <span className="text-[#171717] font-black text-xs">تقرير قضية VELARO</span>
+              <span className="text-[#171717] font-bold text-xs">تقرير قضية VELARO</span>
             </div>
             <div className="pt-2 text-[#343434] text-xs leading-relaxed">
               <p>أستاذ منصور،</p>
@@ -106,7 +106,7 @@ export const EmailSendScreen = ({ onComplete }: EmailSendScreenProps) => {
                 مرفق تقرير قضية VELARO مع تفسير المشكلة كاملاً، نتائج المقابلة مع أستاذ هشام الشريف، والتوصية النهائية.
               </p>
               <p className="mt-2">في انتظار ملاحظاتك.</p>
-              <p className="mt-2 text-primary font-black">📎 VELARO_Framing_Report.pdf</p>
+              <p className="mt-2 text-primary font-bold">📎 VELARO_Framing_Report.pdf</p>
             </div>
           </div>
 
@@ -114,7 +114,7 @@ export const EmailSendScreen = ({ onComplete }: EmailSendScreenProps) => {
             <motion.button
               onClick={handleSend}
               disabled={sending || sent}
-              className="imp-action flex items-center gap-2 px-6 py-2.5 rounded-lg font-black text-sm transition-all disabled:opacity-60"
+              className="imp-action flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold text-sm transition-all disabled:opacity-60"
               whileHover={!sending && !sent ? { scale: 1.04 } : {}}
               whileTap={!sending && !sent ? { scale: 0.96 } : {}}
             >

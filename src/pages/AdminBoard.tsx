@@ -147,7 +147,7 @@ const AdminBoard = () => {
               <Trophy className="w-8 h-8 lg:w-11 lg:h-11 text-amber-400 drop-shadow-[0_0_18px_rgba(251,191,36,0.6)]" />
             </motion.div>
             <div>
-              <h1 className="text-2xl lg:text-4xl font-black bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent tracking-tight">
+              <h1 className="text-2xl lg:text-4xl font-bold bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent tracking-tight">
                 Champions Board
               </h1>
             </div>
@@ -325,7 +325,7 @@ const PlayerRow = ({
       <div className="flex min-h-11 items-center gap-2.5 lg:gap-3">
         {/* Rank number */}
         <motion.div
-          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-sm font-black tabular-nums text-foreground/90 shadow-inner shadow-white/5"
+          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-sm font-bold tabular-nums text-foreground/90 shadow-inner shadow-white/5"
           animate={isFirst ? { scale: [1, 1.05, 1] } : undefined}
           transition={{
             duration: 2.2,
@@ -345,7 +345,6 @@ const PlayerRow = ({
         <div className="min-w-0 flex-1 text-left" dir="auto">
           <p
             className={`truncate text-left text-base font-extrabold lg:text-lg ${nameClass}`}
-            style={{ fontFamily: "'Cairo', 'Tajawal', system-ui, sans-serif" }}
           >
             {fullName}
           </p>

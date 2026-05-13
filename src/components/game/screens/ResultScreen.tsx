@@ -29,7 +29,7 @@ const RESULT_VIEW = {
     stars: 3,
     sound: "fanfare",
     page: "bg-[radial-gradient(circle_at_50%_30%,rgba(166,30,37,.18),transparent_42%),linear-gradient(135deg,#f7f2e8_0%,#fff_54%,#f4e2e3_100%)]",
-    stage: "border-[#A61E25]/80 bg-white/96 shadow-[#A61E25]/25",
+    stage: "border-[#A61E25]/80 bg-white/95 shadow-[#A61E25]/25",
     titleColor: "text-[#151515]",
     badgeStyle: "border-[#A61E25]/35 bg-white/80 text-[#A61E25]",
     starOn: "bg-[#A61E25] text-white shadow-[#A61E25]/35",
@@ -197,7 +197,7 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
           />
           <motion.div
             className={cn(
-              "mx-auto inline-flex h-11 items-center gap-2 rounded-2xl border px-5 text-sm font-black shadow-lg backdrop-blur-sm sm:h-12 sm:text-base",
+              "mx-auto inline-flex h-11 items-center gap-2 rounded-2xl border px-5 text-sm font-bold shadow-lg backdrop-blur-sm sm:h-12 sm:text-base",
               view.badgeStyle
             )}
             initial={{ opacity: 0, y: -16, scale: 0.9 }}
@@ -255,7 +255,7 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
                     <motion.div
                       key={index}
                       className={cn(
-                        "flex h-[clamp(46px,7vw,82px)] w-[clamp(46px,7vw,82px)] items-center justify-center text-[clamp(1.8rem,4.8vw,3.9rem)] font-black shadow-xl",
+                        "flex h-[clamp(46px,7vw,82px)] w-[clamp(46px,7vw,82px)] items-center justify-center text-[clamp(1.8rem,4.8vw,3.9rem)] font-bold shadow-xl",
                         earned ? view.starOn : view.starOff
                       )}
                       style={{
@@ -276,7 +276,7 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
 
               <motion.h1
                 className={cn(
-                  "max-w-[560px] text-balance text-[clamp(1.35rem,3.4vw,2.8rem)] font-black leading-[1.16]",
+                  "max-w-[560px] text-balance text-[clamp(1.35rem,3.4vw,2.8rem)] font-bold leading-[1.16]",
                   view.titleColor
                 )}
                 initial={{ opacity: 0, y: 18 }}
@@ -287,7 +287,7 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
               </motion.h1>
 
               <motion.p
-                className="mt-2 max-w-[520px] text-balance text-[clamp(.95rem,1.8vw,1.25rem)] font-black leading-7 text-[#4b5563] sm:mt-3"
+                className="mt-2 max-w-[520px] text-balance text-[clamp(.95rem,1.8vw,1.25rem)] font-bold leading-7 text-[#4b5563] sm:mt-3"
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.88, duration: 0.38 }}
@@ -305,7 +305,7 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
                   <span
                     key={chip}
                     className={cn(
-                      "inline-flex h-9 items-center rounded-full border px-3 text-xs font-black shadow-sm sm:h-10 sm:px-4 sm:text-sm",
+                      "inline-flex h-9 items-center rounded-full border px-3 text-xs font-bold shadow-sm sm:h-10 sm:px-4 sm:text-sm",
                       index < litChipCount ? view.chipOn : view.chipOff
                     )}
                   >
@@ -316,7 +316,7 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
 
               {outcome === "weak" && (
                 <motion.div
-                  className="mt-2 inline-flex items-center gap-2 rounded-full bg-[#A61E25]/10 px-4 py-2 text-sm font-black text-[#A61E25] shadow-md sm:mt-4"
+                  className="mt-2 inline-flex items-center gap-2 rounded-full bg-[#A61E25]/10 px-4 py-2 text-sm font-bold text-[#A61E25] shadow-md sm:mt-4"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: [1, 1.04, 1] }}
                   transition={{
@@ -340,7 +340,7 @@ export const ResultScreen = ({ onNavigate }: ResultScreenProps) => {
             <motion.button
               onClick={() => onNavigate("company-briefing")}
               className={cn(
-                "flex h-12 w-full items-center justify-center gap-2 rounded-full px-6 text-base font-black shadow-xl outline-none ring-offset-2 transition-transform focus-visible:ring-2 focus-visible:ring-slate-900 sm:h-14",
+                "flex h-12 w-full items-center justify-center gap-2 rounded-full px-6 text-base font-bold shadow-xl outline-none ring-offset-2 transition-transform focus-visible:ring-2 focus-visible:ring-slate-900 sm:h-14",
                 view.button
               )}
               whileHover={{ scale: 1.04 }}

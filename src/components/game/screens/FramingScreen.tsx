@@ -165,7 +165,7 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
               transition={{ type: "spring", damping: 18, stiffness: 200 }}
             >
               <div className="imp-panel-header px-5 py-3 text-right" dir="rtl">
-                <h2 className="text-base font-black">{currentSection.title}</h2>
+                <h2 className="text-base font-bold">{currentSection.title}</h2>
               </div>
 
               <div className="space-y-2.5 p-5">
@@ -235,7 +235,7 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
             >
               <div className="imp-panel-header text-center px-5 py-4">
                 <div className="text-3xl mb-2">📋</div>
-                <h3 className="font-black text-base text-white">ملخّص التقرير</h3>
+                <h3 className="font-bold text-base text-white">ملخّص التقرير</h3>
                 <p className="text-white/75 text-xs mt-1">راجع الاختيارات قبل ما تعتمدها</p>
               </div>
 
@@ -249,7 +249,7 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
                       key={section.id}
                       className="p-3 rounded-xl bg-white border border-black/15"
                     >
-                      <p className="text-xs text-primary font-black mb-1">{section.title}</p>
+                      <p className="text-xs text-primary font-bold mb-1">{section.title}</p>
                       <p className="text-sm text-[#171717] font-bold leading-relaxed">
                         {selectedOption?.text}
                       </p>
@@ -271,7 +271,7 @@ export const FramingScreen = ({ onComplete }: FramingScreenProps) => {
                 </button>
                 <motion.button
                   onClick={handleConfirm}
-                  className="imp-action flex-1 py-2.5 rounded-xl font-black text-sm flex items-center justify-center gap-2"
+                  className="imp-action flex-1 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   disabled={confirmed}

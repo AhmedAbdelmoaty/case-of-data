@@ -86,7 +86,7 @@ export const PlayerSettingsPanel = ({ onReplayBriefing, onResetProgress }: Playe
             >
               {/* Header */}
               <div className="imp-panel-header flex items-center justify-between p-4">
-                <h2 className="text-white font-black text-lg">⚙️ الإعدادات</h2>
+                <h2 className="text-white font-bold text-lg">⚙️ الإعدادات</h2>
                 <button
                   onClick={() => { setIsOpen(false); setIsEditingProfile(false); setConfirmReset(false); }}
                   className="rounded-lg border border-white/20 bg-white/10 p-1.5 text-white/80 transition-colors hover:bg-white hover:text-primary"
@@ -102,7 +102,7 @@ export const PlayerSettingsPanel = ({ onReplayBriefing, onResetProgress }: Playe
                     <img src={avatarImg} alt="avatar" className="w-full h-full object-cover" />
                   </div>
                   <div>
-                    <p className="text-[#171717] font-black">{profile?.display_name}</p>
+                    <p className="text-[#171717] font-bold">{profile?.display_name}</p>
                     <p className="text-[#666] text-xs">
                       {profile?.gender === "female" ? "محللة بيانات" : "محلل بيانات"}
                     </p>
@@ -156,7 +156,7 @@ export const PlayerSettingsPanel = ({ onReplayBriefing, onResetProgress }: Playe
                       <button
                         onClick={handleSaveProfile}
                         disabled={saving || !editFirstName.trim() || !editLastName.trim()}
-                        className="imp-action flex-1 py-2 rounded-lg text-sm font-black disabled:opacity-50"
+                        className="imp-action flex-1 py-2 rounded-lg text-sm font-bold disabled:opacity-50"
                       >
                         {saving ? "جاري الحفظ..." : "حفظ"}
                       </button>
@@ -186,7 +186,7 @@ export const PlayerSettingsPanel = ({ onReplayBriefing, onResetProgress }: Playe
 
               {/* Audio controls */}
               <div className="p-4 border-b border-black/10 bg-[#f7f2e8] space-y-4">
-                <h3 className="text-sm font-black text-[#171717] flex items-center gap-2">
+                <h3 className="text-sm font-bold text-[#171717] flex items-center gap-2">
                   <Volume2 className="w-4 h-4 text-primary" />
                   الصوت
                 </h3>
