@@ -71,11 +71,6 @@ export default {
           bg: "hsl(var(--glass-bg))",
           border: "hsl(var(--glass-border))",
         },
-        "imp-brand": "hsl(var(--imp-brand))",
-        "imp-brand-dark": "hsl(var(--imp-brand-dark))",
-        "imp-paper": "hsl(var(--imp-paper))",
-        "imp-line": "hsl(var(--imp-line))",
-        "imp-ink": "hsl(var(--imp-ink))",
       },
       borderRadius: {
         lg: "var(--radius)",

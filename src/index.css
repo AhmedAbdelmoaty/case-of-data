@@ -13,11 +13,6 @@
     --imp-paper: 42 38% 95%;
     --imp-line: 32 18% 78%;
 
-    /* IMP marketing site palette (Contact Us page) */
-    --imp-brand: 356 78% 38%;        /* deep IMP red */
-    --imp-brand-dark: 356 78% 28%;   /* hover / accents */
-    --imp-ink: 220 18% 14%;          /* body text */
-
     /* Light mode - keeping for compatibility but game uses dark */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
@@ -108,7 +103,7 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground dark;
     font-family: 'Inter', 'Segoe UI', sans-serif;
   }
 }
